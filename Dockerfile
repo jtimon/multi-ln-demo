@@ -32,6 +32,9 @@ RUN apt-get -yqq update \
 
 WORKDIR /wd
 
+COPY docker/requirements.txt /wd/requirements.txt
+RUN pip install -r requirements.txt --require-hashes
+
 COPY docker/build-daemon.sh /wd/build-daemon.sh
 # Build custom daemon able to produce and support an arbitrary number of chains
 ENV DAEMON_NAME=bitcoin
@@ -40,3 +43,8 @@ ENV REPO_HOST=https://github.com/jtimon
 ENV REPO_NAME=bitcoin
 RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
 # ENV PATH="/wd/$DAEMON_NAME-$BRANCH_COMMIT/src:${PATH}"
+
+COPY docker/daemons.env /wd/daemons.env
+COPY docker/daemons.proc /wd/daemons.proc
+COPY docker/daemon-conf /wd/conf
+CMD honcho start -e daemons.env -f daemons.proc

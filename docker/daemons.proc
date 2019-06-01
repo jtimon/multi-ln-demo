@@ -1,0 +1,6 @@
+
+# bitcoin: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/bitcoin.conf
+
+# testnet3: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/testnet3.conf
+
+regtest: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/regtest.conf
