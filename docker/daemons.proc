@@ -4,3 +4,13 @@
 # testnet3: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/testnet3.conf
 
 regtest: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/regtest.conf
+
+chain_1: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_1.conf
+
+chain_2: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_2.conf
+
+chain_3: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_3.conf
+
+chain_4: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_4.conf
+
+chain_5: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_5.conf
