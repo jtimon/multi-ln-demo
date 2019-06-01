@@ -9,6 +9,24 @@ A daemon that is able to operate an arbitrary number of different
 chains is convenient and thus a custom branch will be used instead of
 a released bitcoin version already compiled.
 
+# Run with docker
+
+```
+docker build --tag=multiln . ; docker run multiln
+```
+
+Remove all stopped containers:
+
+```
+docker rm $(docker ps -a -q)
+```
+
+Stop all containers:
+
+```
+docker stop $(docker ps -a -q)
+```
+
 # Future work
 
 - Route through channels in chains with multiple assets
