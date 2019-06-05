@@ -15,6 +15,14 @@ a released bitcoin version already compiled.
 docker build --tag=multiln . ; docker run multiln
 ```
 
+To persist the daemon states, first create a directory
+/home/jt/code/multilnvol (change jt to your own user) with `.chain_1`
+to `.chain_5` in it. Then:
+
+```
+docker build --tag=multiln . ; docker run -v /home/jt/code/multilnvol:/wd/daemon-data multiln
+```
+
 Remove all stopped containers:
 
 ```

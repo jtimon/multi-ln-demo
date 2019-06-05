@@ -1,16 +1,16 @@
 
-# bitcoin: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/bitcoin.conf
+# bitcoin: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/bitcoin.conf -datadir=/wd/daemon-data/.bitcoin/
 
-# testnet3: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/testnet3.conf
+# testnet3: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/testnet3.conf -datadir=/wd/daemon-data/.testnet3/
 
-regtest: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/regtest.conf
+regtest: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/regtest.conf -datadir=/wd/daemon-data/.regtest/
 
-chain_1: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_1.conf
+chain_1: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_1.conf -datadir=/wd/daemon-data/.chain_1/
 
-chain_2: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_2.conf
+chain_2: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_2.conf -datadir=/wd/daemon-data/.chain_2/
 
-chain_3: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_3.conf
+chain_3: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_3.conf -datadir=/wd/daemon-data/.chain_3/
 
-chain_4: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_4.conf
+chain_4: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_4.conf -datadir=/wd/daemon-data/.chain_4/
 
-chain_5: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_5.conf
+chain_5: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_5.conf -datadir=/wd/daemon-data/.chain_5/
