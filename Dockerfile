@@ -5,6 +5,7 @@ RUN apt-get -yqq update \
   && add-apt-repository ppa:bitcoin/bitcoin \
   && apt-get update \
   && apt-get install -qfy \
+    autoconf \
     automake \
     autotools-dev \
     bsdmainutils \
@@ -20,14 +21,21 @@ RUN apt-get -yqq update \
     libdb4.8++-dev \
     libdb4.8-dev \
     libevent-dev \
+    libgmp-dev \
     libminiupnpc-dev \
+    libsodium-dev \
+    libsqlite3-dev \
     libssl-dev \
     libtool \
     libzmq3-dev \
     make \
+    net-tools \
     pkg-config \
+    python \
     python-pip \
+    python3 \
     tor \
+    zlib1g-dev \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /wd
@@ -42,9 +50,16 @@ ENV BRANCH_COMMIT=3ab01aa44a3198502285a2effc38096b56edba28
 ENV REPO_HOST=https://github.com/jtimon
 ENV REPO_NAME=bitcoin
 RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
-# ENV PATH="/wd/$DAEMON_NAME-$BRANCH_COMMIT/src:${PATH}"
+ENV PATH="/wd/$DAEMON_NAME-$BRANCH_COMMIT/src:${PATH}"
+
+COPY docker/build-clightning.sh /wd/build-clightning.sh
+ENV LN_BRANCH_COMMIT=628b65fb4082ff4dc8568fa0f88b7956cc21b392
+ENV LN_REPO_HOST=https://github.com/ElementsProject
+ENV LN_REPO_NAME=lightning
+RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
 
 COPY docker/daemons.env /wd/daemons.env
 COPY docker/daemons.proc /wd/daemons.proc
 COPY docker/daemon-conf /wd/conf
+COPY docker/lightningd-conf /wd/ln-conf
 CMD honcho start -e daemons.env -f daemons.proc
