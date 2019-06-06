@@ -14,3 +14,5 @@ chain_3: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_3.conf -datadir
 chain_4: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_4.conf -datadir=/wd/daemon-data/.chain_4/
 
 chain_5: ./$BITCOIN_BRANCH_DIR/src/bitcoind -conf=/wd/conf/chain_5.conf -datadir=/wd/daemon-data/.chain_5/
+
+alice_regtest: sleep 1 ; ./lightning/lightningd/lightningd --conf=/wd/ln-conf/alice_regtest.conf --lightning-dir=/wd/daemon-data/alice_regtest/
