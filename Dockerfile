@@ -53,8 +53,8 @@ RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
 ENV PATH="/wd/$DAEMON_NAME-$BRANCH_COMMIT/src:${PATH}"
 
 COPY docker/build-clightning.sh /wd/build-clightning.sh
-ENV LN_BRANCH_COMMIT=628b65fb4082ff4dc8568fa0f88b7956cc21b392
-ENV LN_REPO_HOST=https://github.com/ElementsProject
+ENV LN_BRANCH_COMMIT=custom-chain
+ENV LN_REPO_HOST=https://github.com/jtimon
 ENV LN_REPO_NAME=lightning
 RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
 
