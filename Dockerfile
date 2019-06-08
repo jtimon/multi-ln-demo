@@ -10,7 +10,6 @@ RUN apt-get -yqq update \
     autotools-dev \
     bsdmainutils \
     build-essential \
-    curl \
     git \
     libboost-chrono-dev \
     libboost-filesystem-dev \
@@ -46,17 +45,18 @@ RUN pip install -r requirements.txt --require-hashes
 COPY docker/build-daemon.sh /wd/build-daemon.sh
 # Build custom daemon able to produce and support an arbitrary number of chains
 ENV DAEMON_NAME=bitcoin
-ENV BRANCH_COMMIT=3ab01aa44a3198502285a2effc38096b56edba28
+ENV BRANCH_COMMIT=0.13-new-testchain
 ENV REPO_HOST=https://github.com/jtimon
 ENV REPO_NAME=bitcoin
 RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
-ENV PATH="/wd/$DAEMON_NAME-$BRANCH_COMMIT/src:${PATH}"
+ENV PATH="/wd/$REPO_NAME/src:${PATH}"
 
 COPY docker/build-clightning.sh /wd/build-clightning.sh
 ENV LN_BRANCH_COMMIT=custom-chain
 ENV LN_REPO_HOST=https://github.com/jtimon
 ENV LN_REPO_NAME=lightning
 RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
+ENV PATH="/wd/$LN_REPO_NAME/lightningd:${PATH}"
 
 COPY docker/daemons.env /wd/daemons.env
 COPY docker/daemons.proc /wd/daemons.proc

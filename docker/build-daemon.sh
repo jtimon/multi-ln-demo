@@ -9,15 +9,14 @@ if [ "$4" = "" -o "$4" = "disabled_daemon" ]; then
     exit 0
 fi
 
-BRANCH_DIR=$2-$1
-BRANCH_URL=$3/$2/archive/$1.tar.gz
 NUM_JOBS=4
 if [ -f /proc/cpuinfo ]; then
     NUM_JOBS=$(cat /proc/cpuinfo | grep ^processor | wc -l)
 fi
 
-curl -L $BRANCH_URL | tar xz
-cd $BRANCH_DIR
+git clone $3/$2
+cd $2
+git checkout $1
 ./autogen.sh
 ./configure --without-gui
 
