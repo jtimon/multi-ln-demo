@@ -58,8 +58,9 @@ ENV LN_REPO_NAME=lightning
 RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
 ENV PATH="/wd/$LN_REPO_NAME/lightningd:${PATH}"
 
+COPY docker/entry-point.sh /wd/entry-point.sh
 COPY docker/daemons.env /wd/daemons.env
 COPY docker/daemons.proc /wd/daemons.proc
 COPY docker/daemon-conf /wd/conf
 COPY docker/lightningd-conf /wd/ln-conf
-CMD honcho start -e daemons.env -f daemons.proc
+CMD bash entry-point.sh
