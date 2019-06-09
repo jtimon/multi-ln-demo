@@ -45,14 +45,14 @@ RUN pip install -r requirements.txt --require-hashes
 COPY docker/build-daemon.sh /wd/build-daemon.sh
 # Build custom daemon able to produce and support an arbitrary number of chains
 ENV DAEMON_NAME=bitcoin
-ENV BRANCH_COMMIT=0.13-new-testchain
+ENV BRANCH_COMMIT=117dfe056dec64b0bbea5b5a76a7f4f26dbb916b
 ENV REPO_HOST=https://github.com/jtimon
 ENV REPO_NAME=bitcoin
 RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
 ENV PATH="/wd/$REPO_NAME/src:${PATH}"
 
 COPY docker/build-clightning.sh /wd/build-clightning.sh
-ENV LN_BRANCH_COMMIT=custom-chain
+ENV LN_BRANCH_COMMIT=50bbcb8ef1af2d8d5d801b77b83e24d3e800f458
 ENV LN_REPO_HOST=https://github.com/jtimon
 ENV LN_REPO_NAME=lightning
 RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
