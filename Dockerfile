@@ -61,6 +61,6 @@ ENV PATH="/wd/$LN_REPO_NAME/lightningd:${PATH}"
 COPY docker/entry-point.sh /wd/entry-point.sh
 COPY docker/daemons.env /wd/daemons.env
 COPY docker/daemons.proc /wd/daemons.proc
-COPY docker/daemon-conf /wd/conf
-COPY docker/lightningd-conf /wd/ln-conf
+COPY bitcoind-conf /wd/conf
+COPY lightningd-conf /wd/ln-conf
 CMD bash entry-point.sh
