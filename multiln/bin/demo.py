@@ -58,6 +58,14 @@ for chain_daemons in BITCOIND.values():
     rpccaller = next(iter(chain_daemons.values()))
     generate_blocks(rpccaller, chain_name, 101)
 
+
+# Alice can pay bob directly on chain_1
+bob_address = BITCOIND['chain_1']['bob'].call('getnewaddress', {})
+txid = BITCOIND['chain_1']['alice'].call('sendtoaddress', {'address': bob_address, 'amount': 1})
+print('Alice can pay bob directly on chain_1 (txid: %s)' % txid)
+generate_blocks(BITCOIND['chain_1']['alice'], 'chain_1', 1)
+
+
 # TODO Create lightning channels
 
 # TODO Pay from alice to fiona using lightning
