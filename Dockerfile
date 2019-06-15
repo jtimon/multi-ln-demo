@@ -58,6 +58,9 @@ ENV LN_REPO_NAME=lightning
 RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
 ENV PATH="/wd/$LN_REPO_NAME/lightningd:${PATH}"
 
+RUN cd /wd/$LN_REPO_NAME/contrib/pylightning && \
+    python3 setup.py develop
+
 COPY docker/requirements.txt /wd/requirements.txt
 RUN pip install -r requirements.txt --require-hashes
 
