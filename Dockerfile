@@ -30,17 +30,17 @@ RUN apt-get -yqq update \
     make \
     net-tools \
     pkg-config \
-    python \
-    python-pip \
     python3 \
+    python3-distutils \
+    python3-pip \
     tor \
     zlib1g-dev \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /wd
 
-COPY docker/requirements.txt /wd/requirements.txt
-RUN pip install -r requirements.txt --require-hashes
+RUN ln -s /usr/bin/python3 /usr/bin/python && \
+    ln -s /usr/bin/pip3 /usr/bin/pip
 
 COPY docker/build-daemon.sh /wd/build-daemon.sh
 # Build custom daemon able to produce and support an arbitrary number of chains
@@ -58,9 +58,16 @@ ENV LN_REPO_NAME=lightning
 RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
 ENV PATH="/wd/$LN_REPO_NAME/lightningd:${PATH}"
 
+COPY docker/requirements.txt /wd/requirements.txt
+RUN pip install -r requirements.txt --require-hashes
+
+COPY multiln /wd/multiln
+COPY setup.py /wd/setup.py
+RUN python /wd/setup.py install
+
 COPY docker/entry-point.sh /wd/entry-point.sh
-COPY docker/daemons.env /wd/daemons.env
-COPY docker/daemons.proc /wd/daemons.proc
 COPY bitcoind-conf /wd/conf
 COPY lightningd-conf /wd/ln-conf
+COPY docker/daemons.env /wd/daemons.env
+COPY docker/daemons.proc /wd/daemons.proc
 CMD bash entry-point.sh

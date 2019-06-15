@@ -1,4 +1,11 @@
 
+# A python script to make the rpc calls:
+
+demo: python /wd/multiln/bin/demo.py
+
+
+# bitcoind nodes:
+
 chain_1_alice_bitcoind: bitcoind -conf=/wd/conf/chain_1_alice.conf -datadir=/wd/daemon-data/chain_1_alice_bitcoind/
 
 chain_1_bob_bitcoind: bitcoind -conf=/wd/conf/chain_1_bob.conf -datadir=/wd/daemon-data/chain_1_bob_bitcoind/
@@ -18,6 +25,7 @@ chain_4_ezra_bitcoind: bitcoind -conf=/wd/conf/chain_4_ezra.conf -datadir=/wd/da
 chain_5_ezra_bitcoind: bitcoind -conf=/wd/conf/chain_5_ezra.conf -datadir=/wd/daemon-data/chain_5_ezra_bitcoind/
 
 chain_5_fiona_bitcoind: bitcoind -conf=/wd/conf/chain_5_fiona.conf -datadir=/wd/daemon-data/chain_5_fiona_bitcoind/
+
 
 # clightning nodes:
 
