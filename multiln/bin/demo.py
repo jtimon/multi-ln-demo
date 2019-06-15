@@ -23,18 +23,18 @@ BITCOIND = {
         'bob': RpcCaller('0.0.0.0:18555', 'user18555', 'password18555'),
         'carol': RpcCaller('0.0.0.0:18655', 'user18655', 'password18655'),
     },
-    'chain_3': {
-        'carol': RpcCaller('0.0.0.0:18565', 'user18565', 'password18565'),
-        'david': RpcCaller('0.0.0.0:18665', 'user18665', 'password18665'),
-    },
-    'chain_4': {
-        'david': RpcCaller('0.0.0.0:18575', 'user18575', 'password18575'),
-        'ezra': RpcCaller('0.0.0.0:18675', 'user18675', 'password18675'),
-    },
-    'chain_5': {
-        'ezra': RpcCaller('0.0.0.0:18585', 'user18585', 'password18585'),
-        'fiona': RpcCaller('0.0.0.0:18685', 'user18685', 'password18685'),
-    },
+    # 'chain_3': {
+    #     'carol': RpcCaller('0.0.0.0:18565', 'user18565', 'password18565'),
+    #     'david': RpcCaller('0.0.0.0:18665', 'user18665', 'password18665'),
+    # },
+    # 'chain_4': {
+    #     'david': RpcCaller('0.0.0.0:18575', 'user18575', 'password18575'),
+    #     'ezra': RpcCaller('0.0.0.0:18675', 'user18675', 'password18675'),
+    # },
+    # 'chain_5': {
+    #     'ezra': RpcCaller('0.0.0.0:18585', 'user18585', 'password18585'),
+    #     'fiona': RpcCaller('0.0.0.0:18685', 'user18685', 'password18685'),
+    # },
 }
 
 # Wait for daemons to start

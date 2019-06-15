@@ -14,17 +14,17 @@ chain_2_bob_bitcoind: bitcoind -conf=/wd/conf/chain_2_bob.conf -datadir=/wd/daem
 
 chain_2_carol_bitcoind: bitcoind -conf=/wd/conf/chain_2_carol.conf -datadir=/wd/daemon-data/chain_2_carol_bitcoind/
 
-chain_3_carol_bitcoind: bitcoind -conf=/wd/conf/chain_3_carol.conf -datadir=/wd/daemon-data/chain_3_carol_bitcoind/
+# chain_3_carol_bitcoind: bitcoind -conf=/wd/conf/chain_3_carol.conf -datadir=/wd/daemon-data/chain_3_carol_bitcoind/
 
-chain_3_david_bitcoind: bitcoind -conf=/wd/conf/chain_3_david.conf -datadir=/wd/daemon-data/chain_3_david_bitcoind/
+# chain_3_david_bitcoind: bitcoind -conf=/wd/conf/chain_3_david.conf -datadir=/wd/daemon-data/chain_3_david_bitcoind/
 
-chain_4_david_bitcoind: bitcoind -conf=/wd/conf/chain_4_david.conf -datadir=/wd/daemon-data/chain_4_david_bitcoind/
+# chain_4_david_bitcoind: bitcoind -conf=/wd/conf/chain_4_david.conf -datadir=/wd/daemon-data/chain_4_david_bitcoind/
 
-chain_4_ezra_bitcoind: bitcoind -conf=/wd/conf/chain_4_ezra.conf -datadir=/wd/daemon-data/chain_4_ezra_bitcoind/
+# chain_4_ezra_bitcoind: bitcoind -conf=/wd/conf/chain_4_ezra.conf -datadir=/wd/daemon-data/chain_4_ezra_bitcoind/
 
-chain_5_ezra_bitcoind: bitcoind -conf=/wd/conf/chain_5_ezra.conf -datadir=/wd/daemon-data/chain_5_ezra_bitcoind/
+# chain_5_ezra_bitcoind: bitcoind -conf=/wd/conf/chain_5_ezra.conf -datadir=/wd/daemon-data/chain_5_ezra_bitcoind/
 
-chain_5_fiona_bitcoind: bitcoind -conf=/wd/conf/chain_5_fiona.conf -datadir=/wd/daemon-data/chain_5_fiona_bitcoind/
+# chain_5_fiona_bitcoind: bitcoind -conf=/wd/conf/chain_5_fiona.conf -datadir=/wd/daemon-data/chain_5_fiona_bitcoind/
 
 
 # clightning nodes:
@@ -37,14 +37,14 @@ bob_chain_2: sleep 1 ; lightningd --conf=/wd/ln-conf/bob_chain_2.conf --lightnin
 
 carol_chain_2: sleep 1 ; lightningd --conf=/wd/ln-conf/carol_chain_2.conf --lightning-dir=/wd/daemon-data/carol_chain_2/
 
-carol_chain_3: sleep 1 ; lightningd --conf=/wd/ln-conf/carol_chain_3.conf --lightning-dir=/wd/daemon-data/carol_chain_3/
+# carol_chain_3: sleep 1 ; lightningd --conf=/wd/ln-conf/carol_chain_3.conf --lightning-dir=/wd/daemon-data/carol_chain_3/
 
-david_chain_3: sleep 1 ; lightningd --conf=/wd/ln-conf/david_chain_3.conf --lightning-dir=/wd/daemon-data/david_chain_3/
+# david_chain_3: sleep 1 ; lightningd --conf=/wd/ln-conf/david_chain_3.conf --lightning-dir=/wd/daemon-data/david_chain_3/
 
-david_chain_4: sleep 1 ; lightningd --conf=/wd/ln-conf/david_chain_4.conf --lightning-dir=/wd/daemon-data/david_chain_4/
+# david_chain_4: sleep 1 ; lightningd --conf=/wd/ln-conf/david_chain_4.conf --lightning-dir=/wd/daemon-data/david_chain_4/
 
-ezra_chain_4: sleep 1 ; lightningd --conf=/wd/ln-conf/ezra_chain_4.conf --lightning-dir=/wd/daemon-data/ezra_chain_4/
+# ezra_chain_4: sleep 1 ; lightningd --conf=/wd/ln-conf/ezra_chain_4.conf --lightning-dir=/wd/daemon-data/ezra_chain_4/
 
-ezra_chain_5: sleep 1 ; lightningd --conf=/wd/ln-conf/ezra_chain_5.conf --lightning-dir=/wd/daemon-data/ezra_chain_5/
+# ezra_chain_5: sleep 1 ; lightningd --conf=/wd/ln-conf/ezra_chain_5.conf --lightning-dir=/wd/daemon-data/ezra_chain_5/
 
-fiona_chain_5: sleep 1 ; lightningd --conf=/wd/ln-conf/fiona_chain_5.conf --lightning-dir=/wd/daemon-data/fiona_chain_5/
+# fiona_chain_5: sleep 1 ; lightningd --conf=/wd/ln-conf/fiona_chain_5.conf --lightning-dir=/wd/daemon-data/fiona_chain_5/
