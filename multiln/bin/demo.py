@@ -13,11 +13,24 @@ from multiln.bitcoin_test_utils import (
 
 print('This is a demo demonstrating lightning payments across several different regtest chains')
 
-CHAINS = ['chain_1', 'chain_2', 'chain_3', 'chain_4', 'chain_5']
+CHAINS = [
+    'chain_1',
+    'chain_2',
+    # 'chain_3',
+    # 'chain_4',
+    # 'chain_5',
+]
 USERS = ['alice', 'bob', 'carol', 'david', 'ezra', 'fiona']
 
 print('Chains considered:', CHAINS)
 print('Users considered:', USERS)
+
+def select_chains(chains, by_chain_dict):
+    to_return = {}
+    for chain_name, chain_items in by_chain_dict.items():
+        if chain_name in chains:
+            to_return[chain_name] = chain_items
+    return to_return
 
 # TODO do this in a better way
 P2P_PORTS = {
@@ -42,6 +55,7 @@ P2P_PORTS = {
         'fiona': '18686',
     },
 }
+P2P_PORTS = select_chains(CHAINS, P2P_PORTS)
 
 # TODO do this in a better way
 BITCOIND = {
@@ -53,19 +67,20 @@ BITCOIND = {
         'bob': RpcCaller('0.0.0.0:18555', 'user18555', 'password18555'),
         'carol': RpcCaller('0.0.0.0:18655', 'user18655', 'password18655'),
     },
-    # 'chain_3': {
-    #     'carol': RpcCaller('0.0.0.0:18565', 'user18565', 'password18565'),
-    #     'david': RpcCaller('0.0.0.0:18665', 'user18665', 'password18665'),
-    # },
-    # 'chain_4': {
-    #     'david': RpcCaller('0.0.0.0:18575', 'user18575', 'password18575'),
-    #     'ezra': RpcCaller('0.0.0.0:18675', 'user18675', 'password18675'),
-    # },
-    # 'chain_5': {
-    #     'ezra': RpcCaller('0.0.0.0:18585', 'user18585', 'password18585'),
-    #     'fiona': RpcCaller('0.0.0.0:18685', 'user18685', 'password18685'),
-    # },
+    'chain_3': {
+        'carol': RpcCaller('0.0.0.0:18565', 'user18565', 'password18565'),
+        'david': RpcCaller('0.0.0.0:18665', 'user18665', 'password18665'),
+    },
+    'chain_4': {
+        'david': RpcCaller('0.0.0.0:18575', 'user18575', 'password18575'),
+        'ezra': RpcCaller('0.0.0.0:18675', 'user18675', 'password18675'),
+    },
+    'chain_5': {
+        'ezra': RpcCaller('0.0.0.0:18585', 'user18585', 'password18585'),
+        'fiona': RpcCaller('0.0.0.0:18685', 'user18685', 'password18685'),
+    },
 }
+BITCOIND = select_chains(CHAINS, BITCOIND)
 
 # TODO do this in a better way
 LIGHTNINGD = {
@@ -77,19 +92,20 @@ LIGHTNINGD = {
         'bob': LightningRpc('/wd/daemon-data/bob_chain_2/lightning-rpc'),
         'carol': LightningRpc('/wd/daemon-data/carol_chain_2/lightning-rpc'),
     },
-    # 'chain_3': {
-    #     'carol': LightningRpc('/wd/daemon-data/carol_chain_3/lightning-rpc'),
-    #     'david': LightningRpc('/wd/daemon-data/david_chain_3/lightning-rpc'),
-    # },
-    # 'chain_4': {
-    #     'david': LightningRpc('/wd/daemon-data/david_chain_4/lightning-rpc'),
-    #     'ezra': LightningRpc('/wd/daemon-data/ezra_chain_4/lightning-rpc'),
-    # },
-    # 'chain_5': {
-    #     'ezra': LightningRpc('/wd/daemon-data/ezra_chain_5/lightning-rpc'),
-    #     'fiona': LightningRpc('/wd/daemon-data/fiona_chain_5/lightning-rpc'),
-    # },
+    'chain_3': {
+        'carol': LightningRpc('/wd/daemon-data/carol_chain_3/lightning-rpc'),
+        'david': LightningRpc('/wd/daemon-data/david_chain_3/lightning-rpc'),
+    },
+    'chain_4': {
+        'david': LightningRpc('/wd/daemon-data/david_chain_4/lightning-rpc'),
+        'ezra': LightningRpc('/wd/daemon-data/ezra_chain_4/lightning-rpc'),
+    },
+    'chain_5': {
+        'ezra': LightningRpc('/wd/daemon-data/ezra_chain_5/lightning-rpc'),
+        'fiona': LightningRpc('/wd/daemon-data/fiona_chain_5/lightning-rpc'),
+    },
 }
+LIGHTNINGD = select_chains(CHAINS, LIGHTNINGD)
 
 # Connect all nodes of the same chain with each other
 def btc_connect_nodes():
