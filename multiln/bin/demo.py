@@ -57,6 +57,9 @@ P2P_PORTS = {
 }
 P2P_PORTS = select_chains(CHAINS, P2P_PORTS)
 
+def get_p2p_port(chain_name, user_name):
+    return P2P_PORTS[chain_name][user_name]
+
 # TODO do this in a better way
 BITCOIND = {
     'chain_1': {
@@ -111,9 +114,9 @@ LIGHTNINGD = select_chains(CHAINS, LIGHTNINGD)
 def btc_connect_nodes():
     for chain_name, chain_daemons in BITCOIND.items():
         for user_name_a, rpccaller in chain_daemons.items():
-            for user_name_b, port_b in P2P_PORTS[chain_name].items():
+            for user_name_b in chain_daemons:
                 if user_name_a != user_name_b:
-                    connect_nodes(BITCOIND[chain_name][user_name_a], '127.0.0.1:%s' % port_b)
+                    connect_nodes(BITCOIND[chain_name][user_name_a], '127.0.0.1:%s' % get_p2p_port(chain_name, user_name_b))
 
 def generate_blocks(rpccaller, chain_name, nblocks):
     address = rpccaller.call('getnewaddress', {})
