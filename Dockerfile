@@ -69,7 +69,7 @@ COPY setup.py /wd/setup.py
 RUN python /wd/setup.py install
 
 COPY docker/entry-point.sh /wd/entry-point.sh
-COPY bitcoind-conf /wd/conf
+COPY conf /wd/conf
 COPY lightningd-conf /wd/ln-conf
 COPY docker/daemons.env /wd/daemons.env
 COPY docker/daemons.proc /wd/daemons.proc

@@ -6,25 +6,25 @@ demo: python /wd/multiln/bin/demo.py
 
 # bitcoind nodes:
 
-chain_1_alice_bitcoind: bitcoind -conf=/wd/conf/chain_1_alice.conf -datadir=/wd/daemon-data/chain_1_alice_bitcoind/
+chain_1_alice_bitcoind: bitcoind -chain=chain_1 -conf=/wd/conf/alice_bitcoind.conf -datadir=/wd/daemon-data/chain_1_alice_bitcoind/
 
-chain_1_bob_bitcoind: bitcoind -conf=/wd/conf/chain_1_bob.conf -datadir=/wd/daemon-data/chain_1_bob_bitcoind/
+chain_1_bob_bitcoind: bitcoind -chain=chain_1 -conf=/wd/conf/bob_bitcoind.conf -datadir=/wd/daemon-data/chain_1_bob_bitcoind/
 
-chain_2_bob_bitcoind: bitcoind -conf=/wd/conf/chain_2_bob.conf -datadir=/wd/daemon-data/chain_2_bob_bitcoind/
+chain_2_bob_bitcoind: bitcoind -chain=chain_2 -conf=/wd/conf/bob_bitcoind.conf -datadir=/wd/daemon-data/chain_2_bob_bitcoind/
 
-chain_2_carol_bitcoind: bitcoind -conf=/wd/conf/chain_2_carol.conf -datadir=/wd/daemon-data/chain_2_carol_bitcoind/
+chain_2_carol_bitcoind: bitcoind -chain=chain_2 -conf=/wd/conf/carol_bitcoind.conf -datadir=/wd/daemon-data/chain_2_carol_bitcoind/
 
-# chain_3_carol_bitcoind: bitcoind -conf=/wd/conf/chain_3_carol.conf -datadir=/wd/daemon-data/chain_3_carol_bitcoind/
+# chain_3_carol_bitcoind: bitcoind -chain=chain_3 -conf=/wd/conf/carol_bitcoind.conf -datadir=/wd/daemon-data/chain_3_carol_bitcoind/
 
-# chain_3_david_bitcoind: bitcoind -conf=/wd/conf/chain_3_david.conf -datadir=/wd/daemon-data/chain_3_david_bitcoind/
+# chain_3_david_bitcoind: bitcoind -chain=chain_3 -conf=/wd/conf/david_bitcoind.conf -datadir=/wd/daemon-data/chain_3_david_bitcoind/
 
-# chain_4_david_bitcoind: bitcoind -conf=/wd/conf/chain_4_david.conf -datadir=/wd/daemon-data/chain_4_david_bitcoind/
+# chain_4_david_bitcoind: bitcoind -chain=chain_4 -conf=/wd/conf/david_bitcoind.conf -datadir=/wd/daemon-data/chain_4_david_bitcoind/
 
-# chain_4_ezra_bitcoind: bitcoind -conf=/wd/conf/chain_4_ezra.conf -datadir=/wd/daemon-data/chain_4_ezra_bitcoind/
+# chain_4_ezra_bitcoind: bitcoind -chain=chain_4 -conf=/wd/conf/ezra_bitcoind.conf -datadir=/wd/daemon-data/chain_4_ezra_bitcoind/
 
-# chain_5_ezra_bitcoind: bitcoind -conf=/wd/conf/chain_5_ezra.conf -datadir=/wd/daemon-data/chain_5_ezra_bitcoind/
+# chain_5_ezra_bitcoind: bitcoind -chain=chain_5 -conf=/wd/conf/ezra_bitcoind.conf -datadir=/wd/daemon-data/chain_5_ezra_bitcoind/
 
-# chain_5_fiona_bitcoind: bitcoind -conf=/wd/conf/chain_5_fiona.conf -datadir=/wd/daemon-data/chain_5_fiona_bitcoind/
+# chain_5_fiona_bitcoind: bitcoind -chain=chain_5 -conf=/wd/conf/fiona_bitcoind.conf -datadir=/wd/daemon-data/chain_5_fiona_bitcoind/
 
 
 # clightning nodes:
