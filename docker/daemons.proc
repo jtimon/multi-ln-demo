@@ -29,22 +29,22 @@ chain_2_carol_bitcoind: bitcoind -chain=chain_2 -conf=/wd/conf/carol_bitcoind.co
 
 # clightning nodes:
 
-alice_chain_1: sleep 1 ; lightningd --conf=/wd/ln-conf/alice_chain_1.conf --lightning-dir=/wd/daemon-data/alice_chain_1/
+alice_chain_1: sleep 1 ; lightningd --conf=/wd/conf/alice_chain_1.conf --lightning-dir=/wd/daemon-data/alice_chain_1/
 
-bob_chain_1: sleep 1 ; lightningd --conf=/wd/ln-conf/bob_chain_1.conf --lightning-dir=/wd/daemon-data/bob_chain_1/
+bob_chain_1: sleep 1 ; lightningd --conf=/wd/conf/bob_chain_1.conf --lightning-dir=/wd/daemon-data/bob_chain_1/
 
-bob_chain_2: sleep 1 ; lightningd --conf=/wd/ln-conf/bob_chain_2.conf --lightning-dir=/wd/daemon-data/bob_chain_2/
+bob_chain_2: sleep 1 ; lightningd --conf=/wd/conf/bob_chain_2.conf --lightning-dir=/wd/daemon-data/bob_chain_2/
 
-carol_chain_2: sleep 1 ; lightningd --conf=/wd/ln-conf/carol_chain_2.conf --lightning-dir=/wd/daemon-data/carol_chain_2/
+carol_chain_2: sleep 1 ; lightningd --conf=/wd/conf/carol_chain_2.conf --lightning-dir=/wd/daemon-data/carol_chain_2/
 
-# carol_chain_3: sleep 1 ; lightningd --conf=/wd/ln-conf/carol_chain_3.conf --lightning-dir=/wd/daemon-data/carol_chain_3/
+# carol_chain_3: sleep 1 ; lightningd --conf=/wd/conf/carol_chain_3.conf --lightning-dir=/wd/daemon-data/carol_chain_3/
 
-# david_chain_3: sleep 1 ; lightningd --conf=/wd/ln-conf/david_chain_3.conf --lightning-dir=/wd/daemon-data/david_chain_3/
+# david_chain_3: sleep 1 ; lightningd --conf=/wd/conf/david_chain_3.conf --lightning-dir=/wd/daemon-data/david_chain_3/
 
-# david_chain_4: sleep 1 ; lightningd --conf=/wd/ln-conf/david_chain_4.conf --lightning-dir=/wd/daemon-data/david_chain_4/
+# david_chain_4: sleep 1 ; lightningd --conf=/wd/conf/david_chain_4.conf --lightning-dir=/wd/daemon-data/david_chain_4/
 
-# ezra_chain_4: sleep 1 ; lightningd --conf=/wd/ln-conf/ezra_chain_4.conf --lightning-dir=/wd/daemon-data/ezra_chain_4/
+# ezra_chain_4: sleep 1 ; lightningd --conf=/wd/conf/ezra_chain_4.conf --lightning-dir=/wd/daemon-data/ezra_chain_4/
 
-# ezra_chain_5: sleep 1 ; lightningd --conf=/wd/ln-conf/ezra_chain_5.conf --lightning-dir=/wd/daemon-data/ezra_chain_5/
+# ezra_chain_5: sleep 1 ; lightningd --conf=/wd/conf/ezra_chain_5.conf --lightning-dir=/wd/daemon-data/ezra_chain_5/
 
-# fiona_chain_5: sleep 1 ; lightningd --conf=/wd/ln-conf/fiona_chain_5.conf --lightning-dir=/wd/daemon-data/fiona_chain_5/
+# fiona_chain_5: sleep 1 ; lightningd --conf=/wd/conf/fiona_chain_5.conf --lightning-dir=/wd/daemon-data/fiona_chain_5/
