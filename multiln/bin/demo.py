@@ -19,6 +19,31 @@ USERS = ['alice', 'bob', 'carol', 'david', 'ezra', 'fiona']
 print('Chains considered:', CHAINS)
 print('Users considered:', USERS)
 
+# TODO do this in a better way
+P2P_PORTS = {
+    'chain_1': {
+        'alice': '18546',
+        'bob': '18646',
+    },
+    'chain_2': {
+        'bob': '18556',
+        'carol': '18656',
+    },
+    'chain_3': {
+        'carol': '18566',
+        'david': '18666',
+    },
+    'chain_4': {
+        'david': '18576',
+        'ezra': '18676',
+    },
+    'chain_5': {
+        'ezra': '18586',
+        'fiona': '18686',
+    },
+}
+
+# TODO do this in a better way
 BITCOIND = {
     'chain_1': {
         'alice': RpcCaller('0.0.0.0:18545', 'user18545', 'password18545'),
@@ -42,6 +67,7 @@ BITCOIND = {
     # },
 }
 
+# TODO do this in a better way
 LIGHTNINGD = {
     'chain_1': {
         'alice': LightningRpc('/wd/daemon-data/alice_chain_1/lightning-rpc'),
@@ -65,6 +91,14 @@ LIGHTNINGD = {
     # },
 }
 
+# Connect all nodes of the same chain with each other
+def btc_connect_nodes():
+    for chain_name, chain_daemons in BITCOIND.items():
+        for user_name_a, rpccaller in chain_daemons.items():
+            for user_name_b, port_b in P2P_PORTS[chain_name].items():
+                if user_name_a != user_name_b:
+                    connect_nodes(BITCOIND[chain_name][user_name_a], '127.0.0.1:%s' % port_b)
+
 def generate_blocks(rpccaller, chain_name, nblocks):
     address = rpccaller.call('getnewaddress', {})
     block_hashes = rpccaller.call('generatetoaddress', {'nblocks': nblocks, 'address': address})
@@ -77,21 +111,39 @@ def print_balances():
         for user_name, rpccaller in chain_daemons.items():
             print(chain_name, user_name, rpccaller.call('getbalances', {}))
 
+LN_INFO = {}
+
+def ln_update_info():
+    for chain_name, ln_daemons in LIGHTNINGD.items():
+        LN_INFO[chain_name] = {}
+        for user_name, rpccaller in ln_daemons.items():
+            LN_INFO[chain_name][user_name] = LIGHTNINGD[chain_name][user_name].getinfo()
+
+def ln_print_info():
+    for chain_name, ln_users in LN_INFO.items():
+        for user_name, info in ln_users.items():
+            print(chain_name, user_name, info)
+
+def ln_print_funds():
+    for chain_name, ln_daemons in LIGHTNINGD.items():
+        for user_name, rpccaller in ln_daemons.items():
+            print(chain_name, user_name, LIGHTNINGD[chain_name][user_name].listfunds())
+
+# Connect all lightning nodes in the same chain to each other
+def ln_connect_nodes():
+    for chain_name, ln_daemons in LIGHTNINGD.items():
+        for user_name_a, rpccaller in LIGHTNINGD[chain_name].items():
+            for user_name_b, info_b in LN_INFO[chain_name].items():
+                if user_name_a != user_name_b:
+                    rpccaller.connect(info_b['id'], host='0.0.0.0', port=info_b['binding'][0]['port'])
+
+##################################
+
 # Wait for daemons to start
 time.sleep(5)
 
-# Connect all nodes of the same chain with each other
-# TODO do this in a better way
-connect_nodes(BITCOIND['chain_1']['alice'], '127.0.0.1:18646')
-connect_nodes(BITCOIND['chain_1']['bob'], '127.0.0.1:18546')
-connect_nodes(BITCOIND['chain_2']['bob'], '127.0.0.1:18656')
-connect_nodes(BITCOIND['chain_2']['carol'], '127.0.0.1:18556')
-# connect_nodes(BITCOIND['chain_3']['carol'], '127.0.0.1:18666')
-# connect_nodes(BITCOIND['chain_3']['david'], '127.0.0.1:18566')
-# connect_nodes(BITCOIND['chain_4']['david'], '127.0.0.1:18676')
-# connect_nodes(BITCOIND['chain_4']['ezra'], '127.0.0.1:18576')
-# connect_nodes(BITCOIND['chain_5']['ezra'], '127.0.0.1:18686')
-# connect_nodes(BITCOIND['chain_5']['fiona'], '127.0.0.1:18586')
+btc_connect_nodes()
+ln_update_info()
 
 # Let's make sure everyone generates some coins in the chains they participate in
 for chain_name, chain_daemons in BITCOIND.items():
@@ -111,7 +163,6 @@ bob_address = BITCOIND['chain_1']['bob'].call('getnewaddress', {})
 txid = BITCOIND['chain_1']['alice'].call('sendtoaddress', {'address': bob_address, 'amount': 1})
 print('Alice can pay bob directly on chain_1 (txid: %s)' % txid)
 generate_blocks(BITCOIND['chain_1']['alice'], 'chain_1', 1)
-
 print_balances()
 
 # Send coins to all lightning wallets
@@ -122,16 +173,13 @@ for chain_name, chain_daemons in BITCOIND.items():
         txid = rpccaller.call('sendtoaddress', {'address': address, 'amount': 10})
         print('sending coins to address %s in lightning wallet (txid: %s)' % (address, txid))
         generate_blocks(rpccaller, chain_name, 1)
-
 print_balances()
 
-for chain_name, ln_daemons in LIGHTNINGD.items():
-    for user_name, rpccaller in ln_daemons.items():
-        print(chain_name, user_name, LIGHTNINGD[chain_name][user_name].getinfo())
+ln_print_info()
+ln_print_funds()
 
-for chain_name, ln_daemons in LIGHTNINGD.items():
-    for user_name, rpccaller in ln_daemons.items():
-        print(chain_name, user_name, LIGHTNINGD[chain_name][user_name].listfunds())
+# FIX the error in the handshake may be caused by the chain_hash being wrong in the hardcoded chainparams
+ln_connect_nodes()
 
 # TODO Create lightning channels
 
