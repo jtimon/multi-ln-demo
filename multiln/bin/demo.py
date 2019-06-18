@@ -13,13 +13,23 @@ from multiln.bitcoin_test_utils import (
 
 print('This is a demo demonstrating lightning payments across several different regtest chains')
 
-CHAINS = [
-    'chain_1',
-    'chain_2',
-    # 'chain_3',
-    # 'chain_4',
-    # 'chain_5',
-]
+CHAINS = {
+    'chain_1': {
+        'port_decimal': 4
+    },
+    'chain_2': {
+        'port_decimal': 5
+    },
+    # 'chain_3': {
+    #     'port_decimal': 6
+    # },
+    # 'chain_4': {
+    #     'port_decimal': 7
+    # },
+    # 'chain_5': {
+    #     'port_decimal': 8
+    # },
+}
 
 USERS = ['alice', 'bob', 'carol', 'david', 'ezra', 'fiona']
 
@@ -48,26 +58,11 @@ def get_p2p_decimal_1(chain_name, user_name):
     else:
         return '6'
 
-# TODO do this in a better way
-def get_chain_num_from_name(chain_name):
-    if chain_name == 'chain_1':
-        return 1
-    elif chain_name == 'chain_2':
-        return 2
-    elif chain_name == 'chain_3':
-        return 3
-    elif chain_name == 'chain_4':
-        return 4
-    elif chain_name == 'chain_5':
-        return 5
-    else:
-        raise AssertionError(u"%s: %s: Chain %s is beyond the number of the beast" % (__func__, __file__,  chain_name))
-
 def get_p2p_port(chain_name, user_name):
     return '18%s%s6' % (
         # TODO This only scales to 2 nodes per chain
         get_p2p_decimal_1(chain_name, user_name),
-        3 + get_chain_num_from_name(chain_name),
+        CHAINS[chain_name]['port_decimal'],
     )
 
 # TODO do this in a better way
