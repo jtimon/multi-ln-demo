@@ -114,8 +114,8 @@ def btc_connect_nodes():
 def generate_blocks(rpccaller, chain_name, nblocks):
     address = rpccaller.call('getnewaddress', {})
     block_hashes = rpccaller.call('generatetoaddress', {'nblocks': nblocks, 'address': address})
-    print('Generated %s blocks:' % chain_name)
-    print(block_hashes)
+    print('Generated %s %s blocks:' % (nblocks, chain_name))
+    # print(block_hashes)
     sync_blocks(BITCOIND[chain_name].values())
 
 def print_balances():
@@ -184,18 +184,37 @@ print_balances()
 for chain_name, chain_daemons in BITCOIND.items():
     for user_name, rpccaller in chain_daemons.items():
         print(rpccaller.call('getbalances', {}))
-        address = LIGHTNINGD[chain_name][user_name].newaddr('p2sh-segwit')['address']
+        address = LIGHTNINGD[chain_name][user_name].newaddr('p2sh-segwit')['p2sh-segwit']
         txid = rpccaller.call('sendtoaddress', {'address': address, 'amount': 10})
-        print('sending coins to address %s in lightning wallet (txid: %s)' % (address, txid))
+        print('%s %s: sending coins to address %s in lightning wallet (txid: %s)' % (chain_name, user_name, address, txid))
         generate_blocks(rpccaller, chain_name, 1)
+
+# Wait for lightningd to sync with bitcoind
+time.sleep(30)
+
+# for chain_name, chain_daemons in BITCOIND.items():
+#     for user_name, rpccaller in chain_daemons.items():
+#         print(LIGHTNINGD[chain_name][user_name].dev_rescan_outputs())
 
 print_balances()
 ln_print_info()
 ln_print_funds()
 
+# A node funds a channel with every other node in the chain
+for chain_name, ln_daemons in LIGHTNINGD.items():
+    for user_name_a, ln_caller in ln_daemons.items():
+        for user_name_b in ln_daemons:
+            if user_name_a != user_name_b:
+                print('%s funds a channel to %s in chain %s' % (user_name_a, user_name_b, chain_name))
+                print(ln_caller.fundchannel(LN_INFO[chain_name][user_name_b]['id'], 10000))
+        break
+
 # TODO Create lightning channels
 
 # TODO Pay from alice to fiona using lightning
+
+# import json
+# print(json.dumps(LIGHTNINGD['regtest']['alice'].help(), indent=4, sort_keys=True))
 
 print('All done. Exiting in 5 seconds...')
 time.sleep(5)
