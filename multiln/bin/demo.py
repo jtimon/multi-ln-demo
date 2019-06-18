@@ -65,30 +65,23 @@ def get_p2p_port(chain_name, user_name):
         CHAINS[chain_name]['port_decimal'],
     )
 
-# TODO do this in a better way
-BITCOIND = {
-    'chain_1': {
-        'alice': RpcCaller('0.0.0.0:18545', 'user18545', 'password18545'),
-        'bob': RpcCaller('0.0.0.0:18645', 'user18645', 'password18645'),
-    },
-    'chain_2': {
-        'bob': RpcCaller('0.0.0.0:18555', 'user18555', 'password18555'),
-        'carol': RpcCaller('0.0.0.0:18655', 'user18655', 'password18655'),
-    },
-    'chain_3': {
-        'carol': RpcCaller('0.0.0.0:18565', 'user18565', 'password18565'),
-        'david': RpcCaller('0.0.0.0:18665', 'user18665', 'password18665'),
-    },
-    'chain_4': {
-        'david': RpcCaller('0.0.0.0:18575', 'user18575', 'password18575'),
-        'ezra': RpcCaller('0.0.0.0:18675', 'user18675', 'password18675'),
-    },
-    'chain_5': {
-        'ezra': RpcCaller('0.0.0.0:18585', 'user18585', 'password18585'),
-        'fiona': RpcCaller('0.0.0.0:18685', 'user18685', 'password18685'),
-    },
-}
-BITCOIND = select_chains(CHAINS, BITCOIND)
+def btc_init_bitcoind_global():
+    to_return = {}
+    for chain_name, chain_demo_config in CHAINS.items():
+        to_return[chain_name] = {}
+        for user_name in USERS:
+            port_chain_user = '18%s%s5' % (
+                get_p2p_decimal_1(chain_name, user_name),
+                CHAINS[chain_name]['port_decimal'],
+            )
+            to_return[chain_name][user_name] = RpcCaller(
+                '0.0.0.0:%s' % port_chain_user,
+                'user%s' % port_chain_user,
+                'password%s' % port_chain_user,
+            )
+    return to_return
+
+BITCOIND = btc_init_bitcoind_global()
 
 # TODO do this in a better way
 LIGHTNINGD = {
