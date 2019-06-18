@@ -179,7 +179,7 @@ print_balances()
 for chain_name, chain_daemons in BITCOIND.items():
     for user_name, rpccaller in chain_daemons.items():
         print(rpccaller.call('getbalances', {}))
-        address = LIGHTNINGD['chain_1']['alice'].newaddr('p2sh-segwit')['address']
+        address = LIGHTNINGD[chain_name][user_name].newaddr('p2sh-segwit')['address']
         txid = rpccaller.call('sendtoaddress', {'address': address, 'amount': 10})
         print('sending coins to address %s in lightning wallet (txid: %s)' % (address, txid))
         generate_blocks(rpccaller, chain_name, 1)
