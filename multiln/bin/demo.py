@@ -31,7 +31,13 @@ CHAINS = {
     # },
 }
 
-USERS = ['alice', 'bob', 'carol', 'david', 'ezra', 'fiona']
+USERS_PER_CHAIN = {
+    'chain_1': ['alice', 'bob'],
+    'chain_2': ['bob', 'carol'],
+    'chain_3': ['carol', 'david'],
+    'chain_4': ['david', 'ezra'],
+    'chain_5': ['ezra', 'fiona'],
+}
 
 MAIN_USER_PER_CHAIN = {
     'chain_1': 'alice',
@@ -42,7 +48,7 @@ MAIN_USER_PER_CHAIN = {
 }
 
 print('Chains considered:', CHAINS)
-print('Users considered:', USERS)
+print('Users considered:', USERS_PER_CHAIN)
 
 def select_chains(chains, by_chain_dict):
     to_return = {}
@@ -67,9 +73,9 @@ def get_p2p_port(chain_name, user_name):
 
 def btc_init_bitcoind_global():
     to_return = {}
-    for chain_name, chain_demo_config in CHAINS.items():
+    for chain_name in CHAINS:
         to_return[chain_name] = {}
-        for user_name in USERS:
+        for user_name in USERS_PER_CHAIN[chain_name]:
             port_chain_user = '18%s%s5' % (
                 get_p2p_decimal_1(chain_name, user_name),
                 CHAINS[chain_name]['port_decimal'],
@@ -81,32 +87,16 @@ def btc_init_bitcoind_global():
             )
     return to_return
 
-BITCOIND = btc_init_bitcoind_global()
+def ln_init_global():
+    to_return = {}
+    for chain_name in CHAINS:
+        to_return[chain_name] = {}
+        for user_name in USERS_PER_CHAIN[chain_name]:
+            to_return[chain_name][user_name] = LightningRpc('/wd/daemon-data/%s_%s/lightning-rpc' % (user_name, chain_name))
+    return to_return
 
-# TODO do this in a better way
-LIGHTNINGD = {
-    'chain_1': {
-        'alice': LightningRpc('/wd/daemon-data/alice_chain_1/lightning-rpc'),
-        'bob': LightningRpc('/wd/daemon-data/bob_chain_1/lightning-rpc'),
-    },
-    'chain_2': {
-        'bob': LightningRpc('/wd/daemon-data/bob_chain_2/lightning-rpc'),
-        'carol': LightningRpc('/wd/daemon-data/carol_chain_2/lightning-rpc'),
-    },
-    'chain_3': {
-        'carol': LightningRpc('/wd/daemon-data/carol_chain_3/lightning-rpc'),
-        'david': LightningRpc('/wd/daemon-data/david_chain_3/lightning-rpc'),
-    },
-    'chain_4': {
-        'david': LightningRpc('/wd/daemon-data/david_chain_4/lightning-rpc'),
-        'ezra': LightningRpc('/wd/daemon-data/ezra_chain_4/lightning-rpc'),
-    },
-    'chain_5': {
-        'ezra': LightningRpc('/wd/daemon-data/ezra_chain_5/lightning-rpc'),
-        'fiona': LightningRpc('/wd/daemon-data/fiona_chain_5/lightning-rpc'),
-    },
-}
-LIGHTNINGD = select_chains(CHAINS, LIGHTNINGD)
+BITCOIND = btc_init_bitcoind_global()
+LIGHTNINGD = ln_init_global()
 
 # Connect all nodes of the same chain with each other
 def btc_connect_nodes():
