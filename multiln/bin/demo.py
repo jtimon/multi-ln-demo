@@ -20,7 +20,16 @@ CHAINS = [
     # 'chain_4',
     # 'chain_5',
 ]
+
 USERS = ['alice', 'bob', 'carol', 'david', 'ezra', 'fiona']
+
+MAIN_USER_PER_CHAIN = {
+    'chain_1': 'alice',
+    'chain_2': 'bob',
+    'chain_3': 'carol',
+    'chain_4': 'david',
+    'chain_5': 'ezra',
+}
 
 print('Chains considered:', CHAINS)
 print('Users considered:', USERS)
@@ -32,33 +41,34 @@ def select_chains(chains, by_chain_dict):
             to_return[chain_name] = chain_items
     return to_return
 
+def get_p2p_decimal_1(chain_name, user_name):
+    # TODO This only scales to 2 nodes per chain
+    if MAIN_USER_PER_CHAIN[chain_name] == user_name:
+        return '5'
+    else:
+        return '6'
+
 # TODO do this in a better way
-P2P_PORTS = {
-    'chain_1': {
-        'alice': '18546',
-        'bob': '18646',
-    },
-    'chain_2': {
-        'bob': '18556',
-        'carol': '18656',
-    },
-    'chain_3': {
-        'carol': '18566',
-        'david': '18666',
-    },
-    'chain_4': {
-        'david': '18576',
-        'ezra': '18676',
-    },
-    'chain_5': {
-        'ezra': '18586',
-        'fiona': '18686',
-    },
-}
-P2P_PORTS = select_chains(CHAINS, P2P_PORTS)
+def get_chain_num_from_name(chain_name):
+    if chain_name == 'chain_1':
+        return 1
+    elif chain_name == 'chain_2':
+        return 2
+    elif chain_name == 'chain_3':
+        return 3
+    elif chain_name == 'chain_4':
+        return 4
+    elif chain_name == 'chain_5':
+        return 5
+    else:
+        raise AssertionError(u"%s: %s: Chain %s is beyond the number of the beast" % (__func__, __file__,  chain_name))
 
 def get_p2p_port(chain_name, user_name):
-    return P2P_PORTS[chain_name][user_name]
+    return '18%s%s6' % (
+        # TODO This only scales to 2 nodes per chain
+        get_p2p_decimal_1(chain_name, user_name),
+        3 + get_chain_num_from_name(chain_name),
+    )
 
 # TODO do this in a better way
 BITCOIND = {
