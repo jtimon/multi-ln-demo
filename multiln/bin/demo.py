@@ -185,7 +185,7 @@ print_balances()
 ln_print_info()
 ln_print_funds()
 
-# FIX the error in the handshake may be caused by the chain_hash being wrong in the hardcoded chainparams
+# FIX Cryptographic handshake: peer closed connection (wrong key?)
 ln_connect_nodes()
 
 # TODO Create lightning channels
