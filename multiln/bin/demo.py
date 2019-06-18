@@ -142,6 +142,8 @@ def ln_connect_nodes():
         for user_name_a, rpccaller in LIGHTNINGD[chain_name].items():
             for user_name_b, info_b in LN_INFO[chain_name].items():
                 if user_name_a != user_name_b:
+                    print('Connecting %s to %s in chain %s, port %s' % (
+                        user_name_a, user_name_b, chain_name, info_b['binding'][0]['port']))
                     rpccaller.connect(info_b['id'], host='0.0.0.0', port=info_b['binding'][0]['port'])
 
 ##################################
@@ -151,6 +153,7 @@ time.sleep(5)
 
 btc_connect_nodes()
 ln_update_info()
+ln_connect_nodes()
 
 # Let's make sure everyone generates some coins in the chains they participate in
 for chain_name, chain_daemons in BITCOIND.items():
@@ -180,13 +183,10 @@ for chain_name, chain_daemons in BITCOIND.items():
         txid = rpccaller.call('sendtoaddress', {'address': address, 'amount': 10})
         print('sending coins to address %s in lightning wallet (txid: %s)' % (address, txid))
         generate_blocks(rpccaller, chain_name, 1)
-print_balances()
 
+print_balances()
 ln_print_info()
 ln_print_funds()
-
-# FIX Cryptographic handshake: peer closed connection (wrong key?)
-ln_connect_nodes()
 
 # TODO Create lightning channels
 
