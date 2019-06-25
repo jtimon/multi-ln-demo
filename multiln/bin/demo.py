@@ -123,8 +123,8 @@ LN_INFO = {}
 def ln_update_info():
     for chain_name, ln_daemons in LIGHTNINGD.items():
         LN_INFO[chain_name] = {}
-        for user_name, rpccaller in ln_daemons.items():
-            LN_INFO[chain_name][user_name] = LIGHTNINGD[chain_name][user_name].getinfo()
+        for user_name, ln_caller in ln_daemons.items():
+            LN_INFO[chain_name][user_name] = ln_caller.getinfo()
 
 def ln_print_info():
     for chain_name, ln_users in LN_INFO.items():
@@ -133,8 +133,8 @@ def ln_print_info():
 
 def ln_print_funds():
     for chain_name, ln_daemons in LIGHTNINGD.items():
-        for user_name, rpccaller in ln_daemons.items():
-            print(chain_name, user_name, LIGHTNINGD[chain_name][user_name].listfunds())
+        for user_name, ln_caller in ln_daemons.items():
+            print(chain_name, user_name, ln_caller.listfunds())
 
 # Connect all lightning nodes in the same chain to each other
 def ln_connect_nodes():
