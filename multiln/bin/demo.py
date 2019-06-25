@@ -14,12 +14,15 @@ from multiln.bitcoin_test_utils import (
 print('This is a demo demonstrating lightning payments across several different regtest chains')
 
 CHAINS = {
-    'chain_1': {
-        'port_decimal': 4
+    'regtest': {
+        'port_decimal': 1
     },
-    'chain_2': {
-        'port_decimal': 5
-    },
+    # 'chain_1': {
+    #     'port_decimal': 4
+    # },
+    # 'chain_2': {
+    #     'port_decimal': 5
+    # },
     # 'chain_3': {
     #     'port_decimal': 6
     # },
@@ -32,6 +35,7 @@ CHAINS = {
 }
 
 USERS_PER_CHAIN = {
+    'regtest': ['alice', 'bob'],
     'chain_1': ['alice', 'bob'],
     'chain_2': ['bob', 'carol'],
     'chain_3': ['carol', 'david'],
@@ -40,6 +44,7 @@ USERS_PER_CHAIN = {
 }
 
 MAIN_USER_PER_CHAIN = {
+    'regtest': 'alice',
     'chain_1': 'alice',
     'chain_2': 'bob',
     'chain_3': 'carol',
@@ -168,11 +173,11 @@ for chain_daemons in BITCOIND.values():
 
 print_balances()
 
-# Alice can pay bob directly on chain_1
-bob_address = BITCOIND['chain_1']['bob'].call('getnewaddress', {})
-txid = BITCOIND['chain_1']['alice'].call('sendtoaddress', {'address': bob_address, 'amount': 1})
-print('Alice can pay bob directly on chain_1 (txid: %s)' % txid)
-generate_blocks(BITCOIND['chain_1']['alice'], 'chain_1', 1)
+# Alice can pay bob directly on regtest
+bob_address = BITCOIND['regtest']['bob'].call('getnewaddress', {})
+txid = BITCOIND['regtest']['alice'].call('sendtoaddress', {'address': bob_address, 'amount': 1})
+print('Alice can pay bob directly on regtest (txid: %s)' % txid)
+generate_blocks(BITCOIND['regtest']['alice'], 'regtest', 1)
 print_balances()
 
 # Send coins to all lightning wallets
