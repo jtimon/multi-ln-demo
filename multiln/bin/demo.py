@@ -17,21 +17,21 @@ CHAINS = {
     'regtest': {
         'port_decimal': 1
     },
-    # 'chain_1': {
-    #     'port_decimal': 4
-    # },
-    # 'chain_2': {
-    #     'port_decimal': 5
-    # },
-    # 'chain_3': {
-    #     'port_decimal': 6
-    # },
-    # 'chain_4': {
-    #     'port_decimal': 7
-    # },
-    # 'chain_5': {
-    #     'port_decimal': 8
-    # },
+    'chain_1': {
+        'port_decimal': 4
+    },
+    'chain_2': {
+        'port_decimal': 5
+    },
+    'chain_3': {
+        'port_decimal': 6
+    },
+    'chain_4': {
+        'port_decimal': 7
+    },
+    'chain_5': {
+        'port_decimal': 8
+    },
 }
 
 USERS_PER_CHAIN = {
