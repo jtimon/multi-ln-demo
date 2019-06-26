@@ -271,7 +271,19 @@ ln_btc_sync()
 ln_listchannels()
 ln_assert_channels_public(True)
 
-# TODO Create lightning channels
+# A node receives invoices for every other node in the chain and pays it
+for chain_name, ln_daemons in LIGHTNINGD.items():
+    for user_name_a, ln_caller_a in ln_daemons.items():
+        for user_name_b, ln_caller_b in ln_daemons.items():
+            if user_name_a != user_name_b:
+                msatoshi = 1000
+                print('%s receives invoice from %s on chain %s' % (user_name_a, user_name_b, chain_name))
+                desc = '%s_%s_%s' % (user_name_a, user_name_b, chain_name)
+                invoice = ln_caller_b.invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
+                print(invoice)
+                print('...and pays it...')
+                print(ln_caller_a.pay(invoice['bolt11']))
+        break
 
 # TODO Pay from alice to fiona using lightning
 
