@@ -65,6 +65,17 @@ docker stop $(docker ps -a -q)
 
 Alice should be able to pay an invoice from Carol, even though the invoice is for chain_2
 
+
+# Harder goal: Pay from alice to fiona using lightning
+
+## Possible plan A:
+
+1) lightning nodes must be able to support several chains at the same time and be able to create channels in different chains.
+
+2) lightning nodes must be able to connect 2 of their own channels on different chains, and update the price
+
+3) getroute must work through channels of different chains if there's a path
+
 # Future work
 
 - Route through channels in chains with multiple assets
