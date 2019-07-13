@@ -80,6 +80,14 @@ RUN cd /wd/rustdemo && \
 COPY docker/requirements.txt /wd/requirements.txt
 RUN pip install -r requirements.txt --require-hashes
 
+# Install rust daemon
+COPY docker/build-rust-daemon.sh /wd/build-rust-daemon.sh
+ENV LRNDAEMON_BRANCH_COMMIT=e24f109524f5e54c135b9fb2ee25fe88c96e77f8
+ENV LRNDAEMON_REPO_HOST=https://github.com/jtimon
+ENV LRNDAEMON_REPO_NAME=rustlnd
+RUN bash build-rust-daemon.sh $LRNDAEMON_BRANCH_COMMIT $LRNDAEMON_REPO_NAME $LRNDAEMON_REPO_HOST
+ENV PATH="/wd/$LRNDAEMON_REPO_NAME/target/debug:${PATH}"
+
 COPY multiln /wd/multiln
 COPY setup.py /wd/setup.py
 RUN python /wd/setup.py install
