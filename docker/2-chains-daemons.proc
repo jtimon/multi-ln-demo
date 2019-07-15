@@ -13,7 +13,7 @@ chain_2_bitcoind: bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=
 
 # clightning nodes:
 
-alice_regtest_lrnd: sleep 1 ; rustlnd -chain=regtest regtest.-rpchost=localhost:18515 regtest.-rpcuser=user18515 regtest.-rpcpass=password18515
+# alice_regtest_lrnd: sleep 1 ; rustlnd -chain=regtest regtest.-rpchost=localhost:18515 regtest.-rpcuser=user18515 regtest.-rpcpass=password18515
 
 alice_regtest: sleep 1 ; lightningd --conf=/wd/conf/alice_regtest.conf --lightning-dir=/wd/daemon-data/alice_regtest/
 
