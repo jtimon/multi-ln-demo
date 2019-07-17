@@ -81,12 +81,20 @@ COPY docker/requirements.txt /wd/requirements.txt
 RUN pip install -r requirements.txt --require-hashes
 
 # Install rust daemon
-COPY docker/build-rust-daemon.sh /wd/build-rust-daemon.sh
+COPY docker/build-rust-project.sh /wd/build-rust-project.sh
 ENV LRNDAEMON_BRANCH_COMMIT=e24f109524f5e54c135b9fb2ee25fe88c96e77f8
 ENV LRNDAEMON_REPO_HOST=https://github.com/jtimon
 ENV LRNDAEMON_REPO_NAME=rustlnd
-RUN bash build-rust-daemon.sh $LRNDAEMON_BRANCH_COMMIT $LRNDAEMON_REPO_NAME $LRNDAEMON_REPO_HOST
+RUN bash build-rust-project.sh $LRNDAEMON_BRANCH_COMMIT $LRNDAEMON_REPO_NAME $LRNDAEMON_REPO_HOST
 ENV PATH="/wd/$LRNDAEMON_REPO_NAME/target/debug:${PATH}"
+
+# Install rust-lightning-bitcoinrpc
+COPY docker/build-rust-project.sh /wd/build-rust-project.sh
+ENV RLBRPC_BRANCH_COMMIT=8bd568c26b29b4c0fece1888c8ddfa1d4586a445
+ENV RLBRPC_REPO_HOST=https://github.com/jtimon
+ENV RLBRPC_REPO_NAME=rust-lightning-bitcoinrpc
+RUN bash build-rust-project.sh $RLBRPC_BRANCH_COMMIT $RLBRPC_REPO_NAME $RLBRPC_REPO_HOST
+ENV PATH="/wd/$RLBRPC_REPO_NAME/target/debug:${PATH}"
 
 COPY multiln /wd/multiln
 COPY setup.py /wd/setup.py
