@@ -15,7 +15,8 @@ chain_2_bitcoind: bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=
 
 # alice_regtest_lrnd: sleep 1 ; rustlnd -chain=regtest regtest.-rpchost=localhost:18515 regtest.-rpcuser=user18515 regtest.-rpcpass=password18515
 
-alice_regtest: sleep 1 ; lightningd --conf=/wd/conf/alice_regtest.conf --lightning-dir=/wd/daemon-data/alice_regtest/
+# alice_regtest: sleep 1 ; lightningd --conf=/wd/conf/alice_regtest.conf --lightning-dir=/wd/daemon-data/alice_regtest/
+alice_rust_regtest: sleep 1 ; RUST_BACKTRACE=1 rust-lightning-bitcoinrpc -chain=regtest -datadir=/wd/daemon-data/alice_regtest_rlbrpc/ regtest.-rpcauth=user18515:password18515 regtest.-rpchost=0.0.0.0:18515 -p2pport=19515
 
 bob_regtest: sleep 1 ; lightningd --conf=/wd/conf/bob_regtest.conf --lightning-dir=/wd/daemon-data/bob_regtest/
 
