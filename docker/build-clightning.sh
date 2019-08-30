@@ -14,4 +14,4 @@ git clone $3/$2
 cd $2
 git checkout $1
 ./configure
-make
+make -j$NUM_JOBS
