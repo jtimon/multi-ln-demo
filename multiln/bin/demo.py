@@ -136,6 +136,8 @@ def ln_update_info():
         LN_INFO[chain_name] = {}
         for user_name, ln_caller in ln_daemons.items():
             LN_INFO[chain_name][user_name] = ln_caller.getinfo()
+    print('LN_INFO:')
+    print(LN_INFO)
 
 def ln_print_info():
     for chain_name, ln_users in LN_INFO.items():
@@ -188,13 +190,13 @@ def ln_connect_nodes():
         for user_name_a, rpccaller in LIGHTNINGD[chain_name].items():
             for user_name_b, info_b in LN_INFO[chain_name].items():
                 if user_name_a != user_name_b:
-                    print('Connecting %s to %s in chain %s, port %s' % (
-                        user_name_a, user_name_b, chain_name, info_b['binding'][0]['port']))
+                    print('Connecting %s to %s in chain %s, port %s id %s' % (
+                        user_name_a, user_name_b, chain_name, info_b['binding'][0]['port'], info_b['id']))
                     rpccaller.connect(info_b['id'], host='0.0.0.0', port=info_b['binding'][0]['port'])
 
 # TODO find a smarter and faster way to sync lightning nodes with their respective bitcoind
 def ln_btc_sync():
-    time.sleep(30)
+    time.sleep(60)
     # for chain_name, chain_daemons in BITCOIND.items():
     #     for user_name, rpccaller in chain_daemons.items():
     #         print(LIGHTNINGD[chain_name][user_name].dev_rescan_outputs())
