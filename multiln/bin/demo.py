@@ -52,6 +52,8 @@ MAIN_USER_PER_CHAIN = {
     'chain_5': 'ezra',
 }
 
+EXAMPLE_CHAIN = 'regtest'
+
 print('Chains considered:', CHAINS)
 print('Users considered:', USERS_PER_CHAIN)
 
@@ -219,11 +221,11 @@ btc_generate_all_chains(100)
 
 print_balances()
 
-# Alice can pay bob directly on regtest
-bob_address = BITCOIND['regtest']['bob'].call('getnewaddress', {})
-txid = BITCOIND['regtest']['alice'].call('sendtoaddress', {'address': bob_address, 'amount': 1})
-print('Alice can pay bob directly on regtest (txid: %s)' % txid)
-generate_blocks(BITCOIND['regtest']['alice'], 'regtest', 1)
+# Alice can pay bob directly on EXAMPLE_CHAIN
+bob_address = BITCOIND[EXAMPLE_CHAIN]['bob'].call('getnewaddress', {})
+txid = BITCOIND[EXAMPLE_CHAIN]['alice'].call('sendtoaddress', {'address': bob_address, 'amount': 1})
+print('Alice can pay bob directly on EXAMPLE_CHAIN (txid: %s)' % txid)
+generate_blocks(BITCOIND[EXAMPLE_CHAIN]['alice'], EXAMPLE_CHAIN, 1)
 print_balances()
 
 # lightning-specific things from here
@@ -293,7 +295,7 @@ for chain_name, ln_daemons in LIGHTNINGD.items():
 # TODO Pay from alice to fiona using lightning
 
 # import json
-# print(json.dumps(LIGHTNINGD['regtest']['alice'].help(), indent=4, sort_keys=True))
+# print(json.dumps(LIGHTNINGD[EXAMPLE_CHAIN]['alice'].help(), indent=4, sort_keys=True))
 
 print('All done. Exiting in 5 seconds...')
 time.sleep(5)
