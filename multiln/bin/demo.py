@@ -211,6 +211,35 @@ def ln_wait_initial_funds():
                 print('Waiting for user %s initial funds on chain %s (linghtning node)' % (user_name, chain_name))
                 time.sleep(1)
 
+
+# Try to pay an invoice from carol on chain_2 from alice on chain_1
+def demo_2_chains_fail():
+    if N_CHAINS < 2:
+        return
+
+    print('--------Running demo_2_chains_fail()...')
+    # TODO Select the users in a more dynamic way
+    user_name_a = 'alice'
+    chain_name_a = 'chain_1'
+    user_name_b = 'carol'
+    chain_name_b = 'chain_2'
+
+    msatoshi = 1000
+    print('%s on chain %s receives invoice for %s msatoshis from %s on chain %s' % (user_name_a, chain_name_a, msatoshi, user_name_b, chain_name_b))
+    desc = '%s_%s_%s' % (user_name_a, user_name_b, chain_name)
+    invoice = LIGHTNINGD[chain_name_b][user_name_b].invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
+    print(invoice)
+    print('...and tries to pay it...')
+    try:
+        print(LIGHTNINGD[chain_name_a][user_name_a].pay(invoice['bolt11']))
+    except Exception as e:
+        print(e)
+        print(type(e))
+        assert(e.method == 'pay')
+        assert(e.error['code'] == 205)
+        assert(e.error['message'] == 'Could not find a route')
+        assert('bolt11' in e.payload)
+
 ##################################
 
 # Wait for daemons to start
@@ -299,6 +328,10 @@ for chain_name, ln_daemons in LIGHTNINGD.items():
                 print('...and pays it...')
                 print(ln_caller_a.pay(invoice['bolt11']))
         break
+
+
+# Try to pay an invoice from carol on chain_2 from alice on chain_1
+demo_2_chains_fail()
 
 # TODO Pay from alice to fiona using lightning
 
