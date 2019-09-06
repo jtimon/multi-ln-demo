@@ -11,16 +11,28 @@ a released bitcoin version already compiled.
 
 # Run with docker
 
-```
-docker build --tag=multiln . ; docker run multiln
-```
+To build things in a local docker container:
+
+	docker build --tag=multilndemo .
+
+or
+
+	make docker-build
+
+To both build and run that local docker container:
+
+	docker build --tag=multilndemo . && docker run multilndemo
+
+or
+
+	make docker-run
 
 To persist the daemon states, first create a directory
-/home/jt/code/multilnvol (change jt to your own user) with `.chain_1`
+/home/jt/code/multilndemovol (change jt to your own user) with `.chain_1`
 to `.chain_5` in it. Then:
 
 ```
-docker build --tag=multiln . ; docker run -v /home/jt/code/multilnvol:/wd/daemon-data multiln
+docker build --tag=multilndemo . ; docker run -v /home/jt/code/multilndemovol:/wd/daemon-data multilndemo
 ```
 
 Remove all stopped containers:

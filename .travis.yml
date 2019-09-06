@@ -6,7 +6,7 @@ after_success:
   - echo "Success running multi-ln-demo"
 
 install:
-  - docker build --tag=multilndemo .
+  - make docker-build
 
 script:
   - docker run multilndemo
