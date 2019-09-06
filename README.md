@@ -47,6 +47,13 @@ Stop all containers:
 docker stop $(docker ps -a -q)
 ```
 
+# First goal: pay between two chains
+
+- Alice, with channels opened only on chain_1
+- Carol with channels opened only on chain_2
+
+Alice should be able to pay an invoice from Carol, even though the invoice is for chain_2
+
 # Future work
 
 - Route through channels in chains with multiple assets
