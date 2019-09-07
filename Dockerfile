@@ -75,8 +75,16 @@ COPY multiln /wd/multiln
 COPY setup.py /wd/setup.py
 RUN python /wd/setup.py install
 
+COPY rustdemo/Cargo.toml /wd/rustdemo/Cargo.toml
+COPY rustdemo/src /wd/rustdemo/src
+RUN cd /wd/rustdemo && \
+    cargo test && \
+    cargo build --release
+
 COPY conf /wd/conf
 COPY docker/daemons.env /wd/daemons.env
+COPY docker/rustdemo-2-chains-entry-point.sh /wd/rustdemo-2-chains-entry-point.sh
+COPY docker/rustdemo-2-chains-daemons.proc /wd/rustdemo-2-chains-daemons.proc
 COPY docker/default-entry-point.sh /wd/default-entry-point.sh
 COPY docker/default-daemons.proc /wd/default-daemons.proc
 CMD bash default-entry-point.sh

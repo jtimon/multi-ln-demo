@@ -11,3 +11,7 @@ jobs:
     - name: 'Default make (build and run docker)'
       script:
         - make
+
+    - name: 'rustdemo 2 chains'
+      script:
+        - make docker-build ; docker run multilndemo bash -c "bash /wd/rustdemo-2-chains-entry-point.sh"
