@@ -69,6 +69,12 @@ ENV PATH="/wd/$LN_REPO_NAME/lightningd:${PATH}"
 RUN cd /wd/$LN_REPO_NAME/contrib/pylightning && \
     python3 setup.py develop
 
+COPY rustdemo/Cargo.toml /wd/rustdemo/Cargo.toml
+COPY rustdemo/src /wd/rustdemo/src
+RUN cd /wd/rustdemo && \
+    cargo test && \
+    cargo build --release
+
 COPY docker/requirements.txt /wd/requirements.txt
 RUN pip install -r requirements.txt --require-hashes
 
@@ -78,6 +84,8 @@ RUN python /wd/setup.py install
 
 COPY conf /wd/conf
 COPY docker/daemons.env /wd/daemons.env
+COPY docker/rustdemo-2-chains-entry-point.sh /wd/rustdemo-2-chains-entry-point.sh
+COPY docker/rustdemo-2-chains-daemons.proc /wd/rustdemo-2-chains-daemons.proc
 COPY docker/regtest-entry-point.sh /wd/regtest-entry-point.sh
 COPY docker/regtest-daemons.proc /wd/regtest-daemons.proc
 COPY docker/2-chains-entry-point.sh /wd/2-chains-entry-point.sh
