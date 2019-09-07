@@ -10,6 +10,7 @@ RUN apt-get -yqq update \
     autotools-dev \
     bsdmainutils \
     build-essential \
+    curl \
     git \
     libboost-chrono-dev \
     libboost-filesystem-dev \
@@ -41,6 +42,12 @@ WORKDIR /wd
 
 RUN ln -s /usr/bin/python3 /usr/bin/python && \
     ln -s /usr/bin/pip3 /usr/bin/pip
+
+# Install cargo for rust builds
+RUN cd /root \
+    && curl -s -L -O https://static.rust-lang.org/rustup.sh \
+    && bash ./rustup.sh -y --verbose
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 COPY docker/build-daemon.sh /wd/build-daemon.sh
 # Build custom daemon able to produce and support an arbitrary number of chains
