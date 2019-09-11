@@ -208,8 +208,6 @@ def ln_wait_initial_funds():
 time.sleep(5)
 
 btc_connect_nodes()
-ln_update_info()
-ln_connect_nodes()
 
 # Let's make sure everyone generates some coins in the chains they participate in
 for chain_name, chain_daemons in BITCOIND.items():
@@ -228,6 +226,9 @@ print('Alice can pay bob directly on regtest (txid: %s)' % txid)
 generate_blocks(BITCOIND['regtest']['alice'], 'regtest', 1)
 print_balances()
 
+# lightning-specific things from here
+ln_update_info()
+
 # Send coins to all lightning wallets
 for chain_name, chain_daemons in BITCOIND.items():
     for user_name, rpccaller in chain_daemons.items():
@@ -238,6 +239,8 @@ for chain_name, chain_daemons in BITCOIND.items():
         generate_blocks(rpccaller, chain_name, 1)
 
 ln_wait_initial_funds()
+
+ln_connect_nodes()
 
 print_balances()
 ln_print_info()
