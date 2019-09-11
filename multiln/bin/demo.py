@@ -278,10 +278,10 @@ ln_assert_channels_public(False)
 
 ln_listchannels()
 # After 6 confirmations it becomes public
-btc_generate_all_chains(5)
-time.sleep(30)
-ln_listchannels()
-ln_assert_channels_public(True)
+# btc_generate_all_chains(5)
+# time.sleep(30)
+# ln_listchannels()
+# ln_assert_channels_public(True)
 
 # A node receives invoices for every other node in the chain and pays it
 for chain_name, ln_daemons in LIGHTNINGD.items():
