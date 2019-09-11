@@ -233,6 +233,7 @@ generate_blocks(BITCOIND[EXAMPLE_CHAIN]['alice'], EXAMPLE_CHAIN, 1)
 print_balances()
 
 # lightning-specific things from here
+time.sleep(10)
 ln_update_info()
 
 # Send coins to all lightning wallets
