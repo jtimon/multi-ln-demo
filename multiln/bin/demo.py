@@ -194,13 +194,6 @@ def ln_connect_nodes():
                         user_name_a, user_name_b, chain_name, info_b['binding'][0]['port'], info_b['id']))
                     rpccaller.connect(info_b['id'], host='0.0.0.0', port=info_b['binding'][0]['port'])
 
-# TODO find a smarter and faster way to sync lightning nodes with their respective bitcoind
-def ln_btc_sync():
-    time.sleep(60)
-    # for chain_name, chain_daemons in BITCOIND.items():
-    #     for user_name, rpccaller in chain_daemons.items():
-    #         print(LIGHTNINGD[chain_name][user_name].dev_rescan_outputs())
-
 ##################################
 
 # Wait for daemons to start
@@ -237,7 +230,7 @@ for chain_name, chain_daemons in BITCOIND.items():
         generate_blocks(rpccaller, chain_name, 1)
 
 # Wait for lightningd to sync with bitcoind
-ln_btc_sync()
+time.sleep(30)
 
 print_balances()
 ln_print_info()
@@ -262,14 +255,14 @@ ln_assert_channels_state('CHANNELD_AWAITING_LOCKIN')
 
 # Only one block is required in testnets for a channel to be confirmed
 btc_generate_all_chains(1)
-ln_btc_sync()
+time.sleep(30)
 ln_assert_channels_state('CHANNELD_NORMAL')
 ln_assert_channels_public(False)
 
 ln_listchannels()
 # After 6 confirmations it becomes public
 btc_generate_all_chains(5)
-ln_btc_sync()
+time.sleep(30)
 ln_listchannels()
 ln_assert_channels_public(True)
 
