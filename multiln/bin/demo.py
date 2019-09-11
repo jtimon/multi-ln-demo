@@ -194,6 +194,14 @@ def ln_connect_nodes():
                         user_name_a, user_name_b, chain_name, info_b['binding'][0]['port'], info_b['id']))
                     rpccaller.connect(info_b['id'], host='0.0.0.0', port=info_b['binding'][0]['port'])
 
+# wait for everyone to have some onchain funds on every chain they're in
+def ln_wait_initial_funds():
+    for chain_name, chain_daemons in LIGHTNINGD.items():
+        for user_name, rpccaller in chain_daemons.items():
+            while len(LIGHTNINGD[chain_name][user_name].listfunds()['outputs']) == 0:
+                print('Waiting for user %s initial funds on chain %s (linghtning node)' % (user_name, chain_name))
+                time.sleep(1)
+
 ##################################
 
 # Wait for daemons to start
@@ -229,8 +237,7 @@ for chain_name, chain_daemons in BITCOIND.items():
         print('%s %s: sending coins to address %s in lightning wallet (txid: %s)' % (chain_name, user_name, address, txid))
         generate_blocks(rpccaller, chain_name, 1)
 
-# Wait for lightningd to sync with bitcoind
-time.sleep(30)
+ln_wait_initial_funds()
 
 print_balances()
 ln_print_info()
