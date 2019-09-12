@@ -79,4 +79,6 @@ COPY conf /wd/conf
 COPY docker/daemons.env /wd/daemons.env
 COPY docker/regtest-entry-point.sh /wd/regtest-entry-point.sh
 COPY docker/regtest-daemons.proc /wd/regtest-daemons.proc
-CMD bash regtest-entry-point.sh
+COPY docker/2-chains-entry-point.sh /wd/2-chains-entry-point.sh
+COPY docker/2-chains-daemons.proc /wd/2-chains-daemons.proc
+CMD bash 2-chains-entry-point.sh

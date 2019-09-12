@@ -8,6 +8,10 @@ after_success:
 jobs:
   include:
 
-    - name: '1 chain (regtest) (default make)'
+    - name: '1 chain (regtest)'
       script:
         - make docker-build ; docker run multilndemo bash -c "bash /wd/regtest-entry-point.sh"
+
+    - name: '2 chains (default make)'
+      script:
+        - make docker-build ; docker run multilndemo bash -c "bash /wd/2-chains-entry-point.sh"
