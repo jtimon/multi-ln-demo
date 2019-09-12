@@ -32,4 +32,4 @@ mkdir -p /wd/daemon-data/ezra_chain_4
 mkdir -p /wd/daemon-data/ezra_chain_5
 mkdir -p /wd/daemon-data/fiona_chain_5
 
-honcho start -e daemons.env -f daemons.proc
+honcho start -e daemons.env -f default-daemons.proc

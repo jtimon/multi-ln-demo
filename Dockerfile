@@ -75,8 +75,8 @@ COPY multiln /wd/multiln
 COPY setup.py /wd/setup.py
 RUN python /wd/setup.py install
 
-COPY docker/entry-point.sh /wd/entry-point.sh
 COPY conf /wd/conf
 COPY docker/daemons.env /wd/daemons.env
-COPY docker/daemons.proc /wd/daemons.proc
-CMD bash entry-point.sh
+COPY docker/default-entry-point.sh /wd/default-entry-point.sh
+COPY docker/default-daemons.proc /wd/default-daemons.proc
+CMD bash default-entry-point.sh
