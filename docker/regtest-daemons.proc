@@ -1,0 +1,18 @@
+
+# A python script to make the rpc calls:
+
+demo: python /wd/multiln/bin/demo.py regtest
+
+
+# bitcoind nodes:
+
+regtest_alice_bitcoind: bitcoind -chain=regtest -conf=/wd/conf/alice_bitcoind.conf -datadir=/wd/daemon-data/regtest_alice_bitcoind/
+
+regtest_bob_bitcoind: bitcoind -chain=regtest -conf=/wd/conf/bob_bitcoind.conf -datadir=/wd/daemon-data/regtest_bob_bitcoind/
+
+
+# clightning nodes:
+
+alice_regtest: sleep 1 ; lightningd --conf=/wd/conf/alice_regtest.conf --lightning-dir=/wd/daemon-data/alice_regtest/
+
+bob_regtest: sleep 1 ; lightningd --conf=/wd/conf/bob_regtest.conf --lightning-dir=/wd/daemon-data/bob_regtest/

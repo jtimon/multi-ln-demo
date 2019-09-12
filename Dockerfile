@@ -77,6 +77,6 @@ RUN python /wd/setup.py install
 
 COPY conf /wd/conf
 COPY docker/daemons.env /wd/daemons.env
-COPY docker/default-entry-point.sh /wd/default-entry-point.sh
-COPY docker/default-daemons.proc /wd/default-daemons.proc
-CMD bash default-entry-point.sh
+COPY docker/regtest-entry-point.sh /wd/regtest-entry-point.sh
+COPY docker/regtest-daemons.proc /wd/regtest-daemons.proc
+CMD bash regtest-entry-point.sh
