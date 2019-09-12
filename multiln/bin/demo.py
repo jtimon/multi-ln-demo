@@ -3,7 +3,9 @@
 if __name__ != '__main__':
     raise ImportError(u"%s may only be run as a script" % __file__)
 
+import sys
 import time
+
 from lightning import LightningRpc
 from multiln.rpccaller import RpcCaller
 from multiln.bitcoin_test_utils import (
@@ -13,26 +15,35 @@ from multiln.bitcoin_test_utils import (
 
 print('This is a demo demonstrating lightning payments across several different regtest chains')
 
+SELECTED_CHAINS = sys.argv[1:]
+print('Selected Chains:', SELECTED_CHAINS)
+
+if len(SELECTED_CHAINS) == 0:
+    raise AssertionError("No chains selected to run the demo.")
+
+EXAMPLE_CHAIN = SELECTED_CHAINS[0]
+
 CHAINS = {
     'regtest': {
         'port_decimal': 1
     },
-    # 'chain_1': {
-    #     'port_decimal': 4
-    # },
-    # 'chain_2': {
-    #     'port_decimal': 5
-    # },
-    # 'chain_3': {
-    #     'port_decimal': 6
-    # },
-    # 'chain_4': {
-    #     'port_decimal': 7
-    # },
-    # 'chain_5': {
-    #     'port_decimal': 8
-    # },
+    'chain_1': {
+        'port_decimal': 4
+    },
+    'chain_2': {
+        'port_decimal': 5
+    },
+    'chain_3': {
+        'port_decimal': 6
+    },
+    'chain_4': {
+        'port_decimal': 7
+    },
+    'chain_5': {
+        'port_decimal': 8
+    },
 }
+CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
 
 USERS_PER_CHAIN = {
     'regtest': ['alice', 'bob'],
@@ -42,6 +53,7 @@ USERS_PER_CHAIN = {
     'chain_4': ['david', 'ezra'],
     'chain_5': ['ezra', 'fiona'],
 }
+USERS_PER_CHAIN = {k: USERS_PER_CHAIN[k] for k in SELECTED_CHAINS}
 
 MAIN_USER_PER_CHAIN = {
     'regtest': 'alice',
@@ -51,18 +63,10 @@ MAIN_USER_PER_CHAIN = {
     'chain_4': 'david',
     'chain_5': 'ezra',
 }
-
-EXAMPLE_CHAIN = 'regtest'
+MAIN_USER_PER_CHAIN = {k: MAIN_USER_PER_CHAIN[k] for k in SELECTED_CHAINS}
 
 print('Chains considered:', CHAINS)
 print('Users considered:', USERS_PER_CHAIN)
-
-def select_chains(chains, by_chain_dict):
-    to_return = {}
-    for chain_name, chain_items in by_chain_dict.items():
-        if chain_name in chains:
-            to_return[chain_name] = chain_items
-    return to_return
 
 def get_p2p_decimal_1(chain_name, user_name):
     # TODO This only scales to 2 nodes per chain

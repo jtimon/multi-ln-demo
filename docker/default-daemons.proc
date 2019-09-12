@@ -1,7 +1,7 @@
 
 # A python script to make the rpc calls:
 
-demo: python /wd/multiln/bin/demo.py
+demo: python /wd/multiln/bin/demo.py regtest
 
 
 # bitcoind nodes:
