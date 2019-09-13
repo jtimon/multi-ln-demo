@@ -44,6 +44,7 @@ CHAINS = {
     },
 }
 CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
+N_CHAINS = len(CHAINS)
 
 USERS_PER_CHAIN = {
     'regtest': ['alice', 'bob'],
@@ -211,7 +212,7 @@ def ln_wait_initial_funds():
 ##################################
 
 # Wait for daemons to start
-time.sleep(5)
+time.sleep(N_CHAINS * 5)
 
 btc_connect_nodes()
 
