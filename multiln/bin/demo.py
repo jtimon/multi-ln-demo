@@ -302,5 +302,4 @@ for chain_name, ln_daemons in LIGHTNINGD.items():
 # import json
 # print(json.dumps(LIGHTNINGD[EXAMPLE_CHAIN]['alice'].help(), indent=4, sort_keys=True))
 
-print('All done. Exiting in 5 seconds...')
-time.sleep(5)
+print('All done for selected chains %s' % SELECTED_CHAINS)
