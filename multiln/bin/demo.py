@@ -44,6 +44,7 @@ CHAINS = {
     },
 }
 CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
+N_CHAINS = len(CHAINS)
 
 USERS_PER_CHAIN = {
     'regtest': ['alice', 'bob'],
@@ -211,7 +212,7 @@ def ln_wait_initial_funds():
 ##################################
 
 # Wait for daemons to start
-time.sleep(5)
+time.sleep(N_CHAINS * 5)
 
 btc_connect_nodes()
 
@@ -233,6 +234,7 @@ generate_blocks(BITCOIND[EXAMPLE_CHAIN]['alice'], EXAMPLE_CHAIN, 1)
 print_balances()
 
 # lightning-specific things from here
+time.sleep(10)
 ln_update_info()
 
 # Send coins to all lightning wallets
@@ -277,10 +279,10 @@ ln_assert_channels_public(False)
 
 ln_listchannels()
 # After 6 confirmations it becomes public
-btc_generate_all_chains(5)
-time.sleep(30)
-ln_listchannels()
-ln_assert_channels_public(True)
+# btc_generate_all_chains(5)
+# time.sleep(30)
+# ln_listchannels()
+# ln_assert_channels_public(True)
 
 # A node receives invoices for every other node in the chain and pays it
 for chain_name, ln_daemons in LIGHTNINGD.items():
@@ -301,5 +303,4 @@ for chain_name, ln_daemons in LIGHTNINGD.items():
 # import json
 # print(json.dumps(LIGHTNINGD[EXAMPLE_CHAIN]['alice'].help(), indent=4, sort_keys=True))
 
-print('All done. Exiting in 5 seconds...')
-time.sleep(5)
+print('All done for selected chains %s' % SELECTED_CHAINS)
