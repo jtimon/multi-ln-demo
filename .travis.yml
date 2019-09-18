@@ -10,12 +10,12 @@ jobs:
 
     - name: '1 chain (regtest)'
       script:
-        - make docker-build ; docker run multilndemo bash -c "bash /wd/regtest-entry-point.sh"
+        - make docker-demo-regtest
 
-    - name: '2 chains (default make)'
+    - name: '2 chains'
       script:
-        - make docker-build ; docker run multilndemo bash -c "bash /wd/2-chains-entry-point.sh"
+        - make docker-demo-2-chains
 
     - name: 'rustdemo 2 chains'
       script:
-        - make docker-build ; docker run multilndemo bash -c "bash /wd/rustdemo-2-chains-entry-point.sh"
+        - make docker-rust-2-chains
