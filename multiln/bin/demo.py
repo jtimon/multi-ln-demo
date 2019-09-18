@@ -66,28 +66,28 @@ N_CHAINS = len(CHAINS)
 print('Chains considered (%s):', N_CHAINS)
 print(CHAINS)
 
-def get_p2p_decimal_1(chain_name, user_name):
+def get_p2p_decimal_1(chains, chain_name, user_name):
     # TODO This only scales to 2 nodes per chain
-    if CHAINS[chain_name]['main_user'] == user_name:
+    if chains[chain_name]['main_user'] == user_name:
         return '5'
     else:
         return '6'
 
-def get_p2p_port(chain_name, user_name):
+def get_p2p_port(chains, chain_name, user_name):
     return '18%s%s6' % (
         # TODO This only scales to 2 nodes per chain
-        get_p2p_decimal_1(chain_name, user_name),
-        CHAINS[chain_name]['port_decimal'],
+        get_p2p_decimal_1(chains, chain_name, user_name),
+        chains[chain_name]['port_decimal'],
     )
 
-def btc_init_bitcoind_global():
+def btc_init_bitcoind_global(chains):
     to_return = {}
-    for chain_name in CHAINS:
+    for chain_name in chains:
         to_return[chain_name] = {}
-        for user_name in CHAINS[chain_name]['users']:
+        for user_name in chains[chain_name]['users']:
             port_chain_user = '18%s%s5' % (
-                get_p2p_decimal_1(chain_name, user_name),
-                CHAINS[chain_name]['port_decimal'],
+                get_p2p_decimal_1(chains, chain_name, user_name),
+                chains[chain_name]['port_decimal'],
             )
             to_return[chain_name][user_name] = RpcCaller(
                 '0.0.0.0:%s' % port_chain_user,
@@ -96,24 +96,25 @@ def btc_init_bitcoind_global():
             )
     return to_return
 
-def ln_init_global():
+def ln_init_global(chains):
     to_return = {}
-    for chain_name in CHAINS:
+    for chain_name in chains:
         to_return[chain_name] = {}
-        for user_name in CHAINS[chain_name]['users']:
+        for user_name in chains[chain_name]['users']:
             to_return[chain_name][user_name] = LightningRpc('/wd/daemon-data/%s_%s/lightning-rpc' % (user_name, chain_name))
     return to_return
 
-BITCOIND = btc_init_bitcoind_global()
-LIGHTNINGD = ln_init_global()
+BITCOIND = btc_init_bitcoind_global(CHAINS)
+LIGHTNINGD = ln_init_global(CHAINS)
 
 # Connect all nodes of the same chain with each other
-def btc_connect_nodes():
+
+def btc_connect_nodes(chains):
     for chain_name, chain_daemons in BITCOIND.items():
         for user_name_a, rpccaller in chain_daemons.items():
             for user_name_b in chain_daemons:
                 if user_name_a != user_name_b:
-                    connect_nodes(BITCOIND[chain_name][user_name_a], '127.0.0.1:%s' % get_p2p_port(chain_name, user_name_b))
+                    connect_nodes(BITCOIND[chain_name][user_name_a], '127.0.0.1:%s' % get_p2p_port(chains, chain_name, user_name_b))
 
 def generate_blocks(rpccaller, chain_name, nblocks):
     address = rpccaller.call('getnewaddress', {})
@@ -244,7 +245,7 @@ def demo_2_chains_fail():
 
 print('--------Wait for %s daemons to start and connect (%s seconds)' % (N_CHAINS, N_CHAINS * 5))
 time.sleep(N_CHAINS * 5)
-btc_connect_nodes()
+btc_connect_nodes(CHAINS)
 
 # Let's make sure everyone generates some coins in the chains they participate in
 for chain_name, chain_daemons in BITCOIND.items():
