@@ -25,53 +25,50 @@ EXAMPLE_CHAIN = SELECTED_CHAINS[0]
 
 CHAINS = {
     'regtest': {
-        'port_decimal': 1
+        'port_decimal': 1,
+        'users': ['alice', 'bob'],
+        'main_user': 'alice',
     },
+
     'chain_1': {
-        'port_decimal': 4
+        'port_decimal': 4,
+        'users': ['alice', 'bob'],
+        'main_user': 'alice',
     },
+
     'chain_2': {
-        'port_decimal': 5
+        'port_decimal': 5,
+        'users': ['bob', 'carol'],
+        'main_user': 'bob',
     },
+
     'chain_3': {
-        'port_decimal': 6
+        'port_decimal': 6,
+        'users': ['carol', 'david'],
+        'main_user': 'carol',
     },
+
     'chain_4': {
-        'port_decimal': 7
+        'port_decimal': 7,
+        'users': ['david', 'ezra'],
+        'main_user': 'david',
     },
+
     'chain_5': {
-        'port_decimal': 8
+        'port_decimal': 8,
+        'users': ['ezra', 'fiona'],
+        'main_user': 'ezra',
     },
 }
 CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
 N_CHAINS = len(CHAINS)
 
-USERS_PER_CHAIN = {
-    'regtest': ['alice', 'bob'],
-    'chain_1': ['alice', 'bob'],
-    'chain_2': ['bob', 'carol'],
-    'chain_3': ['carol', 'david'],
-    'chain_4': ['david', 'ezra'],
-    'chain_5': ['ezra', 'fiona'],
-}
-USERS_PER_CHAIN = {k: USERS_PER_CHAIN[k] for k in SELECTED_CHAINS}
-
-MAIN_USER_PER_CHAIN = {
-    'regtest': 'alice',
-    'chain_1': 'alice',
-    'chain_2': 'bob',
-    'chain_3': 'carol',
-    'chain_4': 'david',
-    'chain_5': 'ezra',
-}
-MAIN_USER_PER_CHAIN = {k: MAIN_USER_PER_CHAIN[k] for k in SELECTED_CHAINS}
-
-print('Chains considered:', CHAINS)
-print('Users considered:', USERS_PER_CHAIN)
+print('Chains considered (%s):', N_CHAINS)
+print(CHAINS)
 
 def get_p2p_decimal_1(chain_name, user_name):
     # TODO This only scales to 2 nodes per chain
-    if MAIN_USER_PER_CHAIN[chain_name] == user_name:
+    if CHAINS[chain_name]['main_user'] == user_name:
         return '5'
     else:
         return '6'
@@ -87,7 +84,7 @@ def btc_init_bitcoind_global():
     to_return = {}
     for chain_name in CHAINS:
         to_return[chain_name] = {}
-        for user_name in USERS_PER_CHAIN[chain_name]:
+        for user_name in CHAINS[chain_name]['users']:
             port_chain_user = '18%s%s5' % (
                 get_p2p_decimal_1(chain_name, user_name),
                 CHAINS[chain_name]['port_decimal'],
@@ -103,7 +100,7 @@ def ln_init_global():
     to_return = {}
     for chain_name in CHAINS:
         to_return[chain_name] = {}
-        for user_name in USERS_PER_CHAIN[chain_name]:
+        for user_name in CHAINS[chain_name]['users']:
             to_return[chain_name][user_name] = LightningRpc('/wd/daemon-data/%s_%s/lightning-rpc' % (user_name, chain_name))
     return to_return
 
