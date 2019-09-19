@@ -205,7 +205,12 @@ def ln_connect_nodes():
 def ln_wait_initial_funds():
     for chain_name, chain_daemons in LIGHTNINGD.items():
         for user_name, rpccaller in chain_daemons.items():
-            while len(LIGHTNINGD[chain_name][user_name].listfunds()['outputs']) == 0:
+            while True:
+                try:
+                    if len(LIGHTNINGD[chain_name][user_name].listfunds()['outputs']) > 0:
+                        break
+                except TypeError as e:
+                    print('TypeError:', e)
                 print('Waiting for user %s initial funds on chain %s (linghtning node)' % (user_name, chain_name))
                 time.sleep(1)
 
