@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:18.10
 
 RUN apt-get -yqq update \
   && apt-get install -y software-properties-common \
