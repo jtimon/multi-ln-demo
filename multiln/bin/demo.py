@@ -213,9 +213,8 @@ def ln_wait_initial_funds():
 
 ##################################
 
-# Wait for daemons to start
+# Wait for daemons to start and connect
 time.sleep(N_CHAINS * 5)
-
 btc_connect_nodes()
 
 # Let's make sure everyone generates some coins in the chains they participate in
