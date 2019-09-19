@@ -242,9 +242,8 @@ def demo_2_chains_fail():
 
 ##################################
 
-# Wait for daemons to start
+print('--------Wait for %s daemons to start and connect (%s seconds)' % (N_CHAINS, N_CHAINS * 5))
 time.sleep(N_CHAINS * 5)
-
 btc_connect_nodes()
 
 # Let's make sure everyone generates some coins in the chains they participate in
@@ -257,6 +256,8 @@ btc_generate_all_chains(100)
 
 print_balances()
 
+print('--------Let\'s try an on-chain payment first on chain %s' % EXAMPLE_CHAIN)
+
 # Alice can pay bob directly on EXAMPLE_CHAIN
 bob_address = BITCOIND[EXAMPLE_CHAIN]['bob'].call('getnewaddress', {})
 txid = BITCOIND[EXAMPLE_CHAIN]['alice'].call('sendtoaddress', {'address': bob_address, 'amount': 1})
@@ -265,6 +266,7 @@ generate_blocks(BITCOIND[EXAMPLE_CHAIN]['alice'], EXAMPLE_CHAIN, 1)
 print_balances()
 
 # lightning-specific things from here
+print('--------Wait for %s clightning daemons to start before calling getinfo (%s seconds)' % (N_CHAINS, N_CHAINS * 5))
 time.sleep(N_CHAINS * 5)
 ln_update_info()
 
@@ -304,6 +306,7 @@ ln_assert_channels_state('CHANNELD_AWAITING_LOCKIN')
 
 # Only one block is required in testnets for a channel to be confirmed
 btc_generate_all_chains(1)
+print('--------Wait for %s clightning daemons to sync to confirm the channels (%s seconds)' % (N_CHAINS, 30))
 time.sleep(30)
 ln_assert_channels_state('CHANNELD_NORMAL')
 ln_assert_channels_public(False)
