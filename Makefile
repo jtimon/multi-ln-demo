@@ -4,8 +4,8 @@
 
 DOCKER_IMAGE=multilndemo
 
-.PHONY: docker-build docker-demo-regtest docker-demo-2-chains docker-rust-2-chains
-all: docker-demo-regtest docker-demo-2-chains docker-rust-2-chains
+.PHONY: docker-build docker-demo-regtest docker-demo-2-chains docker-rust-2-chains docker-run-5-chains
+all: docker-demo-regtest docker-demo-2-chains docker-rust-2-chains docker-run-5-chains
 
 docker-build:
 	docker build --tag=${DOCKER_IMAGE} .
@@ -15,6 +15,9 @@ docker-demo-regtest: docker-build
 
 docker-demo-2-chains: docker-build
 	docker run ${DOCKER_IMAGE} bash -c "bash /wd/2-chains-entry-point.sh"
+
+docker-demo-5-chains: docker-build
+	docker run ${DOCKER_IMAGE} bash -c "bash /wd/5-chains-entry-point.sh"
 
 docker-rust-2-chains: docker-build
 	docker run ${DOCKER_IMAGE} bash -c "bash /wd/rustdemo-2-chains-entry-point.sh"
