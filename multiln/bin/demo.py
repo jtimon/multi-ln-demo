@@ -134,18 +134,16 @@ def print_balances(bitcoind_map):
         for user_name, rpccaller in chain_daemons.items():
             print(chain_name, user_name, rpccaller.call('getbalances', {}))
 
-LN_INFO = {}
-
-def ln_update_info(lightningd_map):
+def ln_init_info(lightningd_map):
+    ln_info = {}
     for chain_name, ln_daemons in lightningd_map.items():
-        LN_INFO[chain_name] = {}
+        ln_info[chain_name] = {}
         for user_name, ln_caller in ln_daemons.items():
-            LN_INFO[chain_name][user_name] = ln_caller.getinfo()
-    print('LN_INFO:')
-    print(LN_INFO)
+            ln_info[chain_name][user_name] = ln_caller.getinfo()
+    return ln_info
 
-def ln_print_info():
-    for chain_name, ln_users in LN_INFO.items():
+def ln_print_info(ln_info):
+    for chain_name, ln_users in ln_info.items():
         for user_name, info in ln_users.items():
             print(chain_name, user_name, info)
 
@@ -190,10 +188,10 @@ def ln_assert_channels_public(lightningd_map, expected_public):
 
 
 # Connect all lightning nodes in the same chain to each other
-def ln_connect_nodes(lightningd_map):
+def ln_connect_nodes(lightningd_map, ln_info):
     for chain_name, ln_daemons in lightningd_map.items():
         for user_name_a, rpccaller in lightningd_map[chain_name].items():
-            for user_name_b, info_b in LN_INFO[chain_name].items():
+            for user_name_b, info_b in ln_info[chain_name].items():
                 if user_name_a != user_name_b:
                     print('Connecting %s to %s in chain %s, port %s id %s' % (
                         user_name_a, user_name_b, chain_name, info_b['binding'][0]['port'], info_b['id']))
@@ -269,7 +267,9 @@ print_balances(BITCOIND)
 # lightning-specific things from here
 print('--------Wait for %s clightning daemons to start before calling getinfo (%s seconds)' % (N_CHAINS, N_CHAINS * 5))
 time.sleep(N_CHAINS * 5)
-ln_update_info(LIGHTNINGD)
+LN_INFO = ln_init_info(LIGHTNINGD)
+print('LN_INFO:')
+print(LN_INFO)
 
 # Send coins to all lightning wallets
 for chain_name, chain_daemons in BITCOIND.items():
@@ -282,10 +282,10 @@ for chain_name, chain_daemons in BITCOIND.items():
 
 ln_wait_initial_funds(LIGHTNINGD)
 
-ln_connect_nodes(LIGHTNINGD)
+ln_connect_nodes(LIGHTNINGD, LN_INFO)
 
 print_balances(BITCOIND)
-ln_print_info()
+ln_print_info(LN_INFO)
 ln_listfunds(LIGHTNINGD)
 ln_listpeers(LIGHTNINGD)
 ln_listchannels(LIGHTNINGD)
