@@ -136,8 +136,8 @@ def print_balances(bitcoind_map):
 
 LN_INFO = {}
 
-def ln_update_info():
-    for chain_name, ln_daemons in LIGHTNINGD.items():
+def ln_update_info(lightningd_map):
+    for chain_name, ln_daemons in lightningd_map.items():
         LN_INFO[chain_name] = {}
         for user_name, ln_caller in ln_daemons.items():
             LN_INFO[chain_name][user_name] = ln_caller.getinfo()
@@ -149,23 +149,23 @@ def ln_print_info():
         for user_name, info in ln_users.items():
             print(chain_name, user_name, info)
 
-def ln_listfunds():
-    for chain_name, ln_daemons in LIGHTNINGD.items():
+def ln_listfunds(lightningd_map):
+    for chain_name, ln_daemons in lightningd_map.items():
         for user_name, ln_caller in ln_daemons.items():
             print(chain_name, user_name, ln_caller.listfunds())
 
-def ln_listchannels():
-    for chain_name, ln_daemons in LIGHTNINGD.items():
+def ln_listchannels(lightningd_map):
+    for chain_name, ln_daemons in lightningd_map.items():
         for user_name, ln_caller in ln_daemons.items():
             print(chain_name, user_name, ln_caller.listchannels())
 
-def ln_listpeers():
-    for chain_name, ln_daemons in LIGHTNINGD.items():
+def ln_listpeers(lightningd_map):
+    for chain_name, ln_daemons in lightningd_map.items():
         for user_name, ln_caller in ln_daemons.items():
             print(chain_name, user_name, ln_caller.listpeers())
 
-def ln_assert_channels_state(state):
-    for chain_name, ln_daemons in LIGHTNINGD.items():
+def ln_assert_channels_state(lightningd_map, state):
+    for chain_name, ln_daemons in lightningd_map.items():
         for user_name, ln_caller in ln_daemons.items():
             for peer in ln_caller.listpeers()['peers']:
                 for channel in peer['channels']:
@@ -177,8 +177,8 @@ def ln_assert_channels_state(state):
                             channel['state'],
                         ))
 
-def ln_assert_channels_public(expected_public=True):
-    for chain_name, ln_daemons in LIGHTNINGD.items():
+def ln_assert_channels_public(lightningd_map, expected_public):
+    for chain_name, ln_daemons in lightningd_map.items():
         for user_name, ln_caller in ln_daemons.items():
             for channel in ln_caller.listchannels()['channels']:
                 if expected_public != channel['public']:
@@ -190,9 +190,9 @@ def ln_assert_channels_public(expected_public=True):
 
 
 # Connect all lightning nodes in the same chain to each other
-def ln_connect_nodes():
-    for chain_name, ln_daemons in LIGHTNINGD.items():
-        for user_name_a, rpccaller in LIGHTNINGD[chain_name].items():
+def ln_connect_nodes(lightningd_map):
+    for chain_name, ln_daemons in lightningd_map.items():
+        for user_name_a, rpccaller in lightningd_map[chain_name].items():
             for user_name_b, info_b in LN_INFO[chain_name].items():
                 if user_name_a != user_name_b:
                     print('Connecting %s to %s in chain %s, port %s id %s' % (
@@ -200,12 +200,12 @@ def ln_connect_nodes():
                     rpccaller.connect(info_b['id'], host='0.0.0.0', port=info_b['binding'][0]['port'])
 
 # wait for everyone to have some onchain funds on every chain they're in
-def ln_wait_initial_funds():
-    for chain_name, chain_daemons in LIGHTNINGD.items():
+def ln_wait_initial_funds(lightningd_map):
+    for chain_name, chain_daemons in lightningd_map.items():
         for user_name, rpccaller in chain_daemons.items():
             while True:
                 try:
-                    if len(LIGHTNINGD[chain_name][user_name].listfunds()['outputs']) > 0:
+                    if len(lightningd_map[chain_name][user_name].listfunds()['outputs']) > 0:
                         break
                 except TypeError as e:
                     print('TypeError:', e)
@@ -214,7 +214,7 @@ def ln_wait_initial_funds():
 
 
 # Try to pay an invoice from carol on chain_2 from alice on chain_1
-def demo_2_chains_fail():
+def demo_2_chains_fail(lightningd_map):
     if N_CHAINS < 2:
         return
 
@@ -228,11 +228,11 @@ def demo_2_chains_fail():
     msatoshi = 1000
     print('%s on chain %s receives invoice for %s msatoshis from %s on chain %s' % (user_name_a, chain_name_a, msatoshi, user_name_b, chain_name_b))
     desc = '%s_%s_%s' % (user_name_a, user_name_b, chain_name)
-    invoice = LIGHTNINGD[chain_name_b][user_name_b].invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
+    invoice = lightningd_map[chain_name_b][user_name_b].invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
     print(invoice)
     print('...and tries to pay it...')
     try:
-        print(LIGHTNINGD[chain_name_a][user_name_a].pay(invoice['bolt11']))
+        print(lightningd_map[chain_name_a][user_name_a].pay(invoice['bolt11']))
     except Exception as e:
         print(e)
         print(type(e))
@@ -269,7 +269,7 @@ print_balances(BITCOIND)
 # lightning-specific things from here
 print('--------Wait for %s clightning daemons to start before calling getinfo (%s seconds)' % (N_CHAINS, N_CHAINS * 5))
 time.sleep(N_CHAINS * 5)
-ln_update_info()
+ln_update_info(LIGHTNINGD)
 
 # Send coins to all lightning wallets
 for chain_name, chain_daemons in BITCOIND.items():
@@ -280,15 +280,15 @@ for chain_name, chain_daemons in BITCOIND.items():
         print('%s %s: sending coins to address %s in lightning wallet (txid: %s)' % (chain_name, user_name, address, txid))
         generate_blocks(BITCOIND, rpccaller, chain_name, 1)
 
-ln_wait_initial_funds()
+ln_wait_initial_funds(LIGHTNINGD)
 
-ln_connect_nodes()
+ln_connect_nodes(LIGHTNINGD)
 
 print_balances(BITCOIND)
 ln_print_info()
-ln_listfunds()
-ln_listpeers()
-ln_listchannels()
+ln_listfunds(LIGHTNINGD)
+ln_listpeers(LIGHTNINGD)
+ln_listchannels(LIGHTNINGD)
 
 # A node funds a channel with every other node in the chain
 for chain_name, ln_daemons in LIGHTNINGD.items():
@@ -299,25 +299,25 @@ for chain_name, ln_daemons in LIGHTNINGD.items():
                 print(ln_caller.fundchannel(LN_INFO[chain_name][user_name_b]['id'], 10000))
         break
 
-ln_listfunds()
-ln_listpeers()
-ln_listchannels()
+ln_listfunds(LIGHTNINGD)
+ln_listpeers(LIGHTNINGD)
+ln_listchannels(LIGHTNINGD)
 
-ln_assert_channels_state('CHANNELD_AWAITING_LOCKIN')
+ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_AWAITING_LOCKIN')
 
 # Only one block is required in testnets for a channel to be confirmed
 btc_generate_all_chains(BITCOIND, 1)
 print('--------Wait for %s clightning daemons to sync to confirm the channels (%s seconds)' % (N_CHAINS, 30))
 time.sleep(30)
-ln_assert_channels_state('CHANNELD_NORMAL')
-ln_assert_channels_public(False)
+ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_NORMAL')
+ln_assert_channels_public(LIGHTNINGD, False)
 
-ln_listchannels()
+ln_listchannels(LIGHTNINGD)
 # After 6 confirmations it becomes public
 # btc_generate_all_chains(BITCOIND, 5)
 # time.sleep(30)
-# ln_listchannels()
-# ln_assert_channels_public(True)
+# ln_listchannels(LIGHTNINGD)
+# ln_assert_channels_public(LIGHTNINGD, True)
 
 # A node receives invoices for every other node in the chain and pays it
 for chain_name, ln_daemons in LIGHTNINGD.items():
@@ -335,7 +335,7 @@ for chain_name, ln_daemons in LIGHTNINGD.items():
 
 
 # Try to pay an invoice from carol on chain_2 from alice on chain_1
-demo_2_chains_fail()
+demo_2_chains_fail(LIGHTNINGD)
 
 # TODO Pay from alice to fiona using lightning
 
