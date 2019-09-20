@@ -109,28 +109,28 @@ LIGHTNINGD = ln_init_global(CHAINS)
 
 # Connect all nodes of the same chain with each other
 
-def btc_connect_nodes(chains):
-    for chain_name, chain_daemons in BITCOIND.items():
+def btc_connect_nodes(chains, bitcoind_map):
+    for chain_name, chain_daemons in bitcoind_map.items():
         for user_name_a, rpccaller in chain_daemons.items():
             for user_name_b in chain_daemons:
                 if user_name_a != user_name_b:
-                    connect_nodes(BITCOIND[chain_name][user_name_a], '127.0.0.1:%s' % get_p2p_port(chains, chain_name, user_name_b))
+                    connect_nodes(bitcoind_map[chain_name][user_name_a], '127.0.0.1:%s' % get_p2p_port(chains, chain_name, user_name_b))
 
-def generate_blocks(rpccaller, chain_name, nblocks):
+def generate_blocks(bitcoind_map, rpccaller, chain_name, nblocks):
     address = rpccaller.call('getnewaddress', {})
     block_hashes = rpccaller.call('generatetoaddress', {'nblocks': nblocks, 'address': address})
     print('Generated %s %s blocks:' % (nblocks, chain_name))
     # print(block_hashes)
-    sync_blocks(BITCOIND[chain_name].values())
+    sync_blocks(bitcoind_map[chain_name].values())
 
-def btc_generate_all_chains(nblocks):
-    for chain_name, chain_daemons in BITCOIND.items():
+def btc_generate_all_chains(bitcoind_map, nblocks):
+    for chain_name, chain_daemons in bitcoind_map.items():
         # Any daemon for each chain will do
         rpccaller = next(iter(chain_daemons.values()))
-        generate_blocks(rpccaller, chain_name, nblocks)
+        generate_blocks(bitcoind_map, rpccaller, chain_name, nblocks)
 
-def print_balances():
-    for chain_name, chain_daemons in BITCOIND.items():
+def print_balances(bitcoind_map):
+    for chain_name, chain_daemons in bitcoind_map.items():
         for user_name, rpccaller in chain_daemons.items():
             print(chain_name, user_name, rpccaller.call('getbalances', {}))
 
@@ -245,17 +245,17 @@ def demo_2_chains_fail():
 
 print('--------Wait for %s daemons to start and connect (%s seconds)' % (N_CHAINS, N_CHAINS * 5))
 time.sleep(N_CHAINS * 5)
-btc_connect_nodes(CHAINS)
+btc_connect_nodes(CHAINS, BITCOIND)
 
 # Let's make sure everyone generates some coins in the chains they participate in
 for chain_name, chain_daemons in BITCOIND.items():
     for rpccaller in chain_daemons.values():
-        generate_blocks(rpccaller, chain_name, 1)
+        generate_blocks(BITCOIND, rpccaller, chain_name, 1)
 
 # Let's mature the coins in each chain
-btc_generate_all_chains(100)
+btc_generate_all_chains(BITCOIND, 100)
 
-print_balances()
+print_balances(BITCOIND)
 
 print('--------Let\'s try an on-chain payment first on chain %s' % EXAMPLE_CHAIN)
 
@@ -263,8 +263,8 @@ print('--------Let\'s try an on-chain payment first on chain %s' % EXAMPLE_CHAIN
 bob_address = BITCOIND[EXAMPLE_CHAIN]['bob'].call('getnewaddress', {})
 txid = BITCOIND[EXAMPLE_CHAIN]['alice'].call('sendtoaddress', {'address': bob_address, 'amount': 1})
 print('Alice can pay bob directly on EXAMPLE_CHAIN (txid: %s)' % txid)
-generate_blocks(BITCOIND[EXAMPLE_CHAIN]['alice'], EXAMPLE_CHAIN, 1)
-print_balances()
+generate_blocks(BITCOIND, BITCOIND[EXAMPLE_CHAIN]['alice'], EXAMPLE_CHAIN, 1)
+print_balances(BITCOIND)
 
 # lightning-specific things from here
 print('--------Wait for %s clightning daemons to start before calling getinfo (%s seconds)' % (N_CHAINS, N_CHAINS * 5))
@@ -278,13 +278,13 @@ for chain_name, chain_daemons in BITCOIND.items():
         address = LIGHTNINGD[chain_name][user_name].newaddr('p2sh-segwit')['p2sh-segwit']
         txid = rpccaller.call('sendtoaddress', {'address': address, 'amount': 10})
         print('%s %s: sending coins to address %s in lightning wallet (txid: %s)' % (chain_name, user_name, address, txid))
-        generate_blocks(rpccaller, chain_name, 1)
+        generate_blocks(BITCOIND, rpccaller, chain_name, 1)
 
 ln_wait_initial_funds()
 
 ln_connect_nodes()
 
-print_balances()
+print_balances(BITCOIND)
 ln_print_info()
 ln_listfunds()
 ln_listpeers()
@@ -306,7 +306,7 @@ ln_listchannels()
 ln_assert_channels_state('CHANNELD_AWAITING_LOCKIN')
 
 # Only one block is required in testnets for a channel to be confirmed
-btc_generate_all_chains(1)
+btc_generate_all_chains(BITCOIND, 1)
 print('--------Wait for %s clightning daemons to sync to confirm the channels (%s seconds)' % (N_CHAINS, 30))
 time.sleep(30)
 ln_assert_channels_state('CHANNELD_NORMAL')
@@ -314,7 +314,7 @@ ln_assert_channels_public(False)
 
 ln_listchannels()
 # After 6 confirmations it becomes public
-# btc_generate_all_chains(5)
+# btc_generate_all_chains(BITCOIND, 5)
 # time.sleep(30)
 # ln_listchannels()
 # ln_assert_channels_public(True)
