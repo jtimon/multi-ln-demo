@@ -10,6 +10,7 @@ from multiln.utils_demo_bitcoin import (
     btc_connect_nodes,
     btc_generate_all_chains,
     btc_init_bitcoind_global,
+    btc_wait_deamons_start,
     generate_blocks,
     get_p2p_port,
     print_balances,
@@ -115,8 +116,7 @@ def demo_2_chains_fail(lightningd_map):
 
 ##################################
 
-print('--------Wait for %s daemons to start and connect (%s seconds)' % (N_CHAINS, N_CHAINS * 5))
-time.sleep(N_CHAINS * 5)
+btc_wait_deamons_start(BITCOIND)
 btc_connect_nodes(CHAINS, BITCOIND)
 
 # Let's make sure everyone generates some coins in the chains they participate in

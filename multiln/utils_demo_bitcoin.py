@@ -1,4 +1,6 @@
 
+import time
+
 from multiln.bitcoin_test_utils import (
     connect_nodes,
     sync_blocks,
@@ -34,6 +36,15 @@ def btc_init_bitcoind_global(chains):
                 'password%s' % port_chain_user,
             )
     return to_return
+
+def btc_wait_deamons_start(bitcoind_map):
+    for chain_name, chain_daemons in bitcoind_map.items():
+        for user_name, rpccaller in chain_daemons.items():
+            while True:
+                print('Waiting bitcoind for user %s in chain %s to start' % (user_name, chain_name))
+                if not 'error' in rpccaller.call('help', {}):
+                    break
+                time.sleep(1)
 
 
 '''Connect all nodes of the same chain with each other'''
