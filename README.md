@@ -47,6 +47,17 @@ Stop all containers:
 docker stop $(docker ps -a -q)
 ```
 
+# Incremental goals
+
+- [ ] 2 chains, 1 asset
+- [ ] N chains, 1 asset
+- [ ] N chains, 2 assets
+- [ ] N chains, M assets
+- [ ] 1 chain, 2 assets
+- [ ] 1 chain, M assets
+- [ ] N chains, M assets
+- [ ] With CT/CA
+
 # First goal: pay between two chains
 
 - Alice, with channels opened only on chain_1
