@@ -30,6 +30,7 @@ from multiln.util_demo_clightning import (
     ln_listpeers,
     ln_print_info,
     ln_sync_blockheight,
+    ln_wait_channels_state,
     ln_wait_deamons_start,
 )
 
@@ -193,13 +194,12 @@ for chain_name, ln_daemons in LIGHTNINGD.items():
         break
 
 ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_AWAITING_LOCKIN')
+ln_assert_channels_public(LIGHTNINGD, False)
 
 # Only one block is required in testnets for a channel to be confirmed
 btc_generate_all_chains(BITCOIND, 1)
-ln_sync_blockheight(BITCOIND, LIGHTNINGD, timeout=60 * N_CHAINS, interval=5, label='channels to be confirmed')
+ln_wait_channels_state(LIGHTNINGD, 'CHANNELD_NORMAL', wait_interval=5)
 
-ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_NORMAL')
-ln_assert_channels_public(LIGHTNINGD, False)
 ln_listchannels(LIGHTNINGD)
 
 demo_pay_every_chain(LIGHTNINGD)

@@ -94,6 +94,21 @@ def ln_assert_channels_state(lightningd_map, state):
                             channel['state'],
                         ))
 
+def ln_wait_channels_state(lightningd_map, state, wait_interval=5):
+    ready = False
+    while not ready:
+        ready = True
+        for chain_name, ln_daemons in lightningd_map.items():
+            for user_name, ln_caller in ln_daemons.items():
+                for peer in ln_caller.listpeers()['peers']:
+                    for channel in peer['channels']:
+                        if state != channel['state']:
+                            ready = False
+                            print('Waiting channel for user %s in chain %s to get to state %s (currently in %s)' % (
+                                user_name, chain_name, state, channel['state']))
+                            break
+        time.sleep(wait_interval)
+
 def ln_assert_channels_public(lightningd_map, expected_public):
     for chain_name, ln_daemons in lightningd_map.items():
         for user_name, ln_caller in ln_daemons.items():
