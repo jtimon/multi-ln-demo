@@ -11,6 +11,23 @@ def ln_init_global(chains):
             to_return[chain_name][user_name] = LightningRpc('/wd/daemon-data/%s_%s/lightning-rpc' % (user_name, chain_name))
     return to_return
 
+def ln_wait_deamons_start(lightningd_map):
+    for chain_name, ln_daemons in lightningd_map.items():
+        for user_name, ln_caller in ln_daemons.items():
+            while True:
+                print('Waiting lightningd for user %s in chain %s to start' % (user_name, chain_name))
+                try:
+                    info = ln_caller.getinfo()
+                    if isinstance(info, dict):
+                        break
+                except ValueError as e:
+                    pass
+                except TypeError as e:
+                    pass
+                except FileNotFoundError as e:
+                    pass
+                time.sleep(1)
+
 def ln_init_info(lightningd_map):
     ln_info = {}
     for chain_name, ln_daemons in lightningd_map.items():

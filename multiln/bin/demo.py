@@ -25,6 +25,7 @@ from multiln.util_demo_clightning import (
     ln_listfunds,
     ln_listpeers,
     ln_print_info,
+    ln_wait_deamons_start,
     ln_wait_initial_funds,
 )
 
@@ -138,8 +139,7 @@ generate_blocks(BITCOIND, BITCOIND[EXAMPLE_CHAIN]['alice'], EXAMPLE_CHAIN, 1)
 print_balances(BITCOIND)
 
 # lightning-specific things from here
-print('--------Wait for %s clightning daemons to start before calling getinfo (%s seconds)' % (N_CHAINS, N_CHAINS * 5))
-time.sleep(N_CHAINS * 5)
+ln_wait_deamons_start(LIGHTNINGD)
 LN_INFO = ln_init_info(LIGHTNINGD)
 print('LN_INFO:')
 print(LN_INFO)
