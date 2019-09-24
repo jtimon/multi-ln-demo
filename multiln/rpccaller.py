@@ -50,6 +50,10 @@ class RpcCaller(object):
 
         if not json_result:
             return {'error': {'message': 'No rpc result for method %s' % method}}
+
+        if not isinstance(json_result, dict):
+            return {'error': {'message': 'Result for method %s is not a dict: %s' % (method, json_result)}}
+
         # If there's errors, only return the errors
         if 'error' in json_result and json_result['error']:
             return {'error': json_result['error']}
