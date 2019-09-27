@@ -21,11 +21,11 @@ def ln_wait_deamons_start(lightningd_map):
                     if isinstance(info, dict):
                         break
                 except ValueError as e:
-                    pass
+                    print('ValueError:', e)
                 except TypeError as e:
-                    pass
+                    print('TypeError:', e)
                 except FileNotFoundError as e:
-                    pass
+                    print('FileNotFoundError:', e)
                 time.sleep(1)
 
 def ln_init_info(lightningd_map):
@@ -101,5 +101,7 @@ def ln_wait_initial_funds(lightningd_map):
                         break
                 except TypeError as e:
                     print('TypeError:', e)
-                print('Waiting for user %s initial funds on chain %s (linghtning node)' % (user_name, chain_name))
+                except ValueError as e:
+                    print('ValueError:', e)
+                print('Waiting for user %s initial funds on chain %s (lightning node)' % (user_name, chain_name))
                 time.sleep(1)
