@@ -42,37 +42,31 @@ CHAINS = {
     'regtest': {
         'port_decimal': 1,
         'users': ['alice', 'bob'],
-        'main_user': 'alice',
     },
 
     'chain_1': {
         'port_decimal': 4,
         'users': ['alice', 'bob'],
-        'main_user': 'alice',
     },
 
     'chain_2': {
         'port_decimal': 5,
         'users': ['bob', 'carol'],
-        'main_user': 'bob',
     },
 
     'chain_3': {
         'port_decimal': 6,
         'users': ['carol', 'david'],
-        'main_user': 'carol',
     },
 
     'chain_4': {
         'port_decimal': 7,
         'users': ['david', 'ezra'],
-        'main_user': 'david',
     },
 
     'chain_5': {
         'port_decimal': 8,
         'users': ['ezra', 'fiona'],
-        'main_user': 'ezra',
     },
 }
 CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
