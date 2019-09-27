@@ -6,13 +6,9 @@ demo: python /wd/multiln/bin/demo.py chain_1 chain_2
 
 # bitcoind nodes:
 
-chain_1_alice_bitcoind: bitcoind -chain=chain_1 -conf=/wd/conf/alice_bitcoind.conf -datadir=/wd/daemon-data/chain_1_alice_bitcoind/
+chain_1_bitcoind: bitcoind -chain=chain_1 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_1_bitcoind/
 
-chain_1_bob_bitcoind: bitcoind -chain=chain_1 -conf=/wd/conf/bob_bitcoind.conf -datadir=/wd/daemon-data/chain_1_bob_bitcoind/
-
-chain_2_bob_bitcoind: bitcoind -chain=chain_2 -conf=/wd/conf/bob_bitcoind.conf -datadir=/wd/daemon-data/chain_2_bob_bitcoind/
-
-chain_2_carol_bitcoind: bitcoind -chain=chain_2 -conf=/wd/conf/carol_bitcoind.conf -datadir=/wd/daemon-data/chain_2_carol_bitcoind/
+chain_2_bitcoind: bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_2_bitcoind/
 
 
 # clightning nodes:

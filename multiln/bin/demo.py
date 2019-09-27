@@ -7,12 +7,10 @@ import sys
 import time
 
 from multiln.utils_demo_bitcoin import (
-    btc_connect_nodes,
     btc_generate_all_chains,
     btc_init_bitcoind_global,
     btc_wait_deamons_start,
     generate_blocks,
-    get_p2p_port,
     print_balances,
 )
 
@@ -80,7 +78,7 @@ CHAINS = {
 CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
 N_CHAINS = len(CHAINS)
 
-print('Chains considered (%s):', N_CHAINS)
+print('Chains considered (%s):' % N_CHAINS)
 print(CHAINS)
 
 BITCOIND = btc_init_bitcoind_global(CHAINS)
@@ -117,25 +115,9 @@ def demo_2_chains_fail(lightningd_map):
 ##################################
 
 btc_wait_deamons_start(BITCOIND)
-btc_connect_nodes(CHAINS, BITCOIND)
 
-# Let's make sure everyone generates some coins in the chains they participate in
-for chain_name, chain_daemons in BITCOIND.items():
-    for rpccaller in chain_daemons.values():
-        generate_blocks(BITCOIND, rpccaller, chain_name, 1)
-
-# Let's mature the coins in each chain
-btc_generate_all_chains(BITCOIND, 100)
-
-print_balances(BITCOIND)
-
-print('--------Let\'s try an on-chain payment first on chain %s' % EXAMPLE_CHAIN)
-
-# Alice can pay bob directly on EXAMPLE_CHAIN
-bob_address = BITCOIND[EXAMPLE_CHAIN]['bob'].call('getnewaddress', {})
-txid = BITCOIND[EXAMPLE_CHAIN]['alice'].call('sendtoaddress', {'address': bob_address, 'amount': 1})
-print('Alice can pay bob directly on EXAMPLE_CHAIN (txid: %s)' % txid)
-generate_blocks(BITCOIND, BITCOIND[EXAMPLE_CHAIN]['alice'], EXAMPLE_CHAIN, 1)
+# Generate and mature the coins in each chain
+btc_generate_all_chains(BITCOIND, 101)
 print_balances(BITCOIND)
 
 # lightning-specific things from here
@@ -145,16 +127,16 @@ print('LN_INFO:')
 print(LN_INFO)
 
 # Send coins to all lightning wallets
-for chain_name, chain_daemons in BITCOIND.items():
-    for user_name, rpccaller in chain_daemons.items():
+for chain_name, ln_daemons in LIGHTNINGD.items():
+    rpccaller = BITCOIND[chain_name]
+    for user_name, ln_caller in ln_daemons.items():
         print(rpccaller.call('getbalances', {}))
-        address = LIGHTNINGD[chain_name][user_name].newaddr('p2sh-segwit')['p2sh-segwit']
+        address = ln_caller.newaddr('p2sh-segwit')['p2sh-segwit']
         txid = rpccaller.call('sendtoaddress', {'address': address, 'amount': 10})
         print('%s %s: sending coins to address %s in lightning wallet (txid: %s)' % (chain_name, user_name, address, txid))
-        generate_blocks(BITCOIND, rpccaller, chain_name, 1)
+        generate_blocks(rpccaller, chain_name, 1)
 
 ln_wait_initial_funds(LIGHTNINGD)
-
 ln_connect_nodes(LIGHTNINGD, LN_INFO)
 
 print_balances(BITCOIND)
