@@ -160,13 +160,7 @@ print('--------Wait for %s clightning daemons to sync to confirm the channels (%
 time.sleep(30)
 ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_NORMAL')
 ln_assert_channels_public(LIGHTNINGD, False)
-
 ln_listchannels(LIGHTNINGD)
-# After 6 confirmations it becomes public
-# btc_generate_all_chains(BITCOIND, 5)
-# time.sleep(30)
-# ln_listchannels(LIGHTNINGD)
-# ln_assert_channels_public(LIGHTNINGD, True)
 
 # A node receives invoices for every other node in the chain and pays it
 for chain_name, ln_daemons in LIGHTNINGD.items():
