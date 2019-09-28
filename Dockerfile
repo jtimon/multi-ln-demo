@@ -52,6 +52,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 COPY docker/build-daemon.sh /wd/build-daemon.sh
 # Build custom daemon able to produce and support an arbitrary number of chains
+# This corresponds to https://github.com/bitcoin/bitcoin/pull/8994
 ENV DAEMON_NAME=bitcoin
 ENV BRANCH_COMMIT=demo-multiln-0
 ENV REPO_HOST=https://github.com/jtimon
@@ -60,6 +61,7 @@ RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
 ENV PATH="/wd/$REPO_NAME/src:${PATH}"
 
 COPY docker/build-clightning.sh /wd/build-clightning.sh
+# This corresponds to https://github.com/jtimon/lightning/pull/2
 ENV LN_BRANCH_COMMIT=v0.7.1-5-chains
 ENV LN_REPO_HOST=https://github.com/jtimon
 ENV LN_REPO_NAME=lightning
