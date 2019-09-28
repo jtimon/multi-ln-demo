@@ -30,22 +30,22 @@ def ln_wait_deamons_start(lightningd_map):
                     print('FileNotFoundError:', e)
                 time.sleep(1)
 
-# copied from https://github.com/cdecker/lightning-integration/blob/master/test.py
-def sync_blockheight(rpccaller, nodes):
+# copied from https://github.com/cdecker/lightning-integration/blob/master/test.py (modified)
+def sync_blockheight(rpccaller, nodes, timeout=30, interval=1):
     info = rpccaller.call('getblockchaininfo', {})
     blocks = info['blocks']
 
     print("Waiting for %d nodes to blockheight %d" % (len(nodes), blocks))
     for n in nodes:
-        wait_for(lambda: n.getinfo()['blockheight'] == blocks, interval=1)
+        wait_for(lambda: n.getinfo()['blockheight'] == blocks, timeout=timeout, interval=interval)
 
-def ln_sync_blockheight(bitcoind_map, lightningd_map):
+def ln_sync_blockheight(bitcoind_map, lightningd_map, timeout=30, interval=1):
     for chain_name, ln_daemons in lightningd_map.items():
         ln_nodes = []
         for user_name, ln_caller in ln_daemons.items():
             ln_nodes.append(ln_caller)
         print("Waiting for %d nodes in chain %s to sync" % (len(ln_nodes), user_name))
-        sync_blockheight(bitcoind_map[chain_name], ln_nodes)
+        sync_blockheight(bitcoind_map[chain_name], ln_nodes, timeout=timeout, interval=interval)
 
 
 def ln_init_info(lightningd_map):
@@ -110,18 +110,3 @@ def ln_connect_nodes(lightningd_map, ln_info):
                     print('Connecting %s to %s in chain %s, port %s id %s' % (
                         user_name_a, user_name_b, chain_name, info_b['binding'][0]['port'], info_b['id']))
                     rpccaller.connect(info_b['id'], host='0.0.0.0', port=info_b['binding'][0]['port'])
-
-# wait for everyone to have some onchain funds on every chain they're in
-def ln_wait_initial_funds(lightningd_map):
-    for chain_name, chain_daemons in lightningd_map.items():
-        for user_name, rpccaller in chain_daemons.items():
-            while True:
-                try:
-                    if len(lightningd_map[chain_name][user_name].listfunds()['outputs']) > 0:
-                        break
-                except TypeError as e:
-                    print('TypeError:', e)
-                except ValueError as e:
-                    print('ValueError:', e)
-                print('Waiting for user %s initial funds on chain %s (lightning node)' % (user_name, chain_name))
-                time.sleep(1)

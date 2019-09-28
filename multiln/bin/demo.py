@@ -26,7 +26,6 @@ from multiln.util_demo_clightning import (
     ln_print_info,
     ln_sync_blockheight,
     ln_wait_deamons_start,
-    ln_wait_initial_funds,
 )
 
 print('This is a demo demonstrating lightning payments across several different regtest chains')
@@ -131,7 +130,7 @@ for chain_name, ln_daemons in LIGHTNINGD.items():
         print('%s %s: sending coins to address %s in lightning wallet (txid: %s)' % (chain_name, user_name, address, txid))
         generate_blocks(rpccaller, chain_name, 1)
 
-ln_wait_initial_funds(LIGHTNINGD)
+ln_sync_blockheight(BITCOIND, LIGHTNINGD, timeout=60, interval=1)
 ln_connect_nodes(LIGHTNINGD, LN_INFO)
 
 print_balances(BITCOIND)
@@ -157,7 +156,7 @@ ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_AWAITING_LOCKIN')
 
 # Only one block is required in testnets for a channel to be confirmed
 btc_generate_all_chains(BITCOIND, 1)
-ln_sync_blockheight(BITCOIND, LIGHTNINGD)
+ln_sync_blockheight(BITCOIND, LIGHTNINGD, timeout=60, interval=1)
 
 ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_NORMAL')
 ln_assert_channels_public(LIGHTNINGD, False)
