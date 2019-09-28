@@ -3,6 +3,8 @@ import time
 
 from lightning import LightningRpc
 
+from multiln.util import wait_for
+
 def ln_init_global(chains):
     to_return = {}
     for chain_name in chains:
@@ -27,6 +29,24 @@ def ln_wait_deamons_start(lightningd_map):
                 except FileNotFoundError as e:
                     print('FileNotFoundError:', e)
                 time.sleep(1)
+
+# copied from https://github.com/cdecker/lightning-integration/blob/master/test.py
+def sync_blockheight(rpccaller, nodes):
+    info = rpccaller.call('getblockchaininfo', {})
+    blocks = info['blocks']
+
+    print("Waiting for %d nodes to blockheight %d" % (len(nodes), blocks))
+    for n in nodes:
+        wait_for(lambda: n.getinfo()['blockheight'] == blocks, interval=1)
+
+def ln_sync_blockheight(bitcoind_map, lightningd_map):
+    for chain_name, ln_daemons in lightningd_map.items():
+        ln_nodes = []
+        for user_name, ln_caller in ln_daemons.items():
+            ln_nodes.append(ln_caller)
+        print("Waiting for %d nodes in chain %s to sync" % (len(ln_nodes), user_name))
+        sync_blockheight(bitcoind_map[chain_name], ln_nodes)
+
 
 def ln_init_info(lightningd_map):
     ln_info = {}
