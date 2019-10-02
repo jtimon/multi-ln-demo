@@ -31,21 +31,21 @@ def ln_wait_deamons_start(lightningd_map):
                 time.sleep(1)
 
 # copied from https://github.com/cdecker/lightning-integration/blob/master/test.py (modified)
-def sync_blockheight(rpccaller, nodes, timeout=30, interval=1):
+def sync_blockheight(rpccaller, nodes, timeout=30, interval=1, label='sync_blockheight'):
     info = rpccaller.call('getblockchaininfo', {})
     blocks = info['blocks']
 
-    print("Waiting for %d nodes to blockheight %d" % (len(nodes), blocks))
+    label = "%s to block height %d" % (label, blocks)
     for n in nodes:
-        wait_for(lambda: n.getinfo()['blockheight'] == blocks, timeout=timeout, interval=interval)
+        wait_for(lambda: n.getinfo()['blockheight'] == blocks, timeout=timeout, interval=interval, label=label)
 
-def ln_sync_blockheight(bitcoind_map, lightningd_map, timeout=30, interval=1):
+def ln_sync_blockheight(bitcoind_map, lightningd_map, timeout=30, interval=1, label='ln_sync_blockheight'):
     for chain_name, ln_daemons in lightningd_map.items():
         ln_nodes = []
         for user_name, ln_caller in ln_daemons.items():
             ln_nodes.append(ln_caller)
-        print("Waiting for %d nodes in chain %s to sync" % (len(ln_nodes), user_name))
-        sync_blockheight(bitcoind_map[chain_name], ln_nodes, timeout=timeout, interval=interval)
+        label = "%s: %d nodes in chain %s to sync" % (label, len(ln_nodes), chain_name)
+        sync_blockheight(bitcoind_map[chain_name], ln_nodes, timeout=timeout, interval=interval, label=label)
 
 
 def ln_init_info(lightningd_map):
