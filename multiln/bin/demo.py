@@ -130,7 +130,7 @@ for chain_name, ln_daemons in LIGHTNINGD.items():
         print('%s %s: sending coins to address %s in lightning wallet (txid: %s)' % (chain_name, user_name, address, txid))
         generate_blocks(rpccaller, chain_name, 1)
 
-ln_sync_blockheight(BITCOIND, LIGHTNINGD, timeout=60, interval=1)
+ln_sync_blockheight(BITCOIND, LIGHTNINGD, timeout=60, interval=5)
 ln_connect_nodes(LIGHTNINGD, LN_INFO)
 
 print_balances(BITCOIND)
@@ -156,7 +156,7 @@ ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_AWAITING_LOCKIN')
 
 # Only one block is required in testnets for a channel to be confirmed
 btc_generate_all_chains(BITCOIND, 1)
-ln_sync_blockheight(BITCOIND, LIGHTNINGD, timeout=60, interval=1)
+ln_sync_blockheight(BITCOIND, LIGHTNINGD, timeout=60, interval=5)
 
 ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_NORMAL')
 ln_assert_channels_public(LIGHTNINGD, False)
