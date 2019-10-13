@@ -62,7 +62,7 @@ ENV PATH="/wd/$REPO_NAME/src:${PATH}"
 
 COPY docker/build-clightning.sh /wd/build-clightning.sh
 # This corresponds to https://github.com/jtimon/lightning/pull/3
-ENV LN_BRANCH_COMMIT=v0.7.2.1-5-chains
+ENV LN_BRANCH_COMMIT=v0.7.2.1-demo-1
 ENV LN_REPO_HOST=https://github.com/jtimon
 ENV LN_REPO_NAME=lightning
 RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
