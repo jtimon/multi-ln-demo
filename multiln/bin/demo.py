@@ -103,7 +103,7 @@ def demo_2_chains_fail(lightningd_map):
         print(type(e))
         assert(e.method == 'pay')
         assert(e.error['code'] == 205)
-        assert(e.error['message'] == 'Could not find a route')
+        assert(e.error['message'] == 'Invoice is for another network %s' % chain_name_b)
         assert('bolt11' in e.payload)
 
 ##################################
