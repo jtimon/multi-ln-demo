@@ -92,7 +92,7 @@ def demo_2_chains_fail(lightningd_map):
 
     msatoshi = 1000
     print('%s on chain %s receives invoice for %s msatoshis from %s on chain %s' % (user_name_a, chain_name_a, msatoshi, user_name_b, chain_name_b))
-    desc = '%s_%s_%s' % (user_name_a, user_name_b, chain_name)
+    desc = '%s_%s_%s' % (user_name_a, user_name_b, chain_name_b)
     invoice = lightningd_map[chain_name_b][user_name_b].invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
     print(invoice)
     print('...and tries to pay it...')
