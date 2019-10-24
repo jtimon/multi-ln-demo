@@ -19,21 +19,23 @@ or
 
 	make docker-build
 
-To both build and run that local docker container:
+To both build and run that local docker container, there's several options:
 
-	docker build --tag=multilndemo . && docker run multilndemo
+	make docker-demo-regtest
+	make docker-demo-2-chains
+	make docker-demo-5-chains
+	make docker-rust-2-chains
 
-or
-
-	make docker-run
 
 To persist the daemon states, first create a directory
 /home/jt/code/multilndemovol (change jt to your own user) with `.chain_1`
 to `.chain_5` in it. Then:
 
 ```
-docker build --tag=multilndemo . ; docker run -v /home/jt/code/multilndemovol:/wd/daemon-data multilndemo
+docker build --tag=multilndemo . ; docker run -v /home/jt/code/multilndemovol:/wd/daemon-data multilndemo bash -c "bash /wd/regtest-entry-point.sh"
 ```
+
+Or use other entry points, see Makefile.
 
 Remove all stopped containers:
 
