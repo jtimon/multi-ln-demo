@@ -28,6 +28,8 @@ from multiln.util_demo_clightning import (
     ln_wait_deamons_start,
 )
 
+from multiln.gateway import init_gateway
+
 print('This is a demo demonstrating lightning payments across several different regtest chains')
 
 SELECTED_CHAINS = sys.argv[1:]
@@ -87,6 +89,7 @@ def demo_2_chains_fail(lightningd_map):
     # TODO Select the users in a more dynamic way
     user_name_a = 'alice'
     chain_name_a = 'chain_1'
+    user_name_gateway = 'bob'
     user_name_b = 'carol'
     chain_name_b = 'chain_2'
 
@@ -101,10 +104,36 @@ def demo_2_chains_fail(lightningd_map):
     except Exception as e:
         print(e)
         print(type(e))
+        print(e.error['message'])
         assert(e.method == 'pay')
         assert(e.error['code'] == 205)
         assert(e.error['message'] == 'Invoice is for another network %s' % chain_name_b)
         assert('bolt11' in e.payload)
+
+    gateway = init_gateway(lightningd_map, user_name_gateway)
+
+    src_invoice = gateway.request_payment({
+        'bolt11': invoice['bolt11'],
+        'dest_chain': chain_name_b,
+        'amount_msats': msatoshi,
+        'src_chain': chain_name_a,
+        'offer_msats': msatoshi,
+    })
+    print("...but since %s can't pay to chain %s, pays the following invoice to %s gateway inc in chain %s instead..." % (user_name_a, chain_name_b, user_name_gateway, chain_name_a))
+    print(src_invoice)
+
+    try:
+        src_payment_result = lightningd_map[chain_name_a][user_name_a].pay(src_invoice['bolt11'])
+        print('payment succesful:')
+        print(src_payment_result)
+        print('...and after a successful payment to %s gateway inc, %s calls again with the proof of payment...' % (user_name_gateway, user_name_a))
+        gateway_confirm_payment_result = gateway.confirm_request_payment_payment(src_payment_result)
+        print('...this is what %s gateway inc responds:' % (user_name_gateway))
+        print(gateway_confirm_payment_result)
+        print('TODO: %s should wait and confirm for the original invoice to be paid by %s gateway inc too. Just in case.' % (user_name_a, user_name_gateway))
+    except Exception as e:
+        print(e)
+        print(type(e))
 
 ##################################
 
