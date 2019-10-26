@@ -78,5 +78,6 @@ class Gateway(object):
 def init_gateway(lightningd_map, user_name):
     gateway_sibling_nodes = {}
     for chain_name in lightningd_map:
-        gateway_sibling_nodes[chain_name] = lightningd_map[chain_name][user_name]
+        if user_name in lightningd_map[chain_name]:
+            gateway_sibling_nodes[chain_name] = lightningd_map[chain_name][user_name]
     return Gateway(gateway_sibling_nodes)
