@@ -111,6 +111,7 @@ def demo_2_chains_fail(lightningd_map):
         assert('bolt11' in e.payload)
 
     gateway = init_gateway(lightningd_map, user_name_gateway)
+    gateway.update_price(chain_name_a, chain_name_b, 1)
 
     src_invoice = gateway.request_payment({
         'bolt11': invoice['bolt11'],

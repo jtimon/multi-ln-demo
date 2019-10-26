@@ -8,9 +8,19 @@
 class Gateway(object):
 
     def __init__(self, sibling_nodes):
+        self.prices = {}
         self.sibling_nodes = sibling_nodes
         self.requests_to_be_paid = {}
         self.requests_paid = {}
+
+    def update_price(self, src_chain, dest_chain, price):
+        if src_chain not in self.prices:
+            self.prices[src_chain] = {}
+        self.prices[src_chain][dest_chain] = price
+
+    def update_price_bi(self, src_chain, dest_chain, price):
+        self.update_price(src_chain, dest_chain, price)
+        self.update_price(dest_chain, src_chain, 1 / price) # Inverse of price for multiplication operation
 
     def request_payment(self, req):
         dest_bolt11 = req['bolt11']
@@ -21,18 +31,18 @@ class Gateway(object):
         # FIX decode the amount from the req['bolt11'], the caller can lie
         dest_chain = req['dest_chain']
 
-        if src_chain not in self.sibling_nodes:
+        if src_chain not in self.sibling_nodes or src_chain not in self.prices:
             return {'error': "gateway doesn't accept payment in chain %s" % src_chain}
 
-        if dest_chain not in self.sibling_nodes:
-            return {'error': "gateway can't pay to chain %s" % dest_chain}
+        if (dest_chain not in self.sibling_nodes or
+            dest_chain not in self.prices[src_chain] or
+            self.prices[src_chain][dest_chain] <= 0):
+            return {'error': "gateway won't pay to chain %s" % dest_chain}
 
-        # TODO implement some pricing mechanism, always assuming 1:1 for now
-        if offer_msats < dest_amount_msats:
+        if offer_msats * self.prices[src_chain][dest_chain] < dest_amount_msats:
             return {'error': "Insufficient offer %s" % offer_msats,
-                    'suggested_offer_msats': dest_amount_msats,
+                    'suggested_offer_msats': dest_amount_msats / self.prices[src_chain][dest_chain],
             }
-
 
         label = 'from_%s_to_%s_label' % (src_chain, dest_chain)
         description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain, dest_chain, dest_bolt11)
