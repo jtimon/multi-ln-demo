@@ -132,6 +132,7 @@ def demo_2_chains_fail(lightningd_map):
         print('...this is what %s gateway inc responds:' % (user_name_gateway))
         print(gateway_confirm_payment_result)
         print('TODO: %s should wait and confirm for the original invoice to be paid by %s gateway inc too. Just in case.' % (user_name_a, user_name_gateway))
+        # TODO To check that, hash the payment_preimage and compare to the payment_hash, pass binary to sha256, then encode result as hex
     except Exception as e:
         print(e)
         print(type(e))

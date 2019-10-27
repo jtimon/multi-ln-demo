@@ -51,6 +51,7 @@ class Gateway(object):
             'src_invoice': src_invoice,
             'dest_bolt11': dest_bolt11,
             'dest_chain': dest_chain,
+            'src_chain': src_chain,
         }
         return src_invoice
 
@@ -65,8 +66,21 @@ class Gateway(object):
         if payment_hash not in self.requests_to_be_paid:
             return {'error': 'Unkown payment request %s.' % payment_hash}
 
-        # TODO the gateway should check if the invoice was already paid before paying his
         to_pay = self.requests_to_be_paid[payment_hash]
+
+        invoices = self.sibling_nodes[to_pay['src_chain']].listinvoices()['invoices']
+        found = None
+        for invoice in invoices:
+            if invoice['payment_hash'] == payment_hash:
+                found = invoice
+                break
+
+        if not found:
+            return {'error': 'Invoice not found %s.' % payment_hash}
+
+        if found['status'] != 'paid':
+            return {'error': 'Invoice not paid yet, current status %s %s.' % (found['status'], payment_hash)}
+
         try:
             result = self.sibling_nodes[to_pay['dest_chain']].pay(to_pay['dest_bolt11'])
             self.requests_paid[payment_hash] = {
