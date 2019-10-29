@@ -144,6 +144,8 @@ def demo_2_chains_fail(lightningd_map):
         else:
             print('Preimage doesn\'t corresponds to payment hash. %s has been scammed by %s' % (user_name_a, user_name_gateway))
 
+        gateway.print_state()
+
     except Exception as e:
         print(e)
         print(type(e))
