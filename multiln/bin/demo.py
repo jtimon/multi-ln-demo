@@ -3,8 +3,11 @@
 if __name__ != '__main__':
     raise ImportError(u"%s may only be run as a script" % __file__)
 
+import binascii
 import sys
 import time
+
+from hashlib import sha256
 
 from multiln.utils_demo_bitcoin import (
     btc_generate_all_chains,
@@ -29,6 +32,10 @@ from multiln.util_demo_clightning import (
 )
 
 from multiln.gateway import init_gateway
+
+def check_hash_preimage(payment_hash, payment_preimage):
+    hashed_result = sha256(binascii.unhexlify(payment_preimage)).hexdigest()
+    return hashed_result == payment_hash
 
 print('This is a demo demonstrating lightning payments across several different regtest chains')
 
@@ -131,8 +138,12 @@ def demo_2_chains_fail(lightningd_map):
         gateway_confirm_payment_result = gateway.confirm_request_payment_payment(src_payment_result)
         print('...this is what %s gateway inc responds:' % (user_name_gateway))
         print(gateway_confirm_payment_result)
-        print('TODO: %s should wait and confirm for the original invoice to be paid by %s gateway inc too. Just in case.' % (user_name_a, user_name_gateway))
-        # TODO To check that, hash the payment_preimage and compare to the payment_hash, pass binary to sha256, then encode result as hex
+        print('...%s confirms that the payment preimage given corresponds to the original invoice to be paid by %s gateway inc too.' % (user_name_a, user_name_gateway))
+        if check_hash_preimage(invoice['payment_hash'], gateway_confirm_payment_result['payment_preimage']):
+            print('Preimage corresponds to payment hash')
+        else:
+            print('Preimage doesn\'t corresponds to payment hash. %s has been scammed by %s' % (user_name_a, user_name_gateway))
+
     except Exception as e:
         print(e)
         print(type(e))
