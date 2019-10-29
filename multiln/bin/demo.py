@@ -181,7 +181,6 @@ print_balances(BITCOIND)
 ln_print_info(LN_INFO)
 ln_listfunds(LIGHTNINGD)
 ln_listpeers(LIGHTNINGD)
-ln_listchannels(LIGHTNINGD)
 
 # A node funds a channel with every other node in the chain
 for chain_name, ln_daemons in LIGHTNINGD.items():
@@ -191,10 +190,6 @@ for chain_name, ln_daemons in LIGHTNINGD.items():
                 print('%s funds a channel to %s in chain %s' % (user_name_a, user_name_b, chain_name))
                 print(ln_caller.fundchannel(LN_INFO[chain_name][user_name_b]['id'], 10000))
         break
-
-ln_listfunds(LIGHTNINGD)
-ln_listpeers(LIGHTNINGD)
-ln_listchannels(LIGHTNINGD)
 
 ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_AWAITING_LOCKIN')
 
