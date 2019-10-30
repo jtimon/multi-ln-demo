@@ -53,6 +53,7 @@ def unshorten_amount(amount):
 class Gateway(object):
 
     def __init__(self, sibling_nodes):
+        # FIX DoS: Don't store pending request forever
         self.prices = {}
         self.sibling_nodes = sibling_nodes
         self.requests_to_be_paid = {}
@@ -123,12 +124,12 @@ class Gateway(object):
         label = 'from_%s_to_%s_label' % (src_chain, dest_chain)
         description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain, dest_chain, dest_bolt11)
         src_invoice = self.sibling_nodes[src_chain].invoice(offer_msats, label, description)
-        # FIX we're storing more than we need
         self.requests_to_be_paid[src_invoice['payment_hash']] = {
-            'src_invoice': src_invoice,
-            'dest_bolt11': dest_bolt11,
-            'dest_chain': dest_chain,
             'src_chain': src_chain,
+            'src_bolt11': src_invoice['bolt11'],
+            'src_expires_at': src_invoice['expires_at'],
+            'dest_chain': dest_chain,
+            'dest_bolt11': dest_bolt11,
         }
         return src_invoice
 
@@ -162,6 +163,8 @@ class Gateway(object):
         # Prices may have been changed from request to confirm call
         try:
             result = self.sibling_nodes[to_pay['dest_chain']].pay(to_pay['dest_bolt11'])
+            # TODO This should be a log or go to a database
+            # TODO Should we expect anything other than payment_hash and perhaps payment_preimage too from the caller?
             self.requests_paid[payment_hash] = {
                 'request': self.requests_to_be_paid[payment_hash],
                 'src_payment': req,
