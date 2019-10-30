@@ -122,8 +122,6 @@ def demo_2_chains_fail(lightningd_map):
 
     src_invoice = gateway.request_payment({
         'bolt11': invoice['bolt11'],
-        'dest_chain': chain_name_b,
-        'amount_msats': msatoshi,
         'src_chain': chain_name_a,
         'offer_msats': msatoshi,
     })

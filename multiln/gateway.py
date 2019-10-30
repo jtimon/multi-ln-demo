@@ -5,7 +5,49 @@
 # Example payment result:
 # {'id': 2, 'payment_hash': 'a1a06ea2fd1240473eb721b7f1b1d306de1b27ea63ed0f42722c69ea62873b46', 'destination': '02bc1adb03dd2102e4dabfb5554f5a489c9283f3ec663f71ff513045570f576b32', 'msatoshi': 1000, 'amount_msat': 1000msat, 'msatoshi_sent': 1000, 'amount_sent_msat': 1000msat, 'created_at': 1572091440, 'status': 'complete', 'payment_preimage': '2ff6f48168975725a8e7078741ae390f3979df1f52c92ac4ef84a4a494ee25fb', 'bolt11': 'lnbca10n1pwmgd3spp55xsxaghazfqyw04hyxmlrvwnqm0pkfl2v0ks7snj93575c588drqdwdveex7m2lvd5xz6twtuc47ar0ta3ksctfde0nzhmzdak8gvf3takxucnrvgcnqm33wpmk6emyxdehqup4wpmngvnhxqu8wefn0p5x56rhvamhs7tgvscrwet4xsmnqet2wsmkken48pekw7r4wsurs7tjdc6hqvmkxeekgur2wcukk7r2vdknjarpxd4h5atwxpjrxvrt0qm8yury895rjdmkdfk8vvm2dpuxxmt2vsukxwr8xe6rqerr0pchj6nhx4ckxutsxgmr2em9w3snqct2dgu8xap4dfjh2wrewqmkzvpnv9kh5utdxgc8xmt8xaun2ctpw5m8zwpewf58z7rrvam8saejvvm8y6psddhx6emsw9jkuvrwwfmhzdmg89n82mfnde6h5urdddcxvmr5x4c82cf4x3arywpnd3shjumsxc6rswfkdd0kgetnvdexjur5d9hkuxqyjw5qcqp277yuhhqs87udwph8a0jf7v5s6j80rgaw9gz6qtq8dz3xyna2yd2xkm4fvaw5hhdn8nv9rjw2suuvcl3hdfrqm8fufu4xsc6s8u6nm7cpsnyucv'}
 
+from decimal import Decimal
 from pprint import pprint
+import re
+
+from multiln.bech32 import bech32_decode
+
+BIP173_TO_CHAIN_PETNAME = {
+    'bcrt': 'regtest',
+    'bca': 'chain_1',
+    'bcb': 'chain_2',
+    'bcc': 'chain_3',
+    'bcd': 'chain_4',
+    'bce': 'chain_5',
+}
+
+# Copied from https://github.com/rustyrussell/lightning-payencode
+def unshorten_amount(amount):
+    """ Given a shortened amount, convert it into a decimal
+    """
+    # BOLT #11:
+    # The following `multiplier` letters are defined:
+    #
+    #* `m` (milli): multiply by 0.001
+    #* `u` (micro): multiply by 0.000001
+    #* `n` (nano): multiply by 0.000000001
+    #* `p` (pico): multiply by 0.000000000001
+    units = {
+        'p': 10**12,
+        'n': 10**9,
+        'u': 10**6,
+        'm': 10**3,
+    }
+    unit = str(amount)[-1]
+    # BOLT #11:
+    # A reader SHOULD fail if `amount` contains a non-digit, or is followed by
+    # anything except a `multiplier` in the table above.
+    if not re.fullmatch("\d+[pnum]?", str(amount)):
+        raise ValueError("Invalid amount '{}'".format(amount))
+
+    if unit in units.keys():
+        return Decimal(amount[:-1]) / units[unit]
+    else:
+        return Decimal(amount)
 
 class Gateway(object):
 
@@ -39,12 +81,32 @@ class Gateway(object):
         offer_msats = req['offer_msats']
         # FIX change to chain_id (genesis hash) since chain names aren't guaranteed to be unique
         src_chain = req['src_chain']
-        dest_amount_msats = req['amount_msats']
-        # FIX decode the amount from the req['bolt11'], the caller can lie
-        dest_chain = req['dest_chain']
 
         if src_chain not in self.sibling_nodes or src_chain not in self.prices:
             return {'error': "gateway doesn't accept payment in chain %s" % src_chain}
+
+        dest_chain_hrp, data = bech32_decode(dest_bolt11)
+        if not dest_chain_hrp:
+            return {'error': "Bad bech32 checksum for bolt11"}
+
+        if not dest_chain_hrp.startswith('ln'):
+            return {'error': "Bad bolt11, hrp does not start with ln"}
+
+        print('dest_chain_hrp', dest_chain_hrp)
+        m = re.search("[^\d]+", dest_chain_hrp[2:])
+        if not m:
+            return {'error': "No chain bip173 name in bolt11"}
+
+        dest_chain_bip173_name = m.group(0)
+        amountstr = dest_chain_hrp[2+m.end():]
+        if amountstr == '':
+            return {'error': "No amount in bolt11"}
+        dest_amount_msats = unshorten_amount(amountstr)
+
+        if not dest_chain_bip173_name in BIP173_TO_CHAIN_PETNAME:
+            return {'error': "gateway won't pay to chain with bip173 name (hrp) %s" % dest_chain_bip173_name}
+
+        dest_chain = BIP173_TO_CHAIN_PETNAME[dest_chain_bip173_name]
 
         if (dest_chain not in self.sibling_nodes or
             dest_chain not in self.prices[src_chain] or
