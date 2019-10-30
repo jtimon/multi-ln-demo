@@ -11,6 +11,7 @@ RUN apt-get -yqq update \
     bsdmainutils \
     build-essential \
     curl \
+    gettext \
     git \
     libboost-chrono-dev \
     libboost-filesystem-dev \
