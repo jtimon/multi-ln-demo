@@ -1,7 +1,8 @@
 
 # A python script to make the rpc calls:
 
-demo: python /wd/multiln/bin/demo.py chain_1 chain_2
+# PYTHONUNBUFFERED is bad for performance https://honcho.readthedocs.io/en/latest/using_procfiles.html#buffered-output
+demo: PYTHONUNBUFFERED=true python /wd/multiln/bin/demo.py chain_1 chain_2
 
 
 # bitcoind nodes:
