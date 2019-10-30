@@ -49,6 +49,7 @@ def unshorten_amount(amount):
     else:
         return Decimal(amount)
 
+# TODO access via http API on its own server and process
 class Gateway(object):
 
     def __init__(self, sibling_nodes):
@@ -118,9 +119,11 @@ class Gateway(object):
                     'suggested_offer_msats': dest_amount_msats / self.prices[src_chain][dest_chain],
             }
 
+        # FIX check that there's actually a route before accepting the request
         label = 'from_%s_to_%s_label' % (src_chain, dest_chain)
         description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain, dest_chain, dest_bolt11)
         src_invoice = self.sibling_nodes[src_chain].invoice(offer_msats, label, description)
+        # FIX we're storing more than we need
         self.requests_to_be_paid[src_invoice['payment_hash']] = {
             'src_invoice': src_invoice,
             'dest_bolt11': dest_bolt11,
@@ -155,6 +158,8 @@ class Gateway(object):
         if found['status'] != 'paid':
             return {'error': 'Invoice not paid yet, current status %s %s.' % (found['status'], payment_hash)}
 
+        # FIX check price one more time to avoid the free option problem?
+        # Prices may have been changed from request to confirm call
         try:
             result = self.sibling_nodes[to_pay['dest_chain']].pay(to_pay['dest_bolt11'])
             self.requests_paid[payment_hash] = {
@@ -166,6 +171,7 @@ class Gateway(object):
         except Exception as e:
             print(e)
             print(type(e))
+            # TODO Save failed requests and hanlde them with refunds or something
             return {
                 'error': 'Error paying request.',
                 'bolt11': to_pay['dest_bolt11']
