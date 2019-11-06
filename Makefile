@@ -5,7 +5,7 @@
 DOCKER_IMAGE=multilndemo
 
 .PHONY: docker-build docker-demo-regtest docker-demo-2-chains docker-rust-2-chains docker-run-5-chains
-all: docker-demo-regtest docker-demo-2-chains docker-rust-2-chains docker-run-5-chains
+all: docker-demo-2-chains
 
 docker-build:
 	docker build --tag=${DOCKER_IMAGE} .
