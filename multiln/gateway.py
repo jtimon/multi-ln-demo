@@ -49,9 +49,10 @@ def unshorten_amount(amount):
     else:
         return Decimal(amount)
 
-def check_mandatory(req, field, method='method'):
-    if not field in req:
-        return {'error': '%s needs %s field.' % (method, field)}
+def check_mandatory(req, required_args, method='method'):
+    for arg in required_args:
+        if not arg in req:
+            return {'error': '%s needs %s field.' % (method, field)}
     return None
 
 # TODO access via http API on its own server and process
@@ -85,9 +86,8 @@ class Gateway(object):
 
     def request_dest_payment(self, req):
         required_args = ['bolt11', 'src_chain', 'offer_msats']
-        for arg in required_args:
-            error = check_mandatory(req, arg, method='request_dest_payment')
-            if error: return error
+        error = check_mandatory(req, required_args, method='request_dest_payment')
+        if error: return error
 
         dest_bolt11 = req['bolt11']
         offer_msats = req['offer_msats']
@@ -145,9 +145,8 @@ class Gateway(object):
 
     def confirm_src_payment(self, req):
         required_args = ['payment_hash', 'payment_preimage']
-        for arg in required_args:
-            error = check_mandatory(req, arg, method='confirm_src_payment')
-            if error: return error
+        error = check_mandatory(req, required_args, method='confirm_src_payment')
+        if error: return error
         # TODO actively use the payment_preimage in this call or remove it from required_args
 
         payment_hash = req['payment_hash']
