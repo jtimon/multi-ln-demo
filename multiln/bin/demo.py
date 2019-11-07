@@ -103,7 +103,10 @@ def demo_2_chains_fail(lightningd_map):
         print('payment succesful:')
         print(src_payment_result)
         print('...and after a successful payment to %s gateway inc, %s calls again with the proof of payment...' % (user_name_gateway, user_name_a))
-        gateway_confirm_payment_result = gateway.confirm_src_payment(src_payment_result)
+        gateway_confirm_payment_result = gateway.confirm_src_payment({
+            'payment_hash': src_payment_result['payment_hash'],
+            'payment_preimage': src_payment_result['payment_preimage'],
+        })
         print('...this is what %s gateway inc responds:' % (user_name_gateway))
         print(gateway_confirm_payment_result)
         print('...%s confirms that the payment preimage given corresponds to the original invoice to be paid by %s gateway inc too.' % (user_name_a, user_name_gateway))

@@ -55,6 +55,12 @@ def check_mandatory(req, required_args, method='method'):
             return {'error': '%s needs %s field.' % (method, field)}
     return None
 
+def check_unkown_args(req, known_args, method='method'):
+    for arg in req:
+        if arg not in known_args:
+            return {'error': '%s: unkown arg %s.' % (method, arg)}
+    return None
+
 # TODO access via http API on its own server and process
 class Gateway(object):
 
@@ -87,6 +93,8 @@ class Gateway(object):
     def request_dest_payment(self, req):
         required_args = ['bolt11', 'src_chain', 'offer_msats']
         error = check_mandatory(req, required_args, method='request_dest_payment')
+        if error: return error
+        error = check_unkown_args(req, required_args, method='request_dest_payment')
         if error: return error
 
         dest_bolt11 = req['bolt11']
@@ -144,10 +152,12 @@ class Gateway(object):
         return src_invoice
 
     def confirm_src_payment(self, req):
+        # TODO actively use the payment_preimage in this call or remove it from required_args
         required_args = ['payment_hash', 'payment_preimage']
         error = check_mandatory(req, required_args, method='confirm_src_payment')
         if error: return error
-        # TODO actively use the payment_preimage in this call or remove it from required_args
+        error = check_unkown_args(req, required_args, method='confirm_src_payment')
+        if error: return error
 
         payment_hash = req['payment_hash']
         if payment_hash in self.requests_paid:
