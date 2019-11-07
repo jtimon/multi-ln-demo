@@ -49,6 +49,11 @@ def unshorten_amount(amount):
     else:
         return Decimal(amount)
 
+def check_mandatory(req, field, method='method'):
+    if not field in req:
+        return {'error': '%s needs %s field.' % (method, field)}
+    return None
+
 # TODO access via http API on its own server and process
 class Gateway(object):
 
@@ -79,6 +84,11 @@ class Gateway(object):
         self.update_price(dest_chain, src_chain, 1 / price) # Inverse of price for multiplication operation
 
     def request_dest_payment(self, req):
+        required_args = ['bolt11', 'src_chain', 'offer_msats']
+        for arg in required_args:
+            error = check_mandatory(req, arg, method='request_dest_payment')
+            if error: return error
+
         dest_bolt11 = req['bolt11']
         offer_msats = req['offer_msats']
         # FIX change to chain_id (genesis hash) since chain names aren't guaranteed to be unique
@@ -134,6 +144,12 @@ class Gateway(object):
         return src_invoice
 
     def confirm_src_payment(self, req):
+        required_args = ['payment_hash', 'payment_preimage']
+        for arg in required_args:
+            error = check_mandatory(req, arg, method='confirm_src_payment')
+            if error: return error
+        # TODO actively use the payment_preimage in this call or remove it from required_args
+
         payment_hash = req['payment_hash']
         if payment_hash in self.requests_paid:
             return {
