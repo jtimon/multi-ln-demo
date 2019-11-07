@@ -51,7 +51,8 @@ docker stop $(docker ps -a -q)
 
 # Incremental goals
 
-- [ ] 2 chains, 1 asset
+- [x] 2 chains, 1 asset (non atomic, trusted)
+- [ ] 2 chains, 1 asset (atomic, trustless)
 - [ ] N chains, 1 asset
 - [ ] N chains, 2 assets
 - [ ] N chains, M assets
@@ -78,7 +79,7 @@ them under its own criteria.
 - Bob has a gateway
 - Bob's gateway has channels opened on both chain_1 and chain_2
 
-## TODO Step A.1: Non atomic routing
+## Step A.1: Non atomic routing
 
 The payer trusts the gateway will pay invoice_dest_chain if it pays
 invoice_src_chain to the gateway.
