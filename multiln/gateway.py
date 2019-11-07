@@ -133,7 +133,7 @@ class Gateway(object):
             self.prices[src_chain][dest_chain] <= 0):
             return {'error': "gateway won't pay to chain %s" % dest_chain}
 
-        if offer_msats * self.prices[src_chain][dest_chain] < dest_amount_msats:
+        if Decimal(offer_msats) * self.prices[src_chain][dest_chain] < dest_amount_msats:
             return {'error': "Insufficient offer %s" % offer_msats,
                     'suggested_offer_msats': dest_amount_msats / self.prices[src_chain][dest_chain],
             }
