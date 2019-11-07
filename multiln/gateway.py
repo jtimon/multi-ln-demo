@@ -205,7 +205,10 @@ class Gateway(object):
                 'bolt11': to_pay['dest_bolt11']
             }
 
-        return result
+        return {
+            'payment_hash': result['payment_hash'],
+            'payment_preimage': result['payment_preimage'],
+        }
 
 def init_gateway(lightningd_map, user_name):
     gateway_sibling_nodes = {}
