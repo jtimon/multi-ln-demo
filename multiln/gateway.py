@@ -61,7 +61,6 @@ def check_unkown_args(req, known_args, method='method'):
             return {'error': '%s: unkown arg %s.' % (method, arg)}
     return None
 
-# TODO access via http API on its own server and process
 class Gateway(object):
 
     def __init__(self, sibling_nodes):
