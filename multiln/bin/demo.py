@@ -4,6 +4,7 @@ if __name__ != '__main__':
     raise ImportError(u"%s may only be run as a script" % __file__)
 
 import binascii
+import requests
 import sys
 import time
 
@@ -32,7 +33,6 @@ from multiln.util_demo_clightning import (
 )
 
 from multiln.chains import CHAINS
-from multiln.gateway import init_gateway
 
 def check_hash_preimage(payment_hash, payment_preimage):
     hashed_result = sha256(binascii.unhexlify(payment_preimage)).hexdigest()
@@ -46,6 +46,7 @@ print('Selected Chains:', SELECTED_CHAINS)
 if len(SELECTED_CHAINS) == 0:
     raise AssertionError("No chains selected to run the demo.")
 
+GATEWAY_URL = 'http://127.0.0.1:5000'
 EXAMPLE_CHAIN = SELECTED_CHAINS[0]
 
 CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
@@ -87,14 +88,11 @@ def demo_2_chains_fail(lightningd_map):
         assert(e.error['message'] == 'Invoice is for another network %s' % chain_name_b)
         assert('bolt11' in e.payload)
 
-    gateway = init_gateway(lightningd_map, user_name_gateway)
-    gateway.update_price(chain_name_a, chain_name_b, 1)
-
-    src_invoice = gateway.request_dest_payment({
+    src_invoice = requests.post(GATEWAY_URL + "/request_dest_payment", data={
         'bolt11': invoice['bolt11'],
         'src_chain': chain_name_a,
         'offer_msats': msatoshi,
-    })
+    }).json()
     print("...but since %s can't pay to chain %s, pays the following invoice to %s gateway inc in chain %s instead..." % (user_name_a, chain_name_b, user_name_gateway, chain_name_a))
     print(src_invoice)
 
@@ -103,10 +101,10 @@ def demo_2_chains_fail(lightningd_map):
         print('payment succesful:')
         print(src_payment_result)
         print('...and after a successful payment to %s gateway inc, %s calls again with the proof of payment...' % (user_name_gateway, user_name_a))
-        gateway_confirm_payment_result = gateway.confirm_src_payment({
+        gateway_confirm_payment_result = requests.post(GATEWAY_URL + "/confirm_src_payment", data={
             'payment_hash': src_payment_result['payment_hash'],
             'payment_preimage': src_payment_result['payment_preimage'],
-        })
+        }).json()
         print('...this is what %s gateway inc responds:' % (user_name_gateway))
         print(gateway_confirm_payment_result)
         print('...%s confirms that the payment preimage given corresponds to the original invoice to be paid by %s gateway inc too.' % (user_name_a, user_name_gateway))
@@ -114,8 +112,6 @@ def demo_2_chains_fail(lightningd_map):
             print('Preimage corresponds to payment hash')
         else:
             print('Preimage doesn\'t corresponds to payment hash. %s has been scammed by %s' % (user_name_a, user_name_gateway))
-
-        gateway.print_state()
 
     except Exception as e:
         print(e)
