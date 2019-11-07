@@ -90,7 +90,7 @@ def demo_2_chains_fail(lightningd_map):
     gateway = init_gateway(lightningd_map, user_name_gateway)
     gateway.update_price(chain_name_a, chain_name_b, 1)
 
-    src_invoice = gateway.request_payment({
+    src_invoice = gateway.request_dest_payment({
         'bolt11': invoice['bolt11'],
         'src_chain': chain_name_a,
         'offer_msats': msatoshi,
@@ -103,7 +103,7 @@ def demo_2_chains_fail(lightningd_map):
         print('payment succesful:')
         print(src_payment_result)
         print('...and after a successful payment to %s gateway inc, %s calls again with the proof of payment...' % (user_name_gateway, user_name_a))
-        gateway_confirm_payment_result = gateway.confirm_request_payment_payment(src_payment_result)
+        gateway_confirm_payment_result = gateway.confirm_src_payment(src_payment_result)
         print('...this is what %s gateway inc responds:' % (user_name_gateway))
         print(gateway_confirm_payment_result)
         print('...%s confirms that the payment preimage given corresponds to the original invoice to be paid by %s gateway inc too.' % (user_name_a, user_name_gateway))

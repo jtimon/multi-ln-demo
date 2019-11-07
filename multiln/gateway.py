@@ -78,7 +78,7 @@ class Gateway(object):
         self.update_price(src_chain, dest_chain, price)
         self.update_price(dest_chain, src_chain, 1 / price) # Inverse of price for multiplication operation
 
-    def request_payment(self, req):
+    def request_dest_payment(self, req):
         dest_bolt11 = req['bolt11']
         offer_msats = req['offer_msats']
         # FIX change to chain_id (genesis hash) since chain names aren't guaranteed to be unique
@@ -133,7 +133,7 @@ class Gateway(object):
         }
         return src_invoice
 
-    def confirm_request_payment_payment(self, req):
+    def confirm_src_payment(self, req):
         payment_hash = req['payment_hash']
         if payment_hash in self.requests_paid:
             return {
