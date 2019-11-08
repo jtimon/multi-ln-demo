@@ -76,6 +76,7 @@ class Gateway(object):
         self.sibling_nodes = sibling_nodes
         self.requests_to_be_paid = {}
         self.requests_paid = {}
+        self.failed_requests = {}
 
     def print_state(self):
         print('self.sibling_nodes:')
@@ -175,6 +176,11 @@ class Gateway(object):
                 'payment': self.requests_paid[payment_hash],
             }
 
+        if payment_hash in self.failed_requests:
+            return {
+                'error': 'Payment request %s already failed. Please contact customer support.' % payment_hash,
+            }
+
         if payment_hash not in self.requests_to_be_paid:
             return {'error': 'Unkown payment request %s.' % payment_hash}
 
@@ -212,12 +218,25 @@ class Gateway(object):
             }
             del self.requests_to_be_paid[payment_hash]
         except Exception as e:
-            print(e)
             print(type(e))
-            # TODO Save failed requests and hanlde them with refunds or something
+            print(e)
+            # TODO Save handle failed requests with refunds or something
+            # We could refund by opening a channel with some initial funds back to the customer,
+            # but then we need to have the node id on the initial request.
+            # Alternatively we can accept a refund invoice in this call.
+            self.failed_requests[payment_hash] = {
+                'error': str(e),
+                'src_chain': to_pay['src_chain'],
+                'src_bolt11': to_pay['src_bolt11'],
+                'src_expires_at': to_pay['src_expires_at'],
+                'dest_chain': to_pay['dest_chain'],
+                'dest_bolt11': to_pay['dest_bolt11'],
+                'src_payment_hash': payment_hash,
+                'src_payment_preimage': payment_preimage,
+            }
             return {
                 'error': 'Error paying request.',
-                'bolt11': to_pay['dest_bolt11']
+                'bolt11': to_pay['dest_bolt11'],
             }
 
         return {
