@@ -199,11 +199,16 @@ class Gateway(object):
         try:
             result = self.sibling_nodes[to_pay['dest_chain']].pay(to_pay['dest_bolt11'])
             # TODO This should be a log or go to a database
-            # TODO Should we expect anything other than payment_hash and perhaps payment_preimage too from the caller?
             self.requests_paid[payment_hash] = {
-                'request': self.requests_to_be_paid[payment_hash],
-                'src_payment': req,
-                'dest_payment': result
+                'src_chain': to_pay['src_chain'],
+                'src_bolt11': to_pay['src_bolt11'],
+                'src_expires_at': to_pay['src_expires_at'],
+                'dest_chain': to_pay['dest_chain'],
+                'dest_bolt11': to_pay['dest_bolt11'],
+                'src_payment_hash': payment_hash,
+                'src_payment_preimage': payment_preimage,
+                'dest_payment_hash': result['payment_hash'],
+                'dest_payment_preimage': result['payment_preimage'],
             }
             del self.requests_to_be_paid[payment_hash]
         except Exception as e:
