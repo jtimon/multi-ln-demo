@@ -7,7 +7,10 @@
 
 from decimal import Decimal
 from pprint import pprint
+import binascii
 import re
+
+from hashlib import sha256
 
 from py_ln_gateway.bech32 import bech32_decode
 
@@ -19,6 +22,10 @@ BIP173_TO_CHAIN_PETNAME = {
     'bcd': 'chain_4',
     'bce': 'chain_5',
 }
+
+def check_hash_preimage(payment_hash, payment_preimage):
+    hashed_result = sha256(binascii.unhexlify(payment_preimage)).hexdigest()
+    return hashed_result == payment_hash
 
 # Copied from https://github.com/rustyrussell/lightning-payencode
 def unshorten_amount(amount):
@@ -151,7 +158,6 @@ class Gateway(object):
         return src_invoice
 
     def confirm_src_payment(self, req):
-        # TODO actively use the payment_preimage in this call or remove it from required_args
         required_args = ['payment_hash', 'payment_preimage']
         error = check_mandatory(req, required_args, method='confirm_src_payment')
         if error: return error
@@ -159,6 +165,10 @@ class Gateway(object):
         if error: return error
 
         payment_hash = req['payment_hash']
+        payment_preimage = req['payment_preimage']
+        if not check_hash_preimage(payment_hash, payment_preimage):
+            return {'error': 'Payment preimage does not correspond to the hash.'}
+
         if payment_hash in self.requests_paid:
             return {
                 'error': 'Payment request %s already paid.' % payment_hash,
@@ -177,6 +187,7 @@ class Gateway(object):
                 found = invoice
                 break
 
+        # The following 2 errors should never occur given the preimage corresponds to the hash, but let's be safe
         if not found:
             return {'error': 'Invoice not found %s.' % payment_hash}
 
