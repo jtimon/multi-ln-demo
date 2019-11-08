@@ -9,7 +9,7 @@ from decimal import Decimal
 from pprint import pprint
 import re
 
-from multiln.bech32 import bech32_decode
+from py_ln_gateway.bech32 import bech32_decode
 
 BIP173_TO_CHAIN_PETNAME = {
     'bcrt': 'regtest',

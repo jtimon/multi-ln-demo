@@ -77,9 +77,12 @@ RUN cd /wd/rustdemo && \
     cargo test && \
     cargo build --release
 
+COPY py-ln-gateway /wd/py-ln-gateway
+RUN pip install -r /wd/py-ln-gateway/requirements.txt --require-hashes
+RUN cd /wd/py-ln-gateway && python setup.py install
+
 COPY docker/requirements.txt /wd/requirements.txt
 RUN pip install -r requirements.txt --require-hashes
-
 COPY multiln /wd/multiln
 COPY setup.py /wd/setup.py
 RUN python /wd/setup.py install

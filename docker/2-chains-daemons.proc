@@ -4,7 +4,7 @@
 # PYTHONUNBUFFERED is bad for performance https://honcho.readthedocs.io/en/latest/using_procfiles.html#buffered-output
 demo: PYTHONUNBUFFERED=true python /wd/multiln/bin/demo.py chain_1 chain_2
 
-py_gateway: PYTHONUNBUFFERED=true export LC_ALL=C.UTF-8 export LANG=C.UTF-8 export FLASK_APP=/wd/multiln/bin/py-ln-gateway.py ; flask run
+py_gateway: PYTHONUNBUFFERED=true export LC_ALL=C.UTF-8 export LANG=C.UTF-8 export FLASK_APP=/wd/py-ln-gateway/py_ln_gateway/app.py ; flask run
 
 # bitcoind nodes:
 

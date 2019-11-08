@@ -2,7 +2,7 @@
 from flask import Flask, request
 from lightning import LightningRpc
 
-from multiln.gateway import Gateway
+from py_ln_gateway.gateway import Gateway
 
 user_name = 'bob'
 gateway = Gateway({
