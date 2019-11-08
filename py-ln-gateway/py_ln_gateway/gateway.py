@@ -13,15 +13,7 @@ import re
 from hashlib import sha256
 
 from py_ln_gateway.bech32 import bech32_decode
-
-BIP173_TO_CHAIN_PETNAME = {
-    'bcrt': 'regtest',
-    'bca': 'chain_1',
-    'bcb': 'chain_2',
-    'bcc': 'chain_3',
-    'bcd': 'chain_4',
-    'bce': 'chain_5',
-}
+from py_ln_gateway.chains import CHAINS_BY_BIP173
 
 def check_hash_preimage(payment_hash, payment_preimage):
     hashed_result = sha256(binascii.unhexlify(payment_preimage)).hexdigest()
@@ -134,10 +126,10 @@ class Gateway(object):
             return {'error': "No amount in bolt11"}
         dest_amount_msats = unshorten_amount(amountstr)
 
-        if not dest_chain_bip173_name in BIP173_TO_CHAIN_PETNAME:
+        if not dest_chain_bip173_name in CHAINS_BY_BIP173:
             return {'error': "gateway won't pay to chain with bip173 name (hrp) %s" % dest_chain_bip173_name}
 
-        dest_chain = BIP173_TO_CHAIN_PETNAME[dest_chain_bip173_name]
+        dest_chain = CHAINS_BY_BIP173[dest_chain_bip173_name]['petname']
 
         if (dest_chain not in self.sibling_nodes or
             dest_chain not in self.prices[src_chain] or
