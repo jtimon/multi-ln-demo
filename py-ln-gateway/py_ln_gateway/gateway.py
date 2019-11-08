@@ -71,9 +71,10 @@ def check_unkown_args(req, known_args, method='method'):
 class Gateway(object):
 
     def __init__(self, sibling_nodes):
-        # FIX DoS: Don't store pending request forever
         self.prices = {}
         self.sibling_nodes = sibling_nodes
+        # FIX This should all go to a database before this can have concurrency
+        # FIX DoS: Don't store pending request forever (at least not in memory)
         self.requests_to_be_paid = {}
         self.requests_paid = {}
         self.failed_requests = {}
@@ -88,6 +89,9 @@ class Gateway(object):
         print('self.requests_paid:')
         pprint(self.requests_paid)
 
+    # TODO Expose an authenticated API to update prices so that it can
+    # be used to update prices continuously by calling or subscribing
+    # to an external API
     def update_price(self, src_chain, dest_chain, price):
         if src_chain not in self.prices:
             self.prices[src_chain] = {}
@@ -204,7 +208,6 @@ class Gateway(object):
         # Prices may have been changed from request to confirm call
         try:
             result = self.sibling_nodes[to_pay['dest_chain']].pay(to_pay['dest_bolt11'])
-            # TODO This should be a log or go to a database
             self.requests_paid[payment_hash] = {
                 'src_chain': to_pay['src_chain'],
                 'src_bolt11': to_pay['src_bolt11'],
