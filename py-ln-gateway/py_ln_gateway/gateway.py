@@ -142,22 +142,20 @@ class Gateway(object):
 
         dest_chain_id = CHAINS_BY_BIP173[dest_chain_bip173_name]['id']
         dest_chain_petname = CHAINS_BY_BIP173[dest_chain_bip173_name]['petname']
-        # TODO dest_chain is redundant now
-        dest_chain = dest_chain_id
 
-        if (dest_chain not in self.sibling_nodes or
-            dest_chain not in self.prices[src_chain] or
-            self.prices[src_chain][dest_chain] <= 0):
-            return {'error': "gateway won't pay to chain %s" % dest_chain}
+        if (dest_chain_id not in self.sibling_nodes or
+            dest_chain_id not in self.prices[src_chain] or
+            self.prices[src_chain][dest_chain_id] <= 0):
+            return {'error': "gateway won't pay to chain %s" % dest_chain_id}
 
-        if Decimal(offer_msats) * self.prices[src_chain][dest_chain] < dest_amount_msats:
+        if Decimal(offer_msats) * self.prices[src_chain][dest_chain_id] < dest_amount_msats:
             return {'error': "Insufficient offer %s" % offer_msats,
-                    'suggested_offer_msats': dest_amount_msats / self.prices[src_chain][dest_chain],
+                    'suggested_offer_msats': dest_amount_msats / self.prices[src_chain][dest_chain_id],
             }
 
         # FIX check that there's actually a route before accepting the request
-        label = 'from_%s_to_%s_label' % (src_chain, dest_chain)
-        description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain, dest_chain, dest_bolt11)
+        label = 'from_%s_to_%s_label' % (src_chain, dest_chain_id)
+        description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain, dest_chain_id, dest_bolt11)
         src_invoice = self.sibling_nodes[src_chain].invoice(offer_msats, label, description)
         self.requests_to_be_paid[src_invoice['payment_hash']] = {
             'src_chain': src_chain,
@@ -215,7 +213,7 @@ class Gateway(object):
         # FIX check price one more time to avoid the free option problem?
         # Prices may have been changed from request to confirm call
         try:
-            result = self.sibling_nodes[to_pay['dest_chain']].pay(to_pay['dest_bolt11'])
+            result = self.sibling_nodes[to_pay['dest_chain_id']].pay(to_pay['dest_bolt11'])
             self.requests_paid[payment_hash] = {
                 'src_chain': to_pay['src_chain'],
                 'src_bolt11': to_pay['src_bolt11'],
