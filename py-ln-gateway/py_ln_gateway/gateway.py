@@ -129,7 +129,9 @@ class Gateway(object):
         if not dest_chain_bip173_name in CHAINS_BY_BIP173:
             return {'error': "gateway won't pay to chain with bip173 name (hrp) %s" % dest_chain_bip173_name}
 
-        dest_chain = CHAINS_BY_BIP173[dest_chain_bip173_name]['petname']
+        dest_chain_id = CHAINS_BY_BIP173[dest_chain_bip173_name]['id']
+        dest_chain_petname = CHAINS_BY_BIP173[dest_chain_bip173_name]['petname']
+        dest_chain = dest_chain_petname
 
         if (dest_chain not in self.sibling_nodes or
             dest_chain not in self.prices[src_chain] or
@@ -149,7 +151,8 @@ class Gateway(object):
             'src_chain': src_chain,
             'src_bolt11': src_invoice['bolt11'],
             'src_expires_at': src_invoice['expires_at'],
-            'dest_chain': dest_chain,
+            'dest_chain_id': dest_chain_id,
+            'dest_chain_petname': dest_chain_petname,
             'dest_bolt11': dest_bolt11,
         }
         return src_invoice
@@ -204,7 +207,8 @@ class Gateway(object):
                 'src_chain': to_pay['src_chain'],
                 'src_bolt11': to_pay['src_bolt11'],
                 'src_expires_at': to_pay['src_expires_at'],
-                'dest_chain': to_pay['dest_chain'],
+                'dest_chain_id': to_pay['dest_chain_id'],
+                'dest_chain_petname': to_pay['dest_chain_petname'],
                 'dest_bolt11': to_pay['dest_bolt11'],
                 'src_payment_hash': payment_hash,
                 'src_payment_preimage': payment_preimage,
@@ -224,7 +228,8 @@ class Gateway(object):
                 'src_chain': to_pay['src_chain'],
                 'src_bolt11': to_pay['src_bolt11'],
                 'src_expires_at': to_pay['src_expires_at'],
-                'dest_chain': to_pay['dest_chain'],
+                'dest_chain_id': to_pay['dest_chain_id'],
+                'dest_chain_petname': to_pay['dest_chain_petname'],
                 'dest_bolt11': to_pay['dest_bolt11'],
                 'src_payment_hash': payment_hash,
                 'src_payment_preimage': payment_preimage,
