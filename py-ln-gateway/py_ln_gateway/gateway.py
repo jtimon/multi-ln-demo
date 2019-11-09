@@ -142,7 +142,8 @@ class Gateway(object):
 
         dest_chain_id = CHAINS_BY_BIP173[dest_chain_bip173_name]['id']
         dest_chain_petname = CHAINS_BY_BIP173[dest_chain_bip173_name]['petname']
-        dest_chain = dest_chain_petname
+        # TODO dest_chain is redundant now
+        dest_chain = dest_chain_id
 
         if (dest_chain not in self.sibling_nodes or
             dest_chain not in self.prices[src_chain] or
