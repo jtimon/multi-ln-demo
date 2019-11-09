@@ -109,15 +109,13 @@ class Gateway(object):
 
         dest_bolt11 = req['bolt11']
         offer_msats = req['offer_msats']
-        # FIX change to chain_id (genesis hash) since chain names aren't guaranteed to be unique
         src_chain_id = req['src_chain_id']
-        src_chain = chainparams_from_id(src_chain_id)['petname']
-        if not src_chain:
+        src_chain_petname = chainparams_from_id(src_chain_id)['petname']
+        if not src_chain_id:
             return {'error': "Unknown offer chain %s" % src_chain_id}
 
-
-        if src_chain not in self.sibling_nodes or src_chain not in self.prices:
-            return {'error': "gateway doesn't accept payment in chain %s" % src_chain}
+        if src_chain_id not in self.sibling_nodes or src_chain_id not in self.prices:
+            return {'error': "gateway doesn't accept payment in chain %s" % src_chain_id}
 
         dest_chain_hrp, data = bech32_decode(dest_bolt11)
         if not dest_chain_hrp:
@@ -144,21 +142,22 @@ class Gateway(object):
         dest_chain_petname = CHAINS_BY_BIP173[dest_chain_bip173_name]['petname']
 
         if (dest_chain_id not in self.sibling_nodes or
-            dest_chain_id not in self.prices[src_chain] or
-            self.prices[src_chain][dest_chain_id] <= 0):
+            dest_chain_id not in self.prices[src_chain_id] or
+            self.prices[src_chain_id][dest_chain_id] <= 0):
             return {'error': "gateway won't pay to chain %s" % dest_chain_id}
 
-        if Decimal(offer_msats) * self.prices[src_chain][dest_chain_id] < dest_amount_msats:
+        if Decimal(offer_msats) * self.prices[src_chain_id][dest_chain_id] < dest_amount_msats:
             return {'error': "Insufficient offer %s" % offer_msats,
-                    'suggested_offer_msats': dest_amount_msats / self.prices[src_chain][dest_chain_id],
+                    'suggested_offer_msats': dest_amount_msats / self.prices[src_chain_id][dest_chain_id],
             }
 
         # FIX check that there's actually a route before accepting the request
-        label = 'from_%s_to_%s_label' % (src_chain, dest_chain_id)
-        description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain, dest_chain_id, dest_bolt11)
-        src_invoice = self.sibling_nodes[src_chain].invoice(offer_msats, label, description)
+        label = 'from_%s_to_%s_label' % (src_chain_petname, dest_chain_petname)
+        description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_bolt11)
+        src_invoice = self.sibling_nodes[src_chain_id].invoice(offer_msats, label, description)
         self.requests_to_be_paid[src_invoice['payment_hash']] = {
-            'src_chain': src_chain,
+            'src_chain_id': src_chain_id,
+            'src_chain_petname': src_chain_petname,
             'src_bolt11': src_invoice['bolt11'],
             'src_expires_at': src_invoice['expires_at'],
             'dest_chain_id': dest_chain_id,
@@ -196,7 +195,7 @@ class Gateway(object):
 
         to_pay = self.requests_to_be_paid[payment_hash]
 
-        invoices = self.sibling_nodes[to_pay['src_chain']].listinvoices()['invoices']
+        invoices = self.sibling_nodes[to_pay['src_chain_id']].listinvoices()['invoices']
         found = None
         for invoice in invoices:
             if invoice['payment_hash'] == payment_hash:
@@ -215,7 +214,8 @@ class Gateway(object):
         try:
             result = self.sibling_nodes[to_pay['dest_chain_id']].pay(to_pay['dest_bolt11'])
             self.requests_paid[payment_hash] = {
-                'src_chain': to_pay['src_chain'],
+                'src_chain_id': to_pay['src_chain_id'],
+                'src_chain_petname': to_pay['src_chain_petname'],
                 'src_bolt11': to_pay['src_bolt11'],
                 'src_expires_at': to_pay['src_expires_at'],
                 'dest_chain_id': to_pay['dest_chain_id'],
@@ -236,7 +236,8 @@ class Gateway(object):
             # Alternatively we can accept a refund invoice in this call.
             self.failed_requests[payment_hash] = {
                 'error': str(e),
-                'src_chain': to_pay['src_chain'],
+                'src_chain_id': to_pay['src_chain_id'],
+                'src_chain_petname': to_pay['src_chain_petname'],
                 'src_bolt11': to_pay['src_bolt11'],
                 'src_expires_at': to_pay['src_expires_at'],
                 'dest_chain_id': to_pay['dest_chain_id'],

@@ -12,7 +12,7 @@ gateway = Gateway({
     # chain_2 bip173: bcb
     'e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7': LightningRpc('/wd/daemon-data/%s_%s/lightning-rpc' % (user_name, 'chain_2')),
 })
-gateway.update_price('chain_1', 'chain_2', 1)
+gateway.update_price('58ebd25d25b128530d4d462c65a7e679b7e053e6f25ffb8ac63bc68832fda201', 'e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7', 1)
 
 app = Flask(__name__)
 
