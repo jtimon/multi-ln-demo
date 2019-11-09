@@ -94,7 +94,7 @@ def demo_2_chains_fail(lightningd_map):
         'offer_msats': msatoshi,
     }).json()
     print("...but since %s can't pay to chain %s, pays the following invoice to %s gateway inc in chain %s instead..." % (user_name_a, chain_name_b, user_name_gateway, chain_name_a))
-    print(src_invoice)
+    print('src_invoice:', src_invoice)
 
     try:
         src_payment_result = lightningd_map[chain_name_a][user_name_a].pay(src_invoice['bolt11'])

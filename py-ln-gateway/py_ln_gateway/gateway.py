@@ -99,6 +99,7 @@ class Gateway(object):
         if error: return error
         error = check_unkown_args(req, required_args, method='request_dest_payment')
         if error: return error
+        print('Received valid req for %s:' % 'request_dest_payment', req)
 
         dest_bolt11 = req['bolt11']
         offer_msats = req['offer_msats']
@@ -163,6 +164,7 @@ class Gateway(object):
         if error: return error
         error = check_unkown_args(req, required_args, method='confirm_src_payment')
         if error: return error
+        print('Received valid req for %s:' % 'confirm_src_payment', req)
 
         payment_hash = req['payment_hash']
         payment_preimage = req['payment_preimage']
