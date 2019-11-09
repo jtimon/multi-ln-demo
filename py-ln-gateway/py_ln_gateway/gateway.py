@@ -48,6 +48,12 @@ def unshorten_amount(amount):
     else:
         return Decimal(amount)
 
+def chainparams_from_id(chain_id):
+    for key, val in CHAINS_BY_BIP173.items():
+        if val['id'] == chain_id:
+            return val
+    return None
+
 def check_mandatory(req, required_args, method='method'):
     for arg in required_args:
         if not arg in req:
@@ -94,7 +100,7 @@ class Gateway(object):
         self.update_price(dest_chain, src_chain, 1 / price) # Inverse of price for multiplication operation
 
     def request_dest_payment(self, req):
-        required_args = ['bolt11', 'src_chain', 'offer_msats']
+        required_args = ['bolt11', 'src_chain_id', 'offer_msats']
         error = check_mandatory(req, required_args, method='request_dest_payment')
         if error: return error
         error = check_unkown_args(req, required_args, method='request_dest_payment')
@@ -104,7 +110,11 @@ class Gateway(object):
         dest_bolt11 = req['bolt11']
         offer_msats = req['offer_msats']
         # FIX change to chain_id (genesis hash) since chain names aren't guaranteed to be unique
-        src_chain = req['src_chain']
+        src_chain_id = req['src_chain_id']
+        src_chain = chainparams_from_id(src_chain_id)['petname']
+        if not src_chain:
+            return {'error': "Unknown offer chain %s" % src_chain_id}
+
 
         if src_chain not in self.sibling_nodes or src_chain not in self.prices:
             return {'error': "gateway doesn't accept payment in chain %s" % src_chain}

@@ -52,6 +52,9 @@ EXAMPLE_CHAIN = SELECTED_CHAINS[0]
 CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
 N_CHAINS = len(CHAINS)
 
+def chain_petname_to_id(petname):
+    return CHAINS[petname]['id']
+
 print('Chains considered (%s):' % N_CHAINS)
 print(CHAINS)
 
@@ -90,7 +93,7 @@ def demo_2_chains_fail(lightningd_map):
 
     src_invoice = requests.post(GATEWAY_URL + "/request_dest_payment", data={
         'bolt11': invoice['bolt11'],
-        'src_chain': chain_name_a,
+        'src_chain_id': chain_petname_to_id(chain_name_a),
         'offer_msats': msatoshi,
     }).json()
     print("...but since %s can't pay to chain %s, pays the following invoice to %s gateway inc in chain %s instead..." % (user_name_a, chain_name_b, user_name_gateway, chain_name_a))
