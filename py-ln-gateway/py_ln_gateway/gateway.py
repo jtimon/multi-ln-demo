@@ -14,6 +14,7 @@ from hashlib import sha256
 
 from py_ln_gateway.bech32 import bech32_decode
 from py_ln_gateway.chains import CHAINS_BY_BIP173
+from py_ln_gateway.models import Price
 
 def check_hash_preimage(payment_hash, payment_preimage):
     hashed_result = sha256(binascii.unhexlify(payment_preimage)).hexdigest()
@@ -69,8 +70,8 @@ def check_unkown_args(req, known_args, method='method'):
 class Gateway(object):
 
     def __init__(self, sibling_nodes):
-        self.prices = {}
         self.sibling_nodes = sibling_nodes
+
         # FIX This should all go to a database before this can have concurrency
         # FIX DoS: Don't store pending request forever (at least not in memory)
         self.requests_to_be_paid = {}
@@ -80,24 +81,10 @@ class Gateway(object):
     def print_state(self):
         print('self.sibling_nodes:')
         pprint(self.sibling_nodes)
-        print('self.prices:')
-        pprint(self.prices)
         print('self.requests_to_be_paid:')
         pprint(self.requests_to_be_paid)
         print('self.requests_paid:')
         pprint(self.requests_paid)
-
-    # TODO Expose an authenticated API to update prices so that it can
-    # be used to update prices continuously by calling or subscribing
-    # to an external API
-    def update_price(self, src_chain, dest_chain, price):
-        if src_chain not in self.prices:
-            self.prices[src_chain] = {}
-        self.prices[src_chain][dest_chain] = price
-
-    def update_price_bi(self, src_chain, dest_chain, price):
-        self.update_price(src_chain, dest_chain, price)
-        self.update_price(dest_chain, src_chain, 1 / price) # Inverse of price for multiplication operation
 
     def request_dest_payment(self, req):
         required_args = ['bolt11', 'src_chain_id', 'offer_msats']
@@ -114,7 +101,7 @@ class Gateway(object):
         if not src_chain_id:
             return {'error': "Unknown offer chain %s" % src_chain_id}
 
-        if src_chain_id not in self.sibling_nodes or src_chain_id not in self.prices:
+        if src_chain_id not in self.sibling_nodes:
             return {'error': "gateway doesn't accept payment in chain %s" % src_chain_id}
 
         dest_chain_hrp, data = bech32_decode(dest_bolt11)
@@ -141,14 +128,17 @@ class Gateway(object):
         dest_chain_id = CHAINS_BY_BIP173[dest_chain_bip173_name]['id']
         dest_chain_petname = CHAINS_BY_BIP173[dest_chain_bip173_name]['petname']
 
-        if (dest_chain_id not in self.sibling_nodes or
-            dest_chain_id not in self.prices[src_chain_id] or
-            self.prices[src_chain_id][dest_chain_id] <= 0):
-            return {'error': "gateway won't pay to chain %s" % dest_chain_id}
+        if dest_chain_id not in self.sibling_nodes:
+            return {'error': "gateway can't pay to chain %s" % dest_chain_id}
 
-        if Decimal(offer_msats) * self.prices[src_chain_id][dest_chain_id] < dest_amount_msats:
+        price = Price.query.filter(Price.src_chain == src_chain_id, Price.dest_chain == dest_chain_id).first()
+        if not price or price.price == 0:
+            return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
+                src_chain_id, dest_chain_id)}
+
+        if Decimal(offer_msats) * price.price < dest_amount_msats:
             return {'error': "Insufficient offer %s" % offer_msats,
-                    'suggested_offer_msats': dest_amount_msats / self.prices[src_chain_id][dest_chain_id],
+                    'suggested_offer_msats': dest_amount_msats / price.price,
             }
 
         # FIX check that there's actually a route before accepting the request

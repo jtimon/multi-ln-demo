@@ -1,3 +1,4 @@
 *~
 rustdemo/target/
-py3env/
+virtualenv_demo/
+virtualenv_gateway/
