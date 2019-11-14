@@ -166,6 +166,22 @@ class Gateway(object):
         }
         return src_invoice
 
+    def check_paid_to_own_node(self, payment_hash, src_chain_id):
+        invoices = self.sibling_nodes[src_chain_id].listinvoices()['invoices']
+        found = None
+        for invoice in invoices:
+            if invoice['payment_hash'] == payment_hash:
+                found = invoice
+                break
+
+        if not found:
+            return {'error': 'Invoice not found %s.' % payment_hash}
+
+        if found['status'] != 'paid':
+            return {'error': 'Invoice not paid yet, current status %s %s.' % (found['status'], payment_hash)}
+
+        return None
+
     def confirm_src_payment(self, req):
         required_args = ['payment_hash', 'payment_preimage']
         error = check_mandatory(req, required_args, method='confirm_src_payment')
@@ -195,19 +211,9 @@ class Gateway(object):
 
         to_pay = self.requests_to_be_paid[payment_hash]
 
-        invoices = self.sibling_nodes[to_pay['src_chain_id']].listinvoices()['invoices']
-        found = None
-        for invoice in invoices:
-            if invoice['payment_hash'] == payment_hash:
-                found = invoice
-                break
-
-        # The following 2 errors should never occur given the preimage corresponds to the hash, but let's be safe
-        if not found:
-            return {'error': 'Invoice not found %s.' % payment_hash}
-
-        if found['status'] != 'paid':
-            return {'error': 'Invoice not paid yet, current status %s %s.' % (found['status'], payment_hash)}
+        # This should never fail given the preimage corresponds to the hash, but let's be safe
+        error = self.check_paid_to_own_node(payment_hash, to_pay['src_chain_id'])
+        if error: return error
 
         # FIX check price one more time to avoid the free option problem?
         # Prices may have been changed from request to confirm call
