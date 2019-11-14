@@ -230,7 +230,7 @@ class Gateway(object):
         except Exception as e:
             print(type(e))
             print(e)
-            # TODO Save handle failed requests with refunds or something
+            # TODO handle failed requests with refunds or something
             # We could refund by opening a channel with some initial funds back to the customer,
             # but then we need to have the node id on the initial request.
             # Alternatively we can accept a refund invoice in this call.
