@@ -66,14 +66,6 @@ class Gateway(object):
         self.requests_paid = {}
         self.failed_requests = {}
 
-    def print_state(self):
-        print('self.sibling_nodes:')
-        pprint(self.sibling_nodes)
-        print('self.requests_to_be_paid:')
-        pprint(self.requests_to_be_paid)
-        print('self.requests_paid:')
-        pprint(self.requests_paid)
-
     def check_basic(self, req, known_args, required_args, method='check_basic'):
         for arg in req:
             if arg not in known_args:
@@ -154,7 +146,6 @@ class Gateway(object):
             'dest_chain_petname': dest_chain_petname,
             'dest_bolt11': dest_bolt11,
         }
-        self.print_state()
         return src_invoice
 
     def check_paid_to_own_node(self, payment_hash, src_chain_id):
@@ -246,7 +237,6 @@ class Gateway(object):
                 'bolt11': to_pay['dest_bolt11'],
             }
 
-        self.print_state()
         return {
             'payment_hash': result['payment_hash'],
             'payment_preimage': result['payment_preimage'],
