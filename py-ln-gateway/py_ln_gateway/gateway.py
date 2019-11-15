@@ -16,6 +16,7 @@ from py_ln_gateway import db
 from py_ln_gateway.bech32 import bech32_decode
 from py_ln_gateway.chains import CHAINS_BY_BIP173
 from py_ln_gateway.models import (
+    FailedRequest,
     PaidRequest,
     PendingRequest,
     Price,
@@ -64,9 +65,6 @@ class Gateway(object):
 
     def __init__(self, sibling_nodes):
         self.sibling_nodes = sibling_nodes
-
-        # FIX This should all go to a database before this can have concurrency
-        self.failed_requests = {}
 
     def check_basic(self, req, known_args, required_args, method='check_basic'):
         for arg in req:
@@ -188,7 +186,8 @@ class Gateway(object):
                 'dest_payment_preimage': paid_request.dest_payment_preimage,
             }
 
-        if payment_hash in self.failed_requests:
+        failed_request = FailedRequest.query.filter(FailedRequest.src_payment_hash == payment_hash).first()
+        if failed_request:
             return {
                 'error': 'Payment request %s already failed. Please contact customer support.' % payment_hash,
             }
@@ -228,18 +227,21 @@ class Gateway(object):
             # We could refund by opening a channel with some initial funds back to the customer,
             # but then we need to have the node id on the initial request.
             # Alternatively we can accept a refund invoice in this call.
-            self.failed_requests[payment_hash] = {
-                'error': str(e),
-                'src_chain_id': pending_request.src_chain,
-                'src_chain_petname': pending_request.src_chain_petname,
-                'src_bolt11': pending_request.src_bolt11,
-                'src_expires_at': pending_request.src_expires_at,
-                'dest_chain_id': pending_request.dest_chain,
-                'dest_chain_petname': pending_request.dest_chain_petname,
-                'dest_bolt11': pending_request.dest_bolt11,
-                'src_payment_hash': payment_hash,
-                'src_payment_preimage': payment_preimage,
-            }
+            db.session.add(FailedRequest(
+                error = str(e),
+                src_payment_hash = payment_hash,
+                src_payment_preimage = payment_preimage,
+                src_chain = src_chain_id,
+                src_chain_petname = src_chain_petname,
+                src_bolt11 = src_invoice['bolt11'],
+                src_expires_at = src_invoice['expires_at'],
+                dest_chain = dest_chain_id,
+                dest_chain_petname = dest_chain_petname,
+                dest_bolt11 = dest_bolt11,
+            ))
+            # Delete from pending_requests when failing too
+            db.session.delete(pending_request)
+            db.session.commit()
             return {
                 'error': 'Error paying request.',
                 'bolt11': pending_request.dest_bolt11,
