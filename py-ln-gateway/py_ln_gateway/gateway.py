@@ -16,6 +16,7 @@ from py_ln_gateway import db
 from py_ln_gateway.bech32 import bech32_decode
 from py_ln_gateway.chains import CHAINS_BY_BIP173
 from py_ln_gateway.models import (
+    PaidRequest,
     PendingRequest,
     Price,
 )
@@ -65,7 +66,6 @@ class Gateway(object):
         self.sibling_nodes = sibling_nodes
 
         # FIX This should all go to a database before this can have concurrency
-        self.requests_paid = {}
         self.failed_requests = {}
 
     def check_basic(self, req, known_args, required_args, method='check_basic'):
@@ -179,10 +179,13 @@ class Gateway(object):
         if not check_hash_preimage(payment_hash, payment_preimage):
             return {'error': 'Payment preimage does not correspond to the hash.'}
 
-        if payment_hash in self.requests_paid:
+        # TODO this should be a get insead of a filter since src_payment_hash is the key
+        paid_request = PaidRequest.query.filter(PaidRequest.src_payment_hash == payment_hash).first()
+        if paid_request:
             return {
                 'error': 'Payment request %s already paid.' % payment_hash,
-                'payment': self.requests_paid[payment_hash],
+                'dest_payment_hash': paid_request.dest_payment_hash,
+                'dest_payment_preimage': paid_request.dest_payment_preimage,
             }
 
         if payment_hash in self.failed_requests:
@@ -203,19 +206,19 @@ class Gateway(object):
         # Prices may have been changed from request to confirm call
         try:
             result = self.sibling_nodes[pending_request.dest_chain].pay(pending_request.dest_bolt11)
-            self.requests_paid[payment_hash] = {
-                'src_chain_id': pending_request.src_chain,
-                'src_chain_petname': pending_request.src_chain_petname,
-                'src_bolt11': pending_request.src_bolt11,
-                'src_expires_at': pending_request.src_expires_at,
-                'dest_chain_id': pending_request.dest_chain,
-                'dest_chain_petname': pending_request.dest_chain_petname,
-                'dest_bolt11': pending_request.dest_bolt11,
-                'src_payment_hash': payment_hash,
-                'src_payment_preimage': payment_preimage,
-                'dest_payment_hash': result['payment_hash'],
-                'dest_payment_preimage': result['payment_preimage'],
-            }
+            db.session.add(PaidRequest(
+                src_payment_hash = payment_hash,
+                src_chain = pending_request.src_chain,
+                src_chain_petname = pending_request.src_chain_petname,
+                src_bolt11 = pending_request.src_bolt11,
+                src_expires_at = pending_request.src_expires_at,
+                src_payment_preimage = payment_preimage,
+                dest_chain = pending_request.dest_chain,
+                dest_chain_petname = pending_request.dest_chain_petname,
+                dest_bolt11 = pending_request.dest_bolt11,
+                dest_payment_hash = result['payment_hash'],
+                dest_payment_preimage = result['payment_preimage'],
+            ))
             db.session.delete(pending_request)
             db.session.commit()
         except Exception as e:
