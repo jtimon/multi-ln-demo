@@ -55,18 +55,6 @@ def chainparams_from_id(chain_id):
             return val
     return None
 
-def check_mandatory(req, required_args, method='method'):
-    for arg in required_args:
-        if not arg in req:
-            return {'error': '%s needs %s field.' % (method, field)}
-    return None
-
-def check_unkown_args(req, known_args, method='method'):
-    for arg in req:
-        if arg not in known_args:
-            return {'error': '%s: unkown arg %s.' % (method, arg)}
-    return None
-
 class Gateway(object):
 
     def __init__(self, sibling_nodes):
@@ -86,11 +74,20 @@ class Gateway(object):
         print('self.requests_paid:')
         pprint(self.requests_paid)
 
+    def check_basic(self, req, known_args, required_args, method='check_basic'):
+        for arg in req:
+            if arg not in known_args:
+                return {'error': '%s: unknown arg %s.' % (method, arg)}
+
+        for arg in required_args:
+            if arg not in req:
+                return {'error': '%s: arg %s is required.' % (method, arg)}
+
+        return None
+
     def request_dest_payment(self, req):
         required_args = ['bolt11', 'src_chain_id', 'offer_msats']
-        error = check_mandatory(req, required_args, method='request_dest_payment')
-        if error: return error
-        error = check_unkown_args(req, required_args, method='request_dest_payment')
+        error = self.check_basic(req, required_args, required_args, method='request_dest_payment')
         if error: return error
         print('Received valid req for %s:' % 'request_dest_payment', req)
 
@@ -176,9 +173,7 @@ class Gateway(object):
 
     def confirm_src_payment(self, req):
         required_args = ['payment_hash', 'payment_preimage']
-        error = check_mandatory(req, required_args, method='confirm_src_payment')
-        if error: return error
-        error = check_unkown_args(req, required_args, method='confirm_src_payment')
+        error = self.check_basic(req, required_args, required_args, method='confirm_src_payment')
         if error: return error
         print('Received valid req for %s:' % 'confirm_src_payment', req)
 
