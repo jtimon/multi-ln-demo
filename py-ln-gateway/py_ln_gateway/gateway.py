@@ -12,9 +12,13 @@ import re
 
 from hashlib import sha256
 
+from py_ln_gateway import db
 from py_ln_gateway.bech32 import bech32_decode
 from py_ln_gateway.chains import CHAINS_BY_BIP173
-from py_ln_gateway.models import Price
+from py_ln_gateway.models import (
+    PendingRequest,
+    Price,
+)
 
 def check_hash_preimage(payment_hash, payment_preimage):
     hashed_result = sha256(binascii.unhexlify(payment_preimage)).hexdigest()
@@ -61,8 +65,6 @@ class Gateway(object):
         self.sibling_nodes = sibling_nodes
 
         # FIX This should all go to a database before this can have concurrency
-        # FIX DoS: Don't store pending request forever (at least not in memory)
-        self.requests_to_be_paid = {}
         self.requests_paid = {}
         self.failed_requests = {}
 
@@ -137,15 +139,17 @@ class Gateway(object):
         print('src_invoice:')
         pprint(src_invoice)
 
-        self.requests_to_be_paid[src_invoice['payment_hash']] = {
-            'src_chain_id': src_chain_id,
-            'src_chain_petname': src_chain_petname,
-            'src_bolt11': src_invoice['bolt11'],
-            'src_expires_at': src_invoice['expires_at'],
-            'dest_chain_id': dest_chain_id,
-            'dest_chain_petname': dest_chain_petname,
-            'dest_bolt11': dest_bolt11,
-        }
+        db.session.add(PendingRequest(
+            src_payment_hash = src_invoice['payment_hash'],
+            src_chain = src_chain_id,
+            src_chain_petname = src_chain_petname,
+            src_bolt11 = src_invoice['bolt11'],
+            src_expires_at = src_invoice['expires_at'],
+            dest_chain = dest_chain_id,
+            dest_chain_petname = dest_chain_petname,
+            dest_bolt11 = dest_bolt11,
+        ))
+        db.session.commit()
         return src_invoice
 
     def check_paid_to_own_node(self, payment_hash, src_chain_id):
@@ -186,33 +190,34 @@ class Gateway(object):
                 'error': 'Payment request %s already failed. Please contact customer support.' % payment_hash,
             }
 
-        if payment_hash not in self.requests_to_be_paid:
+        # TODO this should be a get insead of a filter since src_payment_hash is the key
+        pending_request = PendingRequest.query.filter(PendingRequest.src_payment_hash == payment_hash).first()
+        if not pending_request:
             return {'error': 'Unkown payment request %s.' % payment_hash}
 
-        to_pay = self.requests_to_be_paid[payment_hash]
-
         # This should never fail given the preimage corresponds to the hash, but let's be safe
-        error = self.check_paid_to_own_node(payment_hash, to_pay['src_chain_id'])
+        error = self.check_paid_to_own_node(payment_hash, pending_request.src_chain)
         if error: return error
 
         # FIX check price one more time to avoid the free option problem?
         # Prices may have been changed from request to confirm call
         try:
-            result = self.sibling_nodes[to_pay['dest_chain_id']].pay(to_pay['dest_bolt11'])
+            result = self.sibling_nodes[pending_request.dest_chain].pay(pending_request.dest_bolt11)
             self.requests_paid[payment_hash] = {
-                'src_chain_id': to_pay['src_chain_id'],
-                'src_chain_petname': to_pay['src_chain_petname'],
-                'src_bolt11': to_pay['src_bolt11'],
-                'src_expires_at': to_pay['src_expires_at'],
-                'dest_chain_id': to_pay['dest_chain_id'],
-                'dest_chain_petname': to_pay['dest_chain_petname'],
-                'dest_bolt11': to_pay['dest_bolt11'],
+                'src_chain_id': pending_request.src_chain,
+                'src_chain_petname': pending_request.src_chain_petname,
+                'src_bolt11': pending_request.src_bolt11,
+                'src_expires_at': pending_request.src_expires_at,
+                'dest_chain_id': pending_request.dest_chain,
+                'dest_chain_petname': pending_request.dest_chain_petname,
+                'dest_bolt11': pending_request.dest_bolt11,
                 'src_payment_hash': payment_hash,
                 'src_payment_preimage': payment_preimage,
                 'dest_payment_hash': result['payment_hash'],
                 'dest_payment_preimage': result['payment_preimage'],
             }
-            del self.requests_to_be_paid[payment_hash]
+            db.session.delete(pending_request)
+            db.session.commit()
         except Exception as e:
             print(type(e))
             print(e)
@@ -222,19 +227,19 @@ class Gateway(object):
             # Alternatively we can accept a refund invoice in this call.
             self.failed_requests[payment_hash] = {
                 'error': str(e),
-                'src_chain_id': to_pay['src_chain_id'],
-                'src_chain_petname': to_pay['src_chain_petname'],
-                'src_bolt11': to_pay['src_bolt11'],
-                'src_expires_at': to_pay['src_expires_at'],
-                'dest_chain_id': to_pay['dest_chain_id'],
-                'dest_chain_petname': to_pay['dest_chain_petname'],
-                'dest_bolt11': to_pay['dest_bolt11'],
+                'src_chain_id': pending_request.src_chain,
+                'src_chain_petname': pending_request.src_chain_petname,
+                'src_bolt11': pending_request.src_bolt11,
+                'src_expires_at': pending_request.src_expires_at,
+                'dest_chain_id': pending_request.dest_chain,
+                'dest_chain_petname': pending_request.dest_chain_petname,
+                'dest_bolt11': pending_request.dest_bolt11,
                 'src_payment_hash': payment_hash,
                 'src_payment_preimage': payment_preimage,
             }
             return {
                 'error': 'Error paying request.',
-                'bolt11': to_pay['dest_bolt11'],
+                'bolt11': pending_request.dest_bolt11,
             }
 
         return {
