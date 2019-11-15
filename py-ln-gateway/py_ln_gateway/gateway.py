@@ -142,6 +142,9 @@ class Gateway(object):
         label = 'from_%s_to_%s_label' % (src_chain_petname, dest_chain_petname)
         description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_bolt11)
         src_invoice = self.sibling_nodes[src_chain_id].invoice(offer_msats, label, description)
+        print('src_invoice:')
+        pprint(src_invoice)
+
         self.requests_to_be_paid[src_invoice['payment_hash']] = {
             'src_chain_id': src_chain_id,
             'src_chain_petname': src_chain_petname,
@@ -151,7 +154,6 @@ class Gateway(object):
             'dest_chain_petname': dest_chain_petname,
             'dest_bolt11': dest_bolt11,
         }
-        pprint(src_invoice)
         self.print_state()
         return src_invoice
 
