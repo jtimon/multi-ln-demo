@@ -177,8 +177,7 @@ class Gateway(object):
         if not check_hash_preimage(payment_hash, payment_preimage):
             return {'error': 'Payment preimage does not correspond to the hash.'}
 
-        # TODO this should be a get insead of a filter since src_payment_hash is the key
-        paid_request = PaidRequest.query.filter(PaidRequest.src_payment_hash == payment_hash).first()
+        paid_request = PaidRequest.query.get(payment_hash)
         if paid_request:
             return {
                 'error': 'Payment request %s already paid.' % payment_hash,
@@ -186,14 +185,13 @@ class Gateway(object):
                 'dest_payment_preimage': paid_request.dest_payment_preimage,
             }
 
-        failed_request = FailedRequest.query.filter(FailedRequest.src_payment_hash == payment_hash).first()
+        failed_request = FailedRequest.query.get(payment_hash)
         if failed_request:
             return {
                 'error': 'Payment request %s already failed. Please contact customer support.' % payment_hash,
             }
 
-        # TODO this should be a get insead of a filter since src_payment_hash is the key
-        pending_request = PendingRequest.query.filter(PendingRequest.src_payment_hash == payment_hash).first()
+        pending_request = PendingRequest.query.get(payment_hash)
         if not pending_request:
             return {'error': 'Unkown payment request %s.' % payment_hash}
 
