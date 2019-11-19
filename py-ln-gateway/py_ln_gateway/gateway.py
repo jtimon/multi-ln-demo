@@ -8,9 +8,11 @@
 from decimal import Decimal
 from pprint import pprint
 import binascii
+import json
 import re
 
 from hashlib import sha256
+from lightning import LightningRpc
 
 from py_ln_gateway import db
 from py_ln_gateway.bech32 import bech32_decode
@@ -63,8 +65,13 @@ def chainparams_from_id(chain_id):
 
 class Gateway(object):
 
-    def __init__(self, sibling_nodes):
-        self.sibling_nodes = sibling_nodes
+    def __init__(self, nodes_config_path):
+        self.sibling_nodes = {}
+        with open(nodes_config_path) as json_file:
+            data = json.load(json_file)
+            for chain_id, node_config in data['nodes'].items():
+                print(chain_id, node_config)
+                self.sibling_nodes[chain_id] = LightningRpc(node_config)
 
     def check_basic(self, req, known_args, required_args, method='check_basic'):
         for arg in req:

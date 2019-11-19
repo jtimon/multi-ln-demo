@@ -1,7 +1,6 @@
 import os
 
 from flask import Flask, request
-from lightning import LightningRpc
 
 from py_ln_gateway import db
 from py_ln_gateway.gateway import Gateway
@@ -30,14 +29,7 @@ with app.app_context():
 # TODO is this the best way to avoid the with above within gateway.py ?
 app.app_context().push()
 
-# TODO Make sibling_nodes customiable via file
-user_name = 'bob'
-gateway = Gateway({
-    # chain_1 bip173: bca
-    '58ebd25d25b128530d4d462c65a7e679b7e053e6f25ffb8ac63bc68832fda201': LightningRpc('/wd/daemon-data/%s_%s/lightning-rpc' % (user_name, 'chain_1')),
-    # chain_2 bip173: bcb
-    'e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7': LightningRpc('/wd/daemon-data/%s_%s/lightning-rpc' % (user_name, 'chain_2')),
-})
+gateway = Gateway('/wd/py-ln-gateway/py_ln_gateway/nodes_config.json')
 
 @app.route('/request_dest_payment', methods = ['POST'])
 def request_dest_payment():
