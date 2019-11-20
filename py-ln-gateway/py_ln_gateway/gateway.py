@@ -252,7 +252,8 @@ class Gateway(object):
             db.session.commit()
             return {
                 'error': 'Error paying request.',
-                'bolt11': pending_request.dest_bolt11,
+                'src_payment_hash': payment_hash,
+                'dest_bolt11': pending_request.dest_bolt11,
             }
 
         return {
