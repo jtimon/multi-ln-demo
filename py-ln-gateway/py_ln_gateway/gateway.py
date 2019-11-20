@@ -18,6 +18,7 @@ from py_ln_gateway import db
 from py_ln_gateway.bech32 import bech32_decode
 from py_ln_gateway.models import (
     FailedRequest,
+    MAX_BOLT11,
     PaidRequest,
     PendingRequest,
     Price,
@@ -94,6 +95,9 @@ class Gateway(object):
         print('Received valid req for %s:' % 'request_dest_payment', req)
 
         dest_bolt11 = req['bolt11']
+        if len(dest_bolt11) > MAX_BOLT11:
+            return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
+
         offer_msats = req['offer_msats']
         src_chain_id = req['src_chain_id']
         src_chain_petname = self.chainparams_from_id(src_chain_id)['petname']
@@ -146,6 +150,8 @@ class Gateway(object):
         src_invoice = self.sibling_nodes[src_chain_id].invoice(offer_msats, label, description)
         print('src_invoice:')
         pprint(src_invoice)
+        if len(src_invoice['bolt11']) > MAX_BOLT11:
+            return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
 
         db.session.add(PendingRequest(
             src_payment_hash = src_invoice['payment_hash'],

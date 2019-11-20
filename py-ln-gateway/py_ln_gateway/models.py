@@ -1,5 +1,9 @@
 from py_ln_gateway import db
 
+# There is no absolute limit for bolt11. There are practical limits based on QR code sizes.
+# There's no maximum to find in the spec, but apparently 2048 for validation and storage is good enough as a guess.
+MAX_BOLT11 = 2048
+
 class Price(db.Model):
     __tablename__ = 'prices'
 
@@ -21,13 +25,12 @@ class PendingRequest(db.Model):
 
     # FIX optimization: binascii.unhexlify and store 32 bytes instead of 64 char hex string
     src_chain = db.Column(db.String(64))
-    # TODO check the actual limit for bolt11
-    src_bolt11 = db.Column(db.String(2048))
+    src_bolt11 = db.Column(db.String(MAX_BOLT11))
     # TODO turn into datetime field
     src_expires_at = db.Column(db.String(256))
 
     dest_chain = db.Column(db.String(64))
-    dest_bolt11 = db.Column(db.String(2048))
+    dest_bolt11 = db.Column(db.String(MAX_BOLT11))
     # TODO add dest_expires_at
 
 class PaidRequest(db.Model):
@@ -38,8 +41,7 @@ class PaidRequest(db.Model):
 
     # FIX optimization: binascii.unhexlify and store 32 bytes instead of 64 char hex string
     src_chain = db.Column(db.String(64))
-    # TODO check the actual limit for bolt11
-    src_bolt11 = db.Column(db.String(2048))
+    src_bolt11 = db.Column(db.String(MAX_BOLT11))
     # TODO turn into datetime field
     src_expires_at = db.Column(db.String(256))
     # FIX optimization: binascii.unhexlify and store 32 bytes instead of 64 char hex string
@@ -47,7 +49,7 @@ class PaidRequest(db.Model):
 
     dest_payment_hash = db.Column(db.String(64)),
     dest_chain = db.Column(db.String(64))
-    dest_bolt11 = db.Column(db.String(2048))
+    dest_bolt11 = db.Column(db.String(MAX_BOLT11))
     # TODO add dest_expires_at
     dest_payment_preimage = db.Column(db.String(64)),
 
@@ -59,13 +61,12 @@ class FailedRequest(db.Model):
 
     # FIX optimization: binascii.unhexlify and store 32 bytes instead of 64 char hex string
     src_chain = db.Column(db.String(64))
-    # TODO check the actual limit for bolt11
-    src_bolt11 = db.Column(db.String(2048))
+    src_bolt11 = db.Column(db.String(MAX_BOLT11))
     # TODO turn into datetime field
     src_expires_at = db.Column(db.String(256))
     # FIX optimization: binascii.unhexlify and store 32 bytes instead of 64 char hex string
     src_payment_preimage = db.Column(db.String(64)),
 
     dest_chain = db.Column(db.String(64))
-    dest_bolt11 = db.Column(db.String(2048))
+    dest_bolt11 = db.Column(db.String(MAX_BOLT11))
     # TODO add dest_expires_at
