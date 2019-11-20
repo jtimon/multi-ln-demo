@@ -1,4 +1,32 @@
 {
+    "chains_by_bip173":
+    {
+	"bcrt": {
+            "petname": "regtest",
+            "id": "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206"
+	},
+	"bca": {
+            "petname": "chain_1",
+            "id": "58ebd25d25b128530d4d462c65a7e679b7e053e6f25ffb8ac63bc68832fda201"
+	},
+	"bcb": {
+            "petname": "chain_2",
+            "id": "e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7"
+	},
+	"bcc": {
+            "petname": "chain_3",
+            "id": "de650213b96a541df3bd9ee530cc3da4e9424d3617f95e6b2a0d5452e23412b9"
+	},
+	"bcd": {
+            "petname": "chain_4",
+            "id": "075e818d62bbe049a715856344987294ea2b4ff636b857911966e7fc9fee637c"
+	},
+	"bce": {
+            "petname": "chain_5",
+            "id": "54a435af6a093f145769b138c20d5f72b35395e7057a89d36a0b8e954031b04c"
+	}
+    },
+
     "nodes":
     {
 	"58ebd25d25b128530d4d462c65a7e679b7e053e6f25ffb8ac63bc68832fda201": "/wd/daemon-data/bob_chain_1/lightning-rpc",

@@ -16,7 +16,6 @@ from lightning import LightningRpc
 
 from py_ln_gateway import db
 from py_ln_gateway.bech32 import bech32_decode
-from py_ln_gateway.chains import CHAINS_BY_BIP173
 from py_ln_gateway.models import (
     FailedRequest,
     PaidRequest,
@@ -57,21 +56,24 @@ def unshorten_amount(amount):
     else:
         return Decimal(amount)
 
-def chainparams_from_id(chain_id):
-    for key, val in CHAINS_BY_BIP173.items():
-        if val['id'] == chain_id:
-            return val
-    return None
-
 class Gateway(object):
 
     def __init__(self, nodes_config_path):
         self.sibling_nodes = {}
         with open(nodes_config_path) as json_file:
             data = json.load(json_file)
+            # The chain id is the hash of the genesis block
+            # REM petname and bip173 are just local settings, others can set them differently
+            self.chains_by_bip173 = data['chains_by_bip173']
             for chain_id, node_config in data['nodes'].items():
                 print(chain_id, node_config)
                 self.sibling_nodes[chain_id] = LightningRpc(node_config)
+
+    def chainparams_from_id(self, chain_id):
+        for key, val in self.chains_by_bip173.items():
+            if val['id'] == chain_id:
+                return val
+        return None
 
     def check_basic(self, req, known_args, required_args, method='check_basic'):
         for arg in req:
@@ -93,7 +95,7 @@ class Gateway(object):
         dest_bolt11 = req['bolt11']
         offer_msats = req['offer_msats']
         src_chain_id = req['src_chain_id']
-        src_chain_petname = chainparams_from_id(src_chain_id)['petname']
+        src_chain_petname = self.chainparams_from_id(src_chain_id)['petname']
         if not src_chain_id:
             return {'error': "Unknown offer chain %s" % src_chain_id}
 
@@ -118,11 +120,11 @@ class Gateway(object):
             return {'error': "No amount in bolt11"}
         dest_amount_msats = unshorten_amount(amountstr)
 
-        if not dest_chain_bip173_name in CHAINS_BY_BIP173:
+        if not dest_chain_bip173_name in self.chains_by_bip173:
             return {'error': "gateway won't pay to chain with bip173 name (hrp) %s" % dest_chain_bip173_name}
 
-        dest_chain_id = CHAINS_BY_BIP173[dest_chain_bip173_name]['id']
-        dest_chain_petname = CHAINS_BY_BIP173[dest_chain_bip173_name]['petname']
+        dest_chain_id = self.chains_by_bip173[dest_chain_bip173_name]['id']
+        dest_chain_petname = self.chains_by_bip173[dest_chain_bip173_name]['petname']
 
         if dest_chain_id not in self.sibling_nodes:
             return {'error': "gateway can't pay to chain %s" % dest_chain_id}
