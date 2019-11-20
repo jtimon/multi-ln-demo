@@ -144,7 +144,7 @@ class Gateway(object):
                     'suggested_offer_msats': dest_amount_msats / price.price,
             }
 
-        # FIX check that there's actually a route before accepting the request
+        # TODO FIX check that there's actually a route before accepting the request
         label = 'from_%s_to_%s_label' % (src_chain_petname, dest_chain_petname)
         description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_bolt11)
         src_invoice = self.sibling_nodes[src_chain_id].invoice(offer_msats, label, description)
@@ -213,7 +213,7 @@ class Gateway(object):
         error = self.check_paid_to_own_node(payment_hash, pending_request.src_chain)
         if error: return error
 
-        # FIX check price one more time to avoid the free option problem?
+        # TODO FIX check price one more time to avoid the free option problem?
         # Prices may have been changed from request to confirm call
         try:
             result = self.sibling_nodes[pending_request.dest_chain].pay(pending_request.dest_bolt11)

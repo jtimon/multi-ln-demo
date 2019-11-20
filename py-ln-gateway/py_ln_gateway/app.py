@@ -13,7 +13,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = database_file
 db.init_app(app)
 
 with app.app_context():
-    # FIX don't run every time
+    # TODO FIX DB don't run every time
     db.create_all()
 
     # TODO Run from a cron job like if it was pulling data from an exchange or something.
