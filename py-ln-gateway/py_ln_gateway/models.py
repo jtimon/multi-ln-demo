@@ -21,15 +21,12 @@ class PendingRequest(db.Model):
 
     # FIX optimization: binascii.unhexlify and store 32 bytes instead of 64 char hex string
     src_chain = db.Column(db.String(64))
-    # TODO this could be simply a getter using Gateway.chains_by_bip173
-    src_chain_petname = db.Column(db.String(256))
     # TODO check the actual limit for bolt11
     src_bolt11 = db.Column(db.String(2048))
     # TODO turn into datetime field
     src_expires_at = db.Column(db.String(256))
 
     dest_chain = db.Column(db.String(64))
-    dest_chain_petname = db.Column(db.String(256))
     dest_bolt11 = db.Column(db.String(2048))
     # TODO add dest_expires_at
 
@@ -41,8 +38,6 @@ class PaidRequest(db.Model):
 
     # FIX optimization: binascii.unhexlify and store 32 bytes instead of 64 char hex string
     src_chain = db.Column(db.String(64))
-    # TODO this could be simply a getter using Gateway.chains_by_bip173
-    src_chain_petname = db.Column(db.String(256))
     # TODO check the actual limit for bolt11
     src_bolt11 = db.Column(db.String(2048))
     # TODO turn into datetime field
@@ -52,7 +47,6 @@ class PaidRequest(db.Model):
 
     dest_payment_hash = db.Column(db.String(64)),
     dest_chain = db.Column(db.String(64))
-    dest_chain_petname = db.Column(db.String(256))
     dest_bolt11 = db.Column(db.String(2048))
     # TODO add dest_expires_at
     dest_payment_preimage = db.Column(db.String(64)),
@@ -65,8 +59,6 @@ class FailedRequest(db.Model):
 
     # FIX optimization: binascii.unhexlify and store 32 bytes instead of 64 char hex string
     src_chain = db.Column(db.String(64))
-    # TODO this could be simply a getter using Gateway.chains_by_bip173
-    src_chain_petname = db.Column(db.String(256))
     # TODO check the actual limit for bolt11
     src_bolt11 = db.Column(db.String(2048))
     # TODO turn into datetime field
@@ -75,6 +67,5 @@ class FailedRequest(db.Model):
     src_payment_preimage = db.Column(db.String(64)),
 
     dest_chain = db.Column(db.String(64))
-    dest_chain_petname = db.Column(db.String(256))
     dest_bolt11 = db.Column(db.String(2048))
     # TODO add dest_expires_at

@@ -87,6 +87,7 @@ class Gateway(object):
         return None
 
     def request_dest_payment(self, req):
+        # TODO src_chain_id could be a vector as potential options for the gateway to consider
         required_args = ['bolt11', 'src_chain_id', 'offer_msats']
         error = self.check_basic(req, required_args, required_args, method='request_dest_payment')
         if error: return error
@@ -149,11 +150,9 @@ class Gateway(object):
         db.session.add(PendingRequest(
             src_payment_hash = src_invoice['payment_hash'],
             src_chain = src_chain_id,
-            src_chain_petname = src_chain_petname,
             src_bolt11 = src_invoice['bolt11'],
             src_expires_at = src_invoice['expires_at'],
             dest_chain = dest_chain_id,
-            dest_chain_petname = dest_chain_petname,
             dest_bolt11 = dest_bolt11,
         ))
         db.session.commit()
@@ -215,12 +214,10 @@ class Gateway(object):
             db.session.add(PaidRequest(
                 src_payment_hash = payment_hash,
                 src_chain = pending_request.src_chain,
-                src_chain_petname = pending_request.src_chain_petname,
                 src_bolt11 = pending_request.src_bolt11,
                 src_expires_at = pending_request.src_expires_at,
                 src_payment_preimage = payment_preimage,
                 dest_chain = pending_request.dest_chain,
-                dest_chain_petname = pending_request.dest_chain_petname,
                 dest_bolt11 = pending_request.dest_bolt11,
                 dest_payment_hash = result['payment_hash'],
                 dest_payment_preimage = result['payment_preimage'],
@@ -239,11 +236,9 @@ class Gateway(object):
                 src_payment_hash = payment_hash,
                 src_payment_preimage = payment_preimage,
                 src_chain = src_chain_id,
-                src_chain_petname = src_chain_petname,
                 src_bolt11 = src_invoice['bolt11'],
                 src_expires_at = src_invoice['expires_at'],
                 dest_chain = dest_chain_id,
-                dest_chain_petname = dest_chain_petname,
                 dest_bolt11 = dest_bolt11,
             ))
             # Delete from pending_requests when failing too
