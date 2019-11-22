@@ -170,8 +170,10 @@ class Gateway(object):
             src_chain = src_chain_id,
             src_bolt11 = src_invoice['bolt11'],
             src_expires_at = src_invoice['expires_at'],
+            src_amount = int(offer_msats),
             dest_chain = dest_chain_id,
             dest_bolt11 = dest_bolt11,
+            dest_amount = int(dest_amount_msats)
         ))
         db.session.commit()
         return src_invoice
@@ -225,8 +227,34 @@ class Gateway(object):
         error = self.check_paid_to_own_node(payment_hash, pending_request.src_chain)
         if error: return error
 
-        # TODO FIX check price one more time to avoid the free option problem?
         # Prices may have been changed from request to confirm call
+        # Check the price one more time to mitigate the free option problem. If it fails because of this, a refund is required too.
+        price = Price.query.filter(Price.src_chain == pending_request.src_chain, Price.dest_chain == pending_request.dest_chain).first()
+        if not price or price.price == 0:
+            return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
+                pending_request.src_chain, pending_request.dest_chain)}
+
+        if Decimal(pending_request.src_amount) * price.price < pending_request.dest_amount:
+            error = "Insufficient offer %s." % (pending_request.src_amount)
+            db.session.add(FailedRequest(
+                error = error,
+                src_payment_hash = payment_hash,
+                src_payment_preimage = payment_preimage,
+                src_chain = pending_request.src_chain,
+                src_bolt11 = pending_request.src_bolt11,
+                src_expires_at = pending_request.src_expires_at,
+                dest_chain = pending_request.dest_chain,
+                dest_bolt11 = pending_request.dest_bolt11,
+            ))
+            # Delete from pending_requests when failing too
+            db.session.delete(pending_request)
+            db.session.commit()
+            return {
+                'error': error,
+                'src_payment_hash': payment_hash,
+                'dest_bolt11': pending_request.dest_bolt11,
+            }
+
         try:
             result = self.sibling_nodes[pending_request.dest_chain].pay(pending_request.dest_bolt11)
             db.session.add(PaidRequest(
@@ -253,11 +281,11 @@ class Gateway(object):
                 error = str(e),
                 src_payment_hash = payment_hash,
                 src_payment_preimage = payment_preimage,
-                src_chain = src_chain_id,
-                src_bolt11 = src_invoice['bolt11'],
-                src_expires_at = src_invoice['expires_at'],
-                dest_chain = dest_chain_id,
-                dest_bolt11 = dest_bolt11,
+                src_chain = pending_request.src_chain,
+                src_bolt11 = pending_request.src_bolt11,
+                src_expires_at = pending_request.src_expires_at,
+                dest_chain = pending_request.dest_chain,
+                dest_bolt11 = pending_request.dest_bolt11,
             ))
             # Delete from pending_requests when failing too
             db.session.delete(pending_request)
