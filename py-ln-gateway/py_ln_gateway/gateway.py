@@ -100,7 +100,6 @@ class Gateway(object):
 
         offer_msats = req['offer_msats']
         src_chain_id = req['src_chain_id']
-        src_chain_petname = self.chainparams_from_id(src_chain_id)['petname']
         if not src_chain_id:
             return {'error': "Unknown offer chain %s" % src_chain_id}
 
@@ -129,7 +128,6 @@ class Gateway(object):
             return {'error': "gateway won't pay to chain with bip173 name (hrp) %s" % dest_chain_bip173_name}
 
         dest_chain_id = self.chains_by_bip173[dest_chain_bip173_name]['id']
-        dest_chain_petname = self.chains_by_bip173[dest_chain_bip173_name]['petname']
 
         if dest_chain_id not in self.sibling_nodes:
             return {'error': "gateway can't pay to chain %s" % dest_chain_id}
@@ -145,7 +143,8 @@ class Gateway(object):
             }
 
         # TODO FIX check that there's actually a route before accepting the request
-        label = 'from_%s_to_%s_label' % (src_chain_petname, dest_chain_petname)
+        label = 'from_%s_to_%s_label' % (self.chainparams_from_id(src_chain_id)['petname'],
+                                         self.chains_by_bip173[dest_chain_bip173_name]['petname'])
         description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_bolt11)
         src_invoice = self.sibling_nodes[src_chain_id].invoice(offer_msats, label, description)
         print('src_invoice:')
