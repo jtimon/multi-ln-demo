@@ -8,6 +8,9 @@
 # Example decoded dest_invoice:
 # {'currency': 'bcb', 'created_at': 1574455201, 'expiry': 604800, 'payee': '0310e6acd171bf63ea5e0fb541082b4cdd9a7bc34aaedc3eeb2b14e8939e073cf4', 'msatoshi': 1000, 'amount_msat': 1000msat, 'description': 'alice_carol_chain_2_description', 'min_final_cltv_expiry': 10, 'payment_hash': '34d771f86c9b17f9f15042f6c387408f8e931022eb30ac3dbed3d972dc742376', 'signature': '304402205021e829da965737470e4be8684c75ec48f1bf0e6762e8eccfe7b6e448da2b8f022008576c29d5453a852df817ca88029f3eaf820b73e1aafc8e505aac32a3a00fd2'}
 
+# Example route:
+# {'route': [{'id': '03d34c85a1b9fb3fa67355c2b82cb1c179d1a4819b119035794eb8c839148719de', 'channel': '104x1x0', 'direction': 0, 'msatoshi': 1000, 'amount_msat': 1000msat, 'delay': 9}]}
+
 from decimal import Decimal
 from pprint import pprint
 import binascii
@@ -131,7 +134,15 @@ class Gateway(object):
                     'suggested_offer_msats': dest_amount_msats / price.price,
             }
 
-        # TODO FIX check that there's actually a route before accepting the request
+        # Check that there's actually a route before accepting the request
+        try:
+            risk_factor = 1
+            route = self.sibling_nodes[dest_chain_id].getroute(dest_invoice['payee'], dest_amount_msats, risk_factor)
+            assert('route' in route)
+            print('route:', route['route'])
+        except Exception as e:
+            return {'error': "No route found to pay dest_bolt11"}
+
         label = 'from_%s_to_%s_label' % (self.chainparams_from_id(src_chain_id)['petname'],
                                          self.chains_by_bip173[dest_chain_bip173_name]['petname'])
         description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_bolt11)
