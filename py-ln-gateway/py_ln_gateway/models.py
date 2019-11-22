@@ -17,6 +17,7 @@ class Price(db.Model):
     # TODO make src_chain and dest_chain unique together and the id, and have a getter
     src_chain = db.Column(db.String(FIELD_32B_AS_HEX_STR))
     dest_chain = db.Column(db.String(FIELD_32B_AS_HEX_STR))
+    # TODO FIX Warning: Dialect sqlite+pysqlite does *not* support Decimal objects natively, and SQLAlchemy must convert from floating point - rounding errors and other issues may occur. Please consider storing Decimal numbers as strings or integers on this platform for lossless storage.
     price = db.Column(db.Numeric(10,4))
 
 # TODO FIX DoS: Don't store pending request forever (cron job to remove old ones)

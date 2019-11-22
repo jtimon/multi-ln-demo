@@ -92,6 +92,7 @@ def demo_2_chains_fail(lightningd_map):
         assert('bolt11' in e.payload)
 
     print(requests.get(GATEWAY_URL + "/get_accepted_chains").json())
+    print(requests.get(GATEWAY_URL + "/get_prices").json())
     src_invoice = requests.post(GATEWAY_URL + "/request_dest_payment", data={
         'bolt11': invoice['bolt11'],
         'src_chain_id': chain_petname_to_id(chain_name_a),

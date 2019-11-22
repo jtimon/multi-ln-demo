@@ -90,6 +90,16 @@ class Gateway(object):
     def get_accepted_chains(self):
         return {'accepted_chains': list(self.sibling_nodes.keys())}
 
+    def get_prices(self):
+        prices = []
+        for p in Price.query.all():
+            prices.append({
+                'src_chain': p.src_chain,
+                'dest_chain': p.dest_chain,
+                'price': str(p.price),
+            })
+        return {'prices': prices}
+
     def request_dest_payment(self, req):
         # TODO src_chain_id could be a vector as potential options for the gateway to consider
         required_args = ['bolt11', 'src_chain_id', 'offer_msats']
