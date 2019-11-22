@@ -31,6 +31,10 @@ app.app_context().push()
 
 gateway = Gateway('/wd/py-ln-gateway/py_ln_gateway/nodes_config.json')
 
+@app.route('/get_accepted_chains', methods = ['GET'])
+def get_accepted_chains():
+    return gateway.get_accepted_chains()
+
 @app.route('/request_dest_payment', methods = ['POST'])
 def request_dest_payment():
     req = request.form # a multidict containing POST data

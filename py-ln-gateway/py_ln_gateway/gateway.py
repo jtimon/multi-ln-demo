@@ -87,6 +87,9 @@ class Gateway(object):
 
         return None
 
+    def get_accepted_chains(self):
+        return {'accepted_chains': list(self.sibling_nodes.keys())}
+
     def request_dest_payment(self, req):
         # TODO src_chain_id could be a vector as potential options for the gateway to consider
         required_args = ['bolt11', 'src_chain_id', 'offer_msats']
