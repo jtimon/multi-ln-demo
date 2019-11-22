@@ -5,6 +5,9 @@
 # Example payment result:
 # {'id': 2, 'payment_hash': 'a1a06ea2fd1240473eb721b7f1b1d306de1b27ea63ed0f42722c69ea62873b46', 'destination': '02bc1adb03dd2102e4dabfb5554f5a489c9283f3ec663f71ff513045570f576b32', 'msatoshi': 1000, 'amount_msat': 1000msat, 'msatoshi_sent': 1000, 'amount_sent_msat': 1000msat, 'created_at': 1572091440, 'status': 'complete', 'payment_preimage': '2ff6f48168975725a8e7078741ae390f3979df1f52c92ac4ef84a4a494ee25fb', 'bolt11': 'lnbca10n1pwmgd3spp55xsxaghazfqyw04hyxmlrvwnqm0pkfl2v0ks7snj93575c588drqdwdveex7m2lvd5xz6twtuc47ar0ta3ksctfde0nzhmzdak8gvf3takxucnrvgcnqm33wpmk6emyxdehqup4wpmngvnhxqu8wefn0p5x56rhvamhs7tgvscrwet4xsmnqet2wsmkken48pekw7r4wsurs7tjdc6hqvmkxeekgur2wcukk7r2vdknjarpxd4h5atwxpjrxvrt0qm8yury895rjdmkdfk8vvm2dpuxxmt2vsukxwr8xe6rqerr0pchj6nhx4ckxutsxgmr2em9w3snqct2dgu8xap4dfjh2wrewqmkzvpnv9kh5utdxgc8xmt8xaun2ctpw5m8zwpewf58z7rrvam8saejvvm8y6psddhx6emsw9jkuvrwwfmhzdmg89n82mfnde6h5urdddcxvmr5x4c82cf4x3arywpnd3shjumsxc6rswfkdd0kgetnvdexjur5d9hkuxqyjw5qcqp277yuhhqs87udwph8a0jf7v5s6j80rgaw9gz6qtq8dz3xyna2yd2xkm4fvaw5hhdn8nv9rjw2suuvcl3hdfrqm8fufu4xsc6s8u6nm7cpsnyucv'}
 
+# Example decoded dest_invoice:
+# {'currency': 'bcb', 'created_at': 1574455201, 'expiry': 604800, 'payee': '0310e6acd171bf63ea5e0fb541082b4cdd9a7bc34aaedc3eeb2b14e8939e073cf4', 'msatoshi': 1000, 'amount_msat': 1000msat, 'description': 'alice_carol_chain_2_description', 'min_final_cltv_expiry': 10, 'payment_hash': '34d771f86c9b17f9f15042f6c387408f8e931022eb30ac3dbed3d972dc742376', 'signature': '304402205021e829da965737470e4be8684c75ec48f1bf0e6762e8eccfe7b6e448da2b8f022008576c29d5453a852df817ca88029f3eaf820b73e1aafc8e505aac32a3a00fd2'}
+
 from decimal import Decimal
 from pprint import pprint
 import binascii
@@ -27,35 +30,6 @@ from py_ln_gateway.models import (
 def check_hash_preimage(payment_hash, payment_preimage):
     hashed_result = sha256(binascii.unhexlify(payment_preimage)).hexdigest()
     return hashed_result == payment_hash
-
-# Copied from https://github.com/rustyrussell/lightning-payencode
-def unshorten_amount(amount):
-    """ Given a shortened amount, convert it into a decimal
-    """
-    # BOLT #11:
-    # The following `multiplier` letters are defined:
-    #
-    #* `m` (milli): multiply by 0.001
-    #* `u` (micro): multiply by 0.000001
-    #* `n` (nano): multiply by 0.000000001
-    #* `p` (pico): multiply by 0.000000000001
-    units = {
-        'p': 10**12,
-        'n': 10**9,
-        'u': 10**6,
-        'm': 10**3,
-    }
-    unit = str(amount)[-1]
-    # BOLT #11:
-    # A reader SHOULD fail if `amount` contains a non-digit, or is followed by
-    # anything except a `multiplier` in the table above.
-    if not re.fullmatch("\d+[pnum]?", str(amount)):
-        raise ValueError("Invalid amount '{}'".format(amount))
-
-    if unit in units.keys():
-        return Decimal(amount[:-1]) / units[unit]
-    else:
-        return Decimal(amount)
 
 class Gateway(object):
 
@@ -126,24 +100,26 @@ class Gateway(object):
         if not dest_chain_hrp.startswith('ln'):
             return {'error': "Bad bolt11, hrp does not start with ln"}
 
-        print('dest_chain_hrp', dest_chain_hrp)
         m = re.search("[^\d]+", dest_chain_hrp[2:])
         if not m:
             return {'error': "No chain bip173 name in bolt11"}
 
         dest_chain_bip173_name = m.group(0)
-        amountstr = dest_chain_hrp[2+m.end():]
-        if amountstr == '':
-            return {'error': "No amount in bolt11"}
-        dest_amount_msats = unshorten_amount(amountstr)
-
         if not dest_chain_bip173_name in self.chains_by_bip173:
             return {'error': "gateway won't pay to chain with bip173 name (hrp) %s" % dest_chain_bip173_name}
 
         dest_chain_id = self.chains_by_bip173[dest_chain_bip173_name]['id']
-
         if dest_chain_id not in self.sibling_nodes:
             return {'error': "gateway can't pay to chain %s" % dest_chain_id}
+
+        try:
+            dest_invoice = self.sibling_nodes[dest_chain_id].decodepay(dest_bolt11)
+        except Exception as e:
+            return {'error': "Invalid bolt11: Bad bech32 string"}
+
+        if 'msatoshi' not in dest_invoice:
+            return {'error': "Invalid bolt11: dest_bolt11 needs to specify an amount"}
+        dest_amount_msats = dest_invoice['msatoshi']
 
         price = Price.query.filter(Price.src_chain == src_chain_id, Price.dest_chain == dest_chain_id).first()
         if not price or price.price == 0:
