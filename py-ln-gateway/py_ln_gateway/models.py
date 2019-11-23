@@ -20,8 +20,6 @@ class Price(db.Model):
     # TODO FIX Warning: Dialect sqlite+pysqlite does *not* support Decimal objects natively, and SQLAlchemy must convert from floating point - rounding errors and other issues may occur. Please consider storing Decimal numbers as strings or integers on this platform for lossless storage.
     price = db.Column(db.Numeric(10,4))
 
-# TODO FIX DoS: Don't store pending request forever (cron job to remove old ones)
-# Perhaps just explicitly configure the max disk to be used on pending requests (or at least the number of entries)
 class PendingRequest(db.Model):
     __tablename__ = 'pending_requests'
 
@@ -61,7 +59,7 @@ class FailedRequest(db.Model):
     src_chain = db.Column(db.String(FIELD_32B_AS_HEX_STR))
     src_bolt11 = db.Column(db.String(MAX_BOLT11))
     src_expires_at = db.Column(db.DateTime())
-    src_payment_preimage = db.Column(db.String(FIELD_32B_AS_HEX_STR)),
+    src_payment_preimage = db.Column(db.String(FIELD_32B_AS_HEX_STR), nullable=True),
 
     dest_chain = db.Column(db.String(FIELD_32B_AS_HEX_STR))
     dest_bolt11 = db.Column(db.String(MAX_BOLT11))
