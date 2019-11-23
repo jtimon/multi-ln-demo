@@ -80,8 +80,7 @@ class Gateway(object):
         return {'prices': prices}
 
     def request_dest_payment(self, req):
-        # TODO src_chain_id could be a vector as potential options for the gateway to consider
-        required_args = ['bolt11', 'src_chain_id']
+        required_args = ['bolt11', 'src_chain_ids']
         error = self.check_basic(req, required_args, required_args, method='request_dest_payment')
         if error: return error
         print('Received valid req for %s:' % 'request_dest_payment', req)
@@ -90,12 +89,17 @@ class Gateway(object):
         if len(dest_bolt11) > MAX_BOLT11:
             return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
 
-        src_chain_id = req['src_chain_id']
-        if not src_chain_id:
-            return {'error': "Unknown offer chain %s" % src_chain_id}
+        src_chain_ids = req.getlist('src_chain_ids')
+        src_chain_id = None
+        for chain_id in src_chain_ids:
+            for node_chain_id in self.sibling_nodes.keys():
+                if chain_id == node_chain_id:
+                    src_chain_id = chain_id
+                    break # TODO allow configuring rankings or consult prices instead of simply using the first match found
 
-        if src_chain_id not in self.sibling_nodes:
-            return {'error': "gateway doesn't accept payment in chain %s" % src_chain_id}
+        if not src_chain_id:
+            return {'error': "Offer chains %s not accepted. Accepted chains %s" % (
+                str(src_chain_ids), str(list(self.sibling_nodes.keys())))}
 
         dest_chain_hrp, data = bech32_decode(dest_bolt11)
         if not dest_chain_hrp:
