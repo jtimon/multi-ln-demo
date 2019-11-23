@@ -34,6 +34,8 @@ def check_hash_preimage(payment_hash, payment_preimage):
     hashed_result = sha256(binascii.unhexlify(payment_preimage)).hexdigest()
     return hashed_result == payment_hash
 
+MIN_OFFER = 1000
+
 class Gateway(object):
 
     def __init__(self, nodes_config_path):
@@ -79,7 +81,7 @@ class Gateway(object):
 
     def request_dest_payment(self, req):
         # TODO src_chain_id could be a vector as potential options for the gateway to consider
-        required_args = ['bolt11', 'src_chain_id', 'offer_msats']
+        required_args = ['bolt11', 'src_chain_id']
         error = self.check_basic(req, required_args, required_args, method='request_dest_payment')
         if error: return error
         print('Received valid req for %s:' % 'request_dest_payment', req)
@@ -88,7 +90,6 @@ class Gateway(object):
         if len(dest_bolt11) > MAX_BOLT11:
             return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
 
-        offer_msats = req['offer_msats']
         src_chain_id = req['src_chain_id']
         if not src_chain_id:
             return {'error': "Unknown offer chain %s" % src_chain_id}
@@ -129,9 +130,17 @@ class Gateway(object):
             return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
                 src_chain_id, dest_chain_id)}
 
-        if Decimal(offer_msats) * price.price < dest_amount_msats:
-            return {'error': "Insufficient offer %s" % offer_msats,
-                    'suggested_offer_msats': dest_amount_msats / price.price,
+        # The gateway imposes a price per chain, take it or leave it
+        # You can try another chain or another gateway
+        offer_msats = dest_amount_msats * price.price
+        if offer_msats < MIN_OFFER:
+            return {
+                'error': "Insufficient amount",
+                'src_chain': src_chain_id,
+                'dest_chain': dest_chain_id,
+                'dest_amount': str(dest_amount_msats),
+                'src_amount': str(offer_msats),
+                'src_min_amount': str(MIN_OFFER),
             }
 
         # Check that there's actually a route before accepting the request
@@ -146,7 +155,7 @@ class Gateway(object):
         label = 'from_%s_to_%s_label' % (self.chainparams_from_id(src_chain_id)['petname'],
                                          self.chains_by_bip173[dest_chain_bip173_name]['petname'])
         description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_bolt11)
-        src_invoice = self.sibling_nodes[src_chain_id].invoice(offer_msats, label, description)
+        src_invoice = self.sibling_nodes[src_chain_id].invoice(str(int(offer_msats)), label, description)
         print('src_invoice:')
         pprint(src_invoice)
         if len(src_invoice['bolt11']) > MAX_BOLT11:
@@ -221,8 +230,9 @@ class Gateway(object):
             return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
                 pending_request.src_chain, pending_request.dest_chain)}
 
-        if Decimal(pending_request.src_amount) * price.price < pending_request.dest_amount:
-            error = "Insufficient offer %s." % (pending_request.src_amount)
+        src_current_offer = pending_request.dest_amount * price.price
+        if Decimal(pending_request.src_amount) < src_current_offer:
+            error = "The offered price is no longer accepted."
             db.session.add(FailedRequest(
                 error = error,
                 src_payment_hash = payment_hash,
@@ -239,6 +249,7 @@ class Gateway(object):
             return {
                 'error': error,
                 'src_payment_hash': payment_hash,
+                'src_current_offer': src_current_offer,
                 'dest_bolt11': pending_request.dest_bolt11,
             }
 
