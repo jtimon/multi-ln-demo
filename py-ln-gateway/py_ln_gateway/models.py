@@ -12,11 +12,8 @@ FIELD_32B_AS_HEX_STR = 64
 class Price(db.Model):
     __tablename__ = 'prices'
 
-    id = db.Column(db.Integer, primary_key=True)
-
-    # TODO make src_chain and dest_chain unique together and the id, and have a getter
-    src_chain = db.Column(db.String(FIELD_32B_AS_HEX_STR))
-    dest_chain = db.Column(db.String(FIELD_32B_AS_HEX_STR))
+    # The id is composed by the src_chain_id followed by ':' and then the dest_chain_id
+    src_dest = db.Column(db.String((2 * FIELD_32B_AS_HEX_STR) + 1), primary_key=True)
     # TODO FIX Warning: Dialect sqlite+pysqlite does *not* support Decimal objects natively, and SQLAlchemy must convert from floating point - rounding errors and other issues may occur. Please consider storing Decimal numbers as strings or integers on this platform for lossless storage.
     price = db.Column(db.Numeric(10,4))
 

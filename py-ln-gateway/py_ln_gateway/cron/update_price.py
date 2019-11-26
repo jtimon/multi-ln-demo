@@ -13,8 +13,8 @@ app.app_context().push()
 
 # We just need to set it once if it's going to be constant
 db.session.add(Price(
-    src_chain = '58ebd25d25b128530d4d462c65a7e679b7e053e6f25ffb8ac63bc68832fda201',
-    dest_chain = 'e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7',
+    src_dest = '%s:%s' % ('58ebd25d25b128530d4d462c65a7e679b7e053e6f25ffb8ac63bc68832fda201',
+                          'e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7'),
     price = 1))
 db.session.commit()
 

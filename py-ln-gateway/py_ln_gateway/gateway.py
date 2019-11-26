@@ -74,9 +74,11 @@ class Gateway(object):
     def get_prices(self):
         prices = []
         for p in Price.query.all():
+            splitted = p.src_dest.split(':')
+            assert(len(splitted) == 2)
             prices.append({
-                'src_chain': p.src_chain,
-                'dest_chain': p.dest_chain,
+                'src_chain': splitted[0],
+                'dest_chain': splitted[1],
                 'price': str(p.price),
             })
         return {'prices': prices}
@@ -135,7 +137,7 @@ class Gateway(object):
         if 'created_at' not in dest_invoice or 'expiry' not in dest_invoice:
             return {'error': "Invalid bolt11: dest_bolt11 needs to specify an expiry"}
 
-        price = Price.query.filter(Price.src_chain == src_chain_id, Price.dest_chain == dest_chain_id).first()
+        price = Price.query.get('%s:%s' % (src_chain_id, dest_chain_id))
         if not price or price.price == 0:
             return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
                 src_chain_id, dest_chain_id)}
@@ -236,7 +238,7 @@ class Gateway(object):
 
         # Prices may have been changed from request to confirm call
         # Check the price one more time to mitigate the free option problem. If it fails because of this, a refund is required too.
-        price = Price.query.filter(Price.src_chain == pending_request.src_chain, Price.dest_chain == pending_request.dest_chain).first()
+        price = Price.query.get('%s:%s' % (pending_request.src_chain, pending_request.dest_chain))
         if not price or price.price == 0:
             return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
                 pending_request.src_chain, pending_request.dest_chain)}
