@@ -11,6 +11,7 @@
 # Example route:
 # {'route': [{'id': '03d34c85a1b9fb3fa67355c2b82cb1c179d1a4819b119035794eb8c839148719de', 'channel': '104x1x0', 'direction': 0, 'msatoshi': 1000, 'amount_msat': 1000msat, 'delay': 9}]}
 
+from datetime import datetime
 from decimal import Decimal
 from pprint import pprint
 import binascii
@@ -169,7 +170,7 @@ class Gateway(object):
             src_payment_hash = src_invoice['payment_hash'],
             src_chain = src_chain_id,
             src_bolt11 = src_invoice['bolt11'],
-            src_expires_at = src_invoice['expires_at'],
+            src_expires_at = datetime.utcfromtimestamp(src_invoice['expires_at']),
             src_amount = int(offer_msats),
             dest_chain = dest_chain_id,
             dest_bolt11 = dest_bolt11,
