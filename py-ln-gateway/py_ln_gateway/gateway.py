@@ -21,8 +21,8 @@ import re
 from hashlib import sha256
 from lightning import LightningRpc
 
-from py_ln_gateway import db
 from py_ln_gateway.bech32 import bech32_decode
+from py_ln_gateway.db import db
 from py_ln_gateway.models import (
     FailedRequest,
     MAX_BOLT11,

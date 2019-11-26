@@ -1,7 +1,7 @@
 
 from flask import Flask, request
 
-from py_ln_gateway import db
+from py_ln_gateway.db import db
 from py_ln_gateway.gateway import Gateway
 from py_ln_gateway.models import Price
 
