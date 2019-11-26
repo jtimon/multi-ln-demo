@@ -1,8 +1,8 @@
 
-from flask import Flask, request
+from flask import Flask
 
 from py_ln_gateway.db import db
-from py_ln_gateway.gateway import Gateway
+from py_ln_gateway.gateway_blueprint import gateway_blueprint
 from py_ln_gateway.models import Price
 
 app = Flask(__name__)
@@ -25,22 +25,4 @@ db.session.add(Price(
     price = 1))
 db.session.commit()
 
-gateway = Gateway('/wd/py-ln-gateway/py_ln_gateway/nodes_config.json')
-
-@app.route('/get_accepted_chains', methods = ['GET'])
-def get_accepted_chains():
-    return gateway.get_accepted_chains()
-
-@app.route('/get_prices', methods = ['GET'])
-def get_prices():
-    return gateway.get_prices()
-
-@app.route('/request_dest_payment', methods = ['POST'])
-def request_dest_payment():
-    req = request.form # a multidict containing POST data
-    return gateway.request_dest_payment(req)
-
-@app.route('/confirm_src_payment', methods = ['POST'])
-def confirm_src_payment():
-    req = request.form # a multidict containing POST data
-    return gateway.confirm_src_payment(req)
+app.register_blueprint(gateway_blueprint)
