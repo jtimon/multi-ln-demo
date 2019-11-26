@@ -43,6 +43,7 @@ class Gateway(object):
         self.sibling_nodes = {}
         with open(nodes_config_path) as json_file:
             data = json.load(json_file)
+            self.invoices_expiry = data['invoices_expiry']
             # The chain id is the hash of the genesis block
             # REM petname and bip173 are just local settings, others can set them differently
             self.chains_by_bip173 = data['chains_by_bip173']
@@ -164,7 +165,7 @@ class Gateway(object):
         label = 'from_%s_to_%s_label' % (self.chainparams_from_id(src_chain_id)['petname'],
                                          self.chains_by_bip173[dest_chain_bip173_name]['petname'])
         description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_bolt11)
-        src_invoice = self.sibling_nodes[src_chain_id].invoice(str(int(offer_msats)), label, description)
+        src_invoice = self.sibling_nodes[src_chain_id].invoice(str(int(offer_msats)), label, description, expiry=self.invoices_expiry)
         print('src_invoice:')
         pprint(src_invoice)
         if len(src_invoice['bolt11']) > MAX_BOLT11:

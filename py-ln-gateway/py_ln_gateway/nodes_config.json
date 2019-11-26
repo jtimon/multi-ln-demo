@@ -1,4 +1,5 @@
 {
+    "invoices_expiry": 60,
     "chains_by_bip173":
     {
 	"bcrt": {
