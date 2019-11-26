@@ -30,11 +30,11 @@ class PendingRequest(db.Model):
     src_chain = db.Column(db.String(FIELD_32B_AS_HEX_STR))
     src_bolt11 = db.Column(db.String(MAX_BOLT11))
     src_expires_at = db.Column(db.DateTime())
-    # TODO add dest_expires_at fields in PendingRequest, PaidRequest and FailedRequest, why not?
     src_amount = db.Column(db.Integer())
 
     dest_chain = db.Column(db.String(64))
     dest_bolt11 = db.Column(db.String(MAX_BOLT11))
+    dest_expires_at = db.Column(db.DateTime())
     dest_amount = db.Column(db.Integer())
 
 class PaidRequest(db.Model):
@@ -50,6 +50,7 @@ class PaidRequest(db.Model):
     dest_payment_hash = db.Column(db.String(FIELD_32B_AS_HEX_STR)),
     dest_chain = db.Column(db.String(FIELD_32B_AS_HEX_STR))
     dest_bolt11 = db.Column(db.String(MAX_BOLT11))
+    dest_expires_at = db.Column(db.DateTime())
     dest_payment_preimage = db.Column(db.String(FIELD_32B_AS_HEX_STR)),
 
 class FailedRequest(db.Model):
@@ -64,3 +65,4 @@ class FailedRequest(db.Model):
 
     dest_chain = db.Column(db.String(FIELD_32B_AS_HEX_STR))
     dest_bolt11 = db.Column(db.String(MAX_BOLT11))
+    dest_expires_at = db.Column(db.DateTime())

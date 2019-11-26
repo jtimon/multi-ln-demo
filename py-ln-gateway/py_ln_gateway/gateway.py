@@ -123,12 +123,16 @@ class Gateway(object):
 
         try:
             dest_invoice = self.sibling_nodes[dest_chain_id].decodepay(dest_bolt11)
+            print('dest_invoice', dest_invoice)
         except Exception as e:
             return {'error': "Invalid bolt11: Bad bech32 string"}
 
         if 'msatoshi' not in dest_invoice:
             return {'error': "Invalid bolt11: dest_bolt11 needs to specify an amount"}
         dest_amount_msats = dest_invoice['msatoshi']
+
+        if 'created_at' not in dest_invoice or 'expiry' not in dest_invoice:
+            return {'error': "Invalid bolt11: dest_bolt11 needs to specify an expiry"}
 
         price = Price.query.filter(Price.src_chain == src_chain_id, Price.dest_chain == dest_chain_id).first()
         if not price or price.price == 0:
@@ -174,6 +178,7 @@ class Gateway(object):
             src_amount = int(offer_msats),
             dest_chain = dest_chain_id,
             dest_bolt11 = dest_bolt11,
+            dest_expires_at = datetime.utcfromtimestamp(dest_invoice['created_at'] + dest_invoice['expiry']),
             dest_amount = int(dest_amount_msats)
         ))
         db.session.commit()
@@ -247,6 +252,7 @@ class Gateway(object):
                 src_expires_at = pending_request.src_expires_at,
                 dest_chain = pending_request.dest_chain,
                 dest_bolt11 = pending_request.dest_bolt11,
+                dest_expires_at = pending_request.dest_expires_at,
             ))
             # Delete from pending_requests when failing too
             db.session.delete(pending_request)
@@ -268,6 +274,7 @@ class Gateway(object):
                 src_payment_preimage = payment_preimage,
                 dest_chain = pending_request.dest_chain,
                 dest_bolt11 = pending_request.dest_bolt11,
+                dest_expires_at = pending_request.dest_expires_at,
                 dest_payment_hash = result['payment_hash'],
                 dest_payment_preimage = result['payment_preimage'],
             ))
@@ -289,6 +296,7 @@ class Gateway(object):
                 src_expires_at = pending_request.src_expires_at,
                 dest_chain = pending_request.dest_chain,
                 dest_bolt11 = pending_request.dest_bolt11,
+                dest_expires_at = pending_request.dest_expires_at,
             ))
             # Delete from pending_requests when failing too
             db.session.delete(pending_request)
