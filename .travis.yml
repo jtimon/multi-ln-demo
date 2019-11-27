@@ -20,6 +20,6 @@ jobs:
       script:
         - make docker-demo-2-chains
 
-    - name: 'rustdemo 2 chains'
-      script:
-        - make docker-rust-2-chains
+    # - name: 'rustdemo 2 chains'
+    #   script:
+    #     - make docker-rust-2-chains
