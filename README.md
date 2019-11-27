@@ -52,16 +52,16 @@ docker stop $(docker ps -a -q)
 # Incremental goals
 
 - [x] 2 chains, 1 asset (non atomic, trusted)
+- [x] 2 chains, 2 asset (non atomic, trusted)
 - [ ] 2 chains, 1 asset (atomic, trustless)
-- [ ] N chains, 1 asset
-- [ ] N chains, 2 assets
-- [ ] N chains, M assets
+- [ ] 2 chains, 2 asset
+- [ ] N chains, N assets
 - [ ] 1 chain, 2 assets
 - [ ] 1 chain, M assets
 - [ ] N chains, M assets
 - [ ] With CT/CA
 
-# TODO First goal: pay between two chains
+# First goal: pay between two chains
 
 - Alice, with channels opened only on chain_1
 - Carol with channels opened only on chain_2
@@ -70,7 +70,7 @@ Alice should be able to pay an invoice from Carol, even though the invoice is fo
 
 The pricing between chains/assets is always 1:1 for now for simplicity.
 
-## TODO Plan A: Gateways
+## Plan A: Gateways
 
 A gateway is a server controlling 2 or more "sibling nodes" which
 connect to different networks and is willing to route payments through
