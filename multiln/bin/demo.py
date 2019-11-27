@@ -61,6 +61,25 @@ print(CHAINS)
 BITCOIND = btc_init_bitcoind_global(CHAINS)
 LIGHTNINGD = ln_init_global(CHAINS)
 
+# pay an invoice on every chain
+def demo_pay_every_chain(lightningd_map):
+    if N_CHAINS == 2:
+        return
+
+    # A node receives invoices for every other node in the chain and pays it
+    for chain_name, ln_daemons in lightningd_map.items():
+        for user_name_a, ln_caller_a in ln_daemons.items():
+            for user_name_b, ln_caller_b in ln_daemons.items():
+                if user_name_a != user_name_b:
+                    msatoshi = 1000
+                    print('%s receives invoice from %s on chain %s' % (user_name_a, user_name_b, chain_name))
+                    desc = '%s_%s_%s' % (user_name_a, user_name_b, chain_name)
+                    invoice = ln_caller_b.invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
+                    print(invoice)
+                    print('...and pays it...')
+                    print(ln_caller_a.pay(invoice['bolt11']))
+            break
+
 # Try to pay an invoice from carol on chain_2 from alice on chain_1
 def demo_2_chains_fail(lightningd_map):
     if N_CHAINS < 2:
@@ -173,20 +192,7 @@ ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_NORMAL')
 ln_assert_channels_public(LIGHTNINGD, False)
 ln_listchannels(LIGHTNINGD)
 
-# A node receives invoices for every other node in the chain and pays it
-for chain_name, ln_daemons in LIGHTNINGD.items():
-    for user_name_a, ln_caller_a in ln_daemons.items():
-        for user_name_b, ln_caller_b in ln_daemons.items():
-            if user_name_a != user_name_b:
-                msatoshi = 1000
-                print('%s receives invoice from %s on chain %s' % (user_name_a, user_name_b, chain_name))
-                desc = '%s_%s_%s' % (user_name_a, user_name_b, chain_name)
-                invoice = ln_caller_b.invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
-                print(invoice)
-                print('...and pays it...')
-                print(ln_caller_a.pay(invoice['bolt11']))
-        break
-
+demo_pay_every_chain(LIGHTNINGD)
 
 # Try to pay an invoice from carol on chain_2 from alice on chain_1
 demo_2_chains_fail(LIGHTNINGD)
