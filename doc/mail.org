@@ -1,0 +1,161 @@
+* lightning-dev email
+** A gossip network for cross-chain trampoline payments
+
+I see more people are thinking about this cross-chain lightning problem and even working on it, it seems.
+That is great, let's please join forces if we can. I'm happy to help in any way I can.
+
+Here's an example on how I think things could work in the future, like 2 or 3 steps after what I think cdecker is doing and
+like 5 or 6 steps of what I'm currently doing.
+Please, point out anything I may be missing or any alternatives I'm not considering.
+
+Let's say Alice has a lightning node configured to run on network=chain_A.
+She wants to pay an invoice Bob gave her, but it turns out that bob has his lightning node configured for network=chain_B.
+
+Let's assume we already have trampoline routing as per https://github.com/lightningnetwork/lightning-rfc/pull/654
+
+In fact, let's copy the entire example there and change some things. We part from:
+
+
+```text
+Alice                 TA1                  TA2 -> TB3         Bob
+  |                   ^ |                   ^      |           ^
+  |                   | |                   |      |           |
+  `---> H1 ---> H2 ---' `---> H3 ---> H4 ---'      `---> H5 ---'
+```
+
+But here not all nodes operate in the same chain, they distribute as follows:
+
+chain_A: Alice, TA1, TA2, H1, H2, H3, H4
+chain_B: Bob, TB3, H5
+
+Now the first problem we encounter, is that since TA2 and TB3 don't
+operate in the same chain, the direct payment between them can't
+happen as described in the example for regular trampoline payments,
+for there can't be a channel between nodes in different chains.
+
+But what if TA2 and TB3 belonged to the same person?
+Let's call that person Carol and let's call the software that makes things happen a "Gateway" (we can find a better name later, as with anything else).
+Note that apart from TA2 and TB3, Carol's gateway could also connect to other nodes operating in chain_C, chain_D and chain_E, for example.
+
+```text
+                                               Carol
+Alice                 TA1                  TA2 -*?-> TB3         Bob
+  |                   ^ |                   ^         |           ^
+  |                   | |                   |         |           |
+  `---> H1 ---> H2 ---' `---> H3 ---> H4 ---'         `---> H5 ---'
+```
+
+Now the main concern is to clarify what the "-*?->" nomenclature means.
+
+But before that, shouldn't alice, when building trampoline_onion_packet, notice that TB3 and Bob don't belong to chain_A?
+We need a way for Alice to know that she can actually attempt that.
+Carol could advertise that she is managing a gateway between TA2 and TB3 (perhaps more) in some gossip network.
+Note this network doesn't need to be part of the lightning protocol, or be just optional following the "it's ok to be odd" design.
+Few things are easier than ignoring gossip that is not of your interest, I think.
+
+We could have an update_gateway gossip message with something like:
+
+- gateway_id
+- list of node ids
+- list of signatures by those node's ids
+- signature by gateway_id
+
+The proportional fees charged for different combinations may be different,
+take into account that we're not only talking about fees but also prices,
+for the asset in chain_A may not be the same as the asset in chain_B and, even if they are,
+there can be some discount for the units in one of the chains for whatever reason.
+
+Apart from a gossip message we would need some update_gateway_route, perhaps with:
+
+- src_chain_id
+- dest_chain_id
+- price (this can include an implicit proportional fee)
+
+I know, this is a directed graph and it potentially grows exponentially with the number of chains in the same gateway.
+But it would be worse with a graph separately by node_id rather than chain_id.
+I honestly don't see other way around this.
+
+Also, I know there's the "free option" problem (see https://en.bitcoin.it/wiki/Atomic_swap#Financial_optionality ).
+Let's remember that at the very moment Carol's gateway software is processing "-*?->" some validation could be triggered
+that concluded something along the lines:
+"you know what? I don't like this H5 path nor any other I found for what I consider a fair price at this very moment,
+so I'm going to pass and forward back to whoever initiated this payment
+an error saying I'm not ok with that price anymore, perhaps suggesting a different one while at it.
+I will also make sure my gateway nodes are sending the right price for that pair and direction in update_gateway_route"
+
+Well, that's not the best way to explain it but I think it can be understood.
+Even if that's not enough, even if other people can't find better ways to mitigate the free option problem,
+there are potential use cases with constant or relatively stable exchange rates for which this shouldn't be a problem.
+So let's please focus on everything else except for the free option problem in this thread.
+
+Let's just accept that both Alice and the gateway software are using some formula to convert
+from the amt_to_forward received by TA2 to the one that TB3 is supposed to receive and process.
+If f(amt_to_forward_TA2, price_current) > f(amt_to_forward_TA2, price_alice),
+TA2 may fail and send H4 an error that ultimately will get back to alice.
+We could use amt_to_forward * price nomenclature rather than f(amt_to_forward, price) if you like.
+Let's just remember we need to define price's type though.
+Presumably some approximation of rational numbers that computers can handle reasonably well and
+with a precision that is reasonable enough for our requirements.
+
+Another operation that is required as part of "-*?->" (and that alice must do) that I personally find much more troubling is the
+calculation from amt_to_forward_TA2 to final_cltv_expiry for Bob or the following outgoing_cltv_value if there were more trampoline nodes
+inbetween, or even more gateways and chains.
+With the price we can calculate f(amt_to_forward_AT2, price) = amt_to_forward_BT3 and derive the rest from there,
+even though a trampoline hop payload for TB3 is not needed since it can be assumed by alice to be calculated by carol's gateway
+from what it receives. The point is TB3 doesn't need to know or care about the prices for other gateways after it.
+
+Maybe I am mistaken, but just like with the price we should just be able to define the following:
+
+g(outgoing_cltv_value_TA2, chain_time_translation) = outgoing_cltv_value_TB2
+
+So since Alice would need to calculate g too, in reality update_gateway_route would look like:
+
+- src_chain_id
+- dest_chain_id
+- price (this can include an implicit proportional fee)
+- chain_time_translation
+
+I imagine the type for chain_time_translation to be an imaginary number.
+Actually, not. I usually imagine imaginary numbers as an array with 2 real elements,
+but in this case I think just 2 integers should be fine, sorry.
+Why 2?
+Well, chains not only have different start times and current height, they also potentially have different
+estimated times between blocks (ie bitcoin has 10 minutes, but other chains have other settings).
+I was I assuming something like:
+
+g(outgoing_cltv_value_TA2, chain_time_translation) =
+chain_time_translation_param_1 + (outgoing_cltv_value_TA2 * chain_time_translation_param_2) =
+outgoing_cltv_value_TB2
+
+Please anyone feel free to actually solve that problem before me.
+I haven't thought hard about this because if I assume unity (1 as in algebra class) for both price and chain_time_translation
+I don't actually need to care about the types or the f and g operations, since doing that I know f(x)=x and g(y)=y by definition if x=1 and y=1.
+
+In any case, we know Alice (the payer) needs to calculate f and g for the whole path using some inter-chain gossip. for prices and chain time translation.
+
+As part of "-*?->", Each gateway also should recalculate f and g locally, potentially with different, more updated values of x and y and perhaps return an error.
+
+But beyond those 2 validations "-*?->" is pretty much undefined.
+
+What I really want to define precisely in "-*?->" is how carol's gateway (CG from now on) communicates with TA2 and TB3.
+
+TA2 and TB3 have some kind of plugin or extension to talk to CG and also CG can talk to them via rpc, cli or equivalent.
+We can assume CG, TA2 and TB3 all run in the same machine or local network.
+
+When TA2 receives a trampoline hop for which next's hop is a node in a list of sibling gateway nodes configured on init or in the relevant plugin:
+
+1) TA2 gives the peeled trampoline onion to CG (including the relevant hmac) for it to process it and give an error back or:
+2) CG gives the processed onion to TB3, which processes it even though it perceives it as a loss, for it trusts any message from CG
+3) Any errors received by TB3 must be relied back to TA2 through CG, that's 2 new messages for this mini-protocol within "-*?->"
+
+If everything goes well, I think TB3 needs to communicate one more time with TA2 through CG to pass the payment preimage.
+But I'm not very sure about this part, I should re-read lightning-rfc more times.
+If that's the case, there's 2 more messages here too (one from BT3 to TCG, another from CG to TX2).
+
+I feel the best way to document this communication between CG, TA2 and TB3 is a UML sequence diagram.
+I promise one if people want it. I just need to reinstall plantUML, but I won't do that today.
+
+I hope people can find flaws on my assumptions or reasoning.
+Or perhaps just add more detail to vaguely defined ideas.
+
+Any form of feedback is welcomed.
