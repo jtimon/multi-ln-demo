@@ -11,4 +11,4 @@ mkdir -p /wd/daemon-data/regtest_bitcoind
 mkdir -p /wd/daemon-data/alice_regtest
 mkdir -p /wd/daemon-data/bob_regtest
 
-honcho start -e daemons.env -f regtest-daemons.proc
+honcho start -e /wd/docker/regtest/.env -f /wd/docker/regtest/Procfile

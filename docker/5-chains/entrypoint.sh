@@ -25,4 +25,4 @@ mkdir -p /wd/daemon-data/ezra_chain_4
 mkdir -p /wd/daemon-data/ezra_chain_5
 mkdir -p /wd/daemon-data/fiona_chain_5
 
-honcho start -e daemons.env -f 5-chains-daemons.proc
+honcho start -e /wd/docker/5-chains/.env -f /wd/docker/5-chains/Procfile

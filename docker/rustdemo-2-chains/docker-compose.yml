@@ -1,0 +1,9 @@
+version: '3.6'
+
+services:
+
+  demo:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    entrypoint: /wd/docker/rustdemo-2-chains/entrypoint.sh

@@ -9,45 +9,14 @@ A daemon that is able to operate an arbitrary number of different
 chains is convenient and thus a custom branch will be used instead of
 a released bitcoin version already compiled.
 
-# Run with docker
+# Dependencies
 
-To build things in a local docker container:
+docker and docker-compose.
+See https://docs.docker.com/compose/install/
 
-	docker build --tag=multilndemo .
+# Run
 
-or
-
-	make docker-build
-
-To both build and run that local docker container, there's several options:
-
-	make docker-demo-regtest
-	make docker-demo-2-chains
-	make docker-demo-5-chains
-	make docker-rust-2-chains
-
-
-To persist the daemon states, first create a directory
-/home/jt/code/multilndemovol (change jt to your own user) with `.chain_1`
-to `.chain_5` in it. Then:
-
-```
-docker build --tag=multilndemo . ; docker run -v /home/jt/code/multilndemovol:/wd/daemon-data multilndemo bash -c "bash /wd/regtest-entry-point.sh"
-```
-
-Or use other entry points, see Makefile.
-
-Remove all stopped containers:
-
-```
-docker rm $(docker ps -a -q)
-```
-
-Stop all containers:
-
-```
-docker stop $(docker ps -a -q)
-```
+See Makefile and docker-compose documentation
 
 # Incremental goals
 

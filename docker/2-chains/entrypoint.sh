@@ -14,4 +14,4 @@ mkdir -p /wd/daemon-data/bob_chain_1
 mkdir -p /wd/daemon-data/bob_chain_2
 mkdir -p /wd/daemon-data/carol_chain_2
 
-honcho start -e daemons.env -f rustdemo-2-chains-daemons.proc
+honcho start -e /wd/docker/2-chains/.env -f /wd/docker/2-chains/Procfile

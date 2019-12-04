@@ -90,13 +90,4 @@ COPY setup.py /wd/setup.py
 RUN python /wd/setup.py install
 
 COPY conf /wd/conf
-COPY docker/daemons.env /wd/daemons.env
-COPY docker/rustdemo-2-chains-entry-point.sh /wd/rustdemo-2-chains-entry-point.sh
-COPY docker/rustdemo-2-chains-daemons.proc /wd/rustdemo-2-chains-daemons.proc
-COPY docker/5-chains-entry-point.sh /wd/5-chains-entry-point.sh
-COPY docker/5-chains-daemons.proc /wd/5-chains-daemons.proc
-COPY docker/regtest-entry-point.sh /wd/regtest-entry-point.sh
-COPY docker/regtest-daemons.proc /wd/regtest-daemons.proc
-COPY docker/2-chains-entry-point.sh /wd/2-chains-entry-point.sh
-COPY docker/2-chains-daemons.proc /wd/2-chains-daemons.proc
-CMD bash 2-chains-entry-point.sh
+COPY docker /wd/docker

@@ -1,0 +1,9 @@
+version: '3.6'
+
+services:
+
+  demo:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    entrypoint: /wd/docker/5-chains/entrypoint.sh
