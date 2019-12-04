@@ -30,17 +30,17 @@ while True:
         else:
             error_msg = 'destination invoice expired'
 
-        print('Expired pending request %s: %s' % (pending_request.src_payment_hash, error_msg))
+        print('Expired pending request %s: %s' % (p.src_payment_hash, error_msg))
         db.session.add(FailedRequest(
             error = error_msg,
-            src_payment_hash = pending_request.src_payment_hash,
-            src_chain = pending_request.src_chain,
-            src_bolt11 = pending_request.src_bolt11,
-            src_expires_at = pending_request.src_expires_at,
-            dest_chain = pending_request.dest_chain,
-            dest_bolt11 = pending_request.dest_bolt11,
+            src_payment_hash = p.src_payment_hash,
+            src_chain = p.src_chain,
+            src_bolt11 = p.src_bolt11,
+            src_expires_at = p.src_expires_at,
+            dest_chain = p.dest_chain,
+            dest_bolt11 = p.dest_bolt11,
         ))
-        db.session.delete(pending_request)
+        db.session.delete(p)
         db.session.commit()
 
     count = count + 1
