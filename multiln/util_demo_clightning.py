@@ -27,6 +27,8 @@ def ln_wait_deamons_start(lightningd_map):
                         break
                 except ValueError as e:
                     print('ValueError:', e)
+                except ConnectionRefusedError as e:
+                    print('ConnectionRefusedError:', e)
                 except TypeError as e:
                     print('TypeError:', e)
                 except FileNotFoundError as e:
