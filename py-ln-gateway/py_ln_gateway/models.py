@@ -51,6 +51,7 @@ class PaidRequest(db.Model):
 class FailedRequest(db.Model):
     __tablename__ = 'failed_requests'
 
+    error = db.Column(db.String(2500))
     src_payment_hash = db.Column(db.String(FIELD_32B_AS_HEX_STR), primary_key=True)
 
     src_chain = db.Column(db.String(FIELD_32B_AS_HEX_STR))
