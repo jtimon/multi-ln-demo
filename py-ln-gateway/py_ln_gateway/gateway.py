@@ -22,7 +22,7 @@ from hashlib import sha256
 from lightning import LightningRpc
 
 from py_ln_gateway.bech32 import bech32_decode
-from py_ln_gateway.db import db
+from py_ln_gateway.db import db_session
 from py_ln_gateway.models import (
     FailedRequest,
     MAX_BOLT11,
@@ -173,7 +173,7 @@ class Gateway(object):
         if len(src_invoice['bolt11']) > MAX_BOLT11:
             return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
 
-        db.session.add(PendingRequest(
+        db_session.add(PendingRequest(
             src_payment_hash = src_invoice['payment_hash'],
             src_chain = src_chain_id,
             src_bolt11 = src_invoice['bolt11'],
@@ -184,7 +184,7 @@ class Gateway(object):
             dest_expires_at = datetime.utcfromtimestamp(dest_invoice['created_at'] + dest_invoice['expiry']),
             dest_amount = int(dest_amount_msats)
         ))
-        db.session.commit()
+        db_session.commit()
         return src_invoice
 
     def check_paid_to_own_node(self, payment_hash, src_chain_id):
@@ -246,7 +246,7 @@ class Gateway(object):
         src_current_offer = pending_request.dest_amount * price.price
         if Decimal(pending_request.src_amount) < src_current_offer:
             error = "The offered price is no longer accepted."
-            db.session.add(FailedRequest(
+            db_session.add(FailedRequest(
                 error = error,
                 src_payment_hash = payment_hash,
                 src_payment_preimage = payment_preimage,
@@ -258,8 +258,8 @@ class Gateway(object):
                 dest_expires_at = pending_request.dest_expires_at,
             ))
             # Delete from pending_requests when failing too
-            db.session.delete(pending_request)
-            db.session.commit()
+            db_session.delete(pending_request)
+            db_session.commit()
             return {
                 'error': error,
                 'src_payment_hash': payment_hash,
@@ -269,7 +269,7 @@ class Gateway(object):
 
         try:
             result = self.sibling_nodes[pending_request.dest_chain].pay(pending_request.dest_bolt11)
-            db.session.add(PaidRequest(
+            db_session.add(PaidRequest(
                 src_payment_hash = payment_hash,
                 src_chain = pending_request.src_chain,
                 src_bolt11 = pending_request.src_bolt11,
@@ -281,8 +281,8 @@ class Gateway(object):
                 dest_payment_hash = result['payment_hash'],
                 dest_payment_preimage = result['payment_preimage'],
             ))
-            db.session.delete(pending_request)
-            db.session.commit()
+            db_session.delete(pending_request)
+            db_session.commit()
         except Exception as e:
             print(type(e))
             print(e)
@@ -290,7 +290,7 @@ class Gateway(object):
             # We could refund by opening a channel with some initial funds back to the customer,
             # but then we need to have the node id on the initial request.
             # Alternatively we can accept a refund invoice in this call.
-            db.session.add(FailedRequest(
+            db_session.add(FailedRequest(
                 error = str(e),
                 src_payment_hash = payment_hash,
                 src_payment_preimage = payment_preimage,
@@ -302,8 +302,8 @@ class Gateway(object):
                 dest_expires_at = pending_request.dest_expires_at,
             ))
             # Delete from pending_requests when failing too
-            db.session.delete(pending_request)
-            db.session.commit()
+            db_session.delete(pending_request)
+            db_session.commit()
             return {
                 'error': 'Error paying request.',
                 'src_payment_hash': payment_hash,

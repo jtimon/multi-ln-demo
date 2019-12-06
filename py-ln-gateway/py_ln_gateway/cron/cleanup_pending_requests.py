@@ -9,7 +9,7 @@ import time
 from sqlalchemy import or_
 
 from py_ln_gateway.app import app
-from py_ln_gateway.db import db
+from py_ln_gateway.db import db_session
 from py_ln_gateway.models import (
     FailedRequest,
     PendingRequest,
@@ -31,7 +31,7 @@ while True:
             error_msg = 'destination invoice expired'
 
         print('Expired pending request %s: %s' % (p.src_payment_hash, error_msg))
-        db.session.add(FailedRequest(
+        db_session.add(FailedRequest(
             error = error_msg,
             src_payment_hash = p.src_payment_hash,
             src_chain = p.src_chain,
@@ -40,8 +40,8 @@ while True:
             dest_chain = p.dest_chain,
             dest_bolt11 = p.dest_bolt11,
         ))
-        db.session.delete(p)
-        db.session.commit()
+        db_session.delete(p)
+        db_session.commit()
 
     count = count + 1
     time.sleep(30)
