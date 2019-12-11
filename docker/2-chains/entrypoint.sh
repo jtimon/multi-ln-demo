@@ -6,9 +6,6 @@ set -e
 mkdir -p /wd/daemon-data
 chown -R $user:$user /wd/daemon-data
 
-mkdir -p /wd/daemon-data/regtest_bitcoind
-mkdir -p /wd/daemon-data/chain_2_bitcoind
-
 mkdir -p /wd/daemon-data/alice_regtest
 mkdir -p /wd/daemon-data/bob_regtest
 mkdir -p /wd/daemon-data/bob_chain_2

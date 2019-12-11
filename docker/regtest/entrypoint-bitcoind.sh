@@ -6,7 +6,6 @@ set -e
 mkdir -p /wd/daemon-data
 chown -R $user:$user /wd/daemon-data
 
-mkdir -p /wd/daemon-data/alice_regtest
-mkdir -p /wd/daemon-data/bob_regtest
+mkdir -p /wd/daemon-data/regtest_bitcoind
 
-honcho start -e /wd/docker/regtest/.env -f /wd/docker/regtest/Procfile
+honcho start -f /wd/docker/regtest/bitcoind.Procfile

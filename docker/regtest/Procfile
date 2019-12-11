@@ -5,11 +5,6 @@
 demo: PYTHONUNBUFFERED=true python /wd/multiln/bin/demo.py regtest
 
 
-# bitcoind nodes:
-
-regtest_bitcoind: bitcoind -chain=regtest -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/regtest_bitcoind/
-
-
 # clightning nodes:
 
 alice_regtest: sleep 1 ; lightningd --conf=/wd/conf/alice_regtest.conf --lightning-dir=/wd/daemon-data/alice_regtest/

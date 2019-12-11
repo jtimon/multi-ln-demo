@@ -7,14 +7,17 @@ all: docker-demo-2-chains
 
 docker-demo-regtest:
 	export DEMO_ENTRYPOINT=/wd/docker/regtest/entrypoint.sh ; \
+	export BITCOIND_ENTRYPOINT=/wd/docker/regtest/entrypoint-bitcoind.sh ; \
 	cd docker && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
 
 docker-demo-2-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/2-chains/entrypoint.sh ; \
+	export BITCOIND_ENTRYPOINT=/wd/docker/2-chains/entrypoint-bitcoind.sh ; \
 	cd docker && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
 
 docker-demo-3-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/3-chains/entrypoint.sh ; \
+	export BITCOIND_ENTRYPOINT=/wd/docker/3-chains/entrypoint-bitcoind.sh ; \
 	cd docker && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
 
 docker-rust-2-chains:

@@ -13,6 +13,23 @@ services:
     entrypoint: ${DEMO_ENTRYPOINT}
     depends_on:
       - db
+      - daemons
+    networks:
+      - backend-network
+
+  daemons:
+    build:
+      context: ../
+      dockerfile: docker/bitcoind.Dockerfile
+    entrypoint: ${BITCOIND_ENTRYPOINT}
+    ports:
+      - "18515:18515"
+      - "18555:18555"
+      - "18565:18565"
+    expose:
+      - "18515"
+      - "18555"
+      - "18565"
     networks:
       - backend-network
 
