@@ -5,5 +5,5 @@ services:
   demo:
     build:
       context: ../../
-      dockerfile: Dockerfile
+      dockerfile: docker/py-demo.Dockerfile
     entrypoint: /wd/docker/5-chains/entrypoint.sh

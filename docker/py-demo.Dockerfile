@@ -1,5 +1,6 @@
 FROM ubuntu:18.04
 
+# TODO cleaunup dependencies
 RUN apt-get -yqq update \
   && apt-get install -y software-properties-common \
   && add-apt-repository ppa:bitcoin/bitcoin \
@@ -45,12 +46,6 @@ WORKDIR /wd
 RUN ln -s /usr/bin/python3 /usr/bin/python && \
     ln -s /usr/bin/pip3 /usr/bin/pip
 
-# Install cargo for rust builds
-RUN cd /root \
-    && curl -s -L -O https://static.rust-lang.org/rustup.sh \
-    && bash ./rustup.sh -y --verbose
-ENV PATH="/root/.cargo/bin:${PATH}"
-
 COPY docker/build-daemon.sh /wd/build-daemon.sh
 # Build custom daemon able to produce and support an arbitrary number of chains
 # This corresponds to https://github.com/bitcoin/bitcoin/pull/8994
@@ -70,12 +65,6 @@ ENV PATH="/wd/$LN_REPO_NAME/lightningd:${PATH}"
 
 RUN cd /wd/$LN_REPO_NAME/contrib/pylightning && \
     python3 setup.py develop
-
-COPY rustdemo/Cargo.toml /wd/rustdemo/Cargo.toml
-COPY rustdemo/src /wd/rustdemo/src
-RUN cd /wd/rustdemo && \
-    cargo test && \
-    cargo build --release
 
 COPY py-ln-gateway/requirements.txt /wd/py-ln-gateway/requirements.txt
 RUN pip install -r /wd/py-ln-gateway/requirements.txt --require-hashes
