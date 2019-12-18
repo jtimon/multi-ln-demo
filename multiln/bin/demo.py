@@ -197,7 +197,7 @@ demo_pay_every_chain(LIGHTNINGD)
 # Try to pay an invoice from carol on chain_2 from alice on regtest
 demo_2_chains_fail(LIGHTNINGD)
 
-# TODO Pay from alice to fiona using lightning
+# TODO Pay from alice to david using lightning
 
 # import json
 # print(json.dumps(LIGHTNINGD[EXAMPLE_CHAIN]['alice'].help(), indent=4, sort_keys=True))
