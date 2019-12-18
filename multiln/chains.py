@@ -7,13 +7,6 @@ CHAINS = {
         'users': ['alice', 'bob'],
     },
 
-    'chain_1': {
-        'id': '58ebd25d25b128530d4d462c65a7e679b7e053e6f25ffb8ac63bc68832fda201',
-        'petname': 'chain_1',
-        'port_decimal': 4,
-        'users': ['alice', 'bob'],
-    },
-
     'chain_2': {
         'id': 'e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7',
         'petname': 'chain_2',

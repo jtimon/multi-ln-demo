@@ -32,7 +32,7 @@ See Makefile and docker-compose documentation
 
 # First goal: pay between two chains
 
-- Alice, with channels opened only on chain_1
+- Alice, with channels opened only on regtest
 - Carol with channels opened only on chain_2
 
 Alice should be able to pay an invoice from Carol, even though the invoice is for chain_2
@@ -46,7 +46,7 @@ connect to different networks and is willing to route payments through
 them under its own criteria.
 
 - Bob has a gateway
-- Bob's gateway has channels opened on both chain_1 and chain_2
+- Bob's gateway has channels opened on both regtest and chain_2
 
 ## Step A.1: Non atomic routing
 
