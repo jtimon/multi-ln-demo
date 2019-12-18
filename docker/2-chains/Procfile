@@ -2,7 +2,7 @@
 # A python script to make the rpc calls:
 
 # PYTHONUNBUFFERED is bad for performance https://honcho.readthedocs.io/en/latest/using_procfiles.html#buffered-output
-demo: PYTHONUNBUFFERED=true python /wd/multiln/bin/demo.py chain_1 chain_2
+demo: PYTHONUNBUFFERED=true python /wd/multiln/bin/demo.py regtest chain_2
 
 py_gateway: export FLASK_ENV=development export LC_ALL=C.UTF-8 export LANG=C.UTF-8 export FLASK_APP=/wd/py-ln-gateway/py_ln_gateway/app.py ; PYTHONUNBUFFERED=true flask run
 
@@ -12,16 +12,16 @@ gw_clean_pending: PYTHONUNBUFFERED=true python /wd/py-ln-gateway/py_ln_gateway/c
 
 # bitcoind nodes:
 
-chain_1_bitcoind: bitcoind -chain=chain_1 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_1_bitcoind/
+regtest_bitcoind: bitcoind -chain=regtest -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/regtest_bitcoind/
 
 chain_2_bitcoind: bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_2_bitcoind/
 
 
 # clightning nodes:
 
-alice_chain_1: sleep 1 ; lightningd --conf=/wd/conf/alice_chain_1.conf --lightning-dir=/wd/daemon-data/alice_chain_1/
+alice_regtest: sleep 1 ; lightningd --conf=/wd/conf/alice_regtest.conf --lightning-dir=/wd/daemon-data/alice_regtest/
 
-bob_chain_1: sleep 1 ; lightningd --conf=/wd/conf/bob_chain_1.conf --lightning-dir=/wd/daemon-data/bob_chain_1/
+bob_regtest: sleep 1 ; lightningd --conf=/wd/conf/bob_regtest.conf --lightning-dir=/wd/daemon-data/bob_regtest/
 
 bob_chain_2: sleep 1 ; lightningd --conf=/wd/conf/bob_chain_2.conf --lightning-dir=/wd/daemon-data/bob_chain_2/
 

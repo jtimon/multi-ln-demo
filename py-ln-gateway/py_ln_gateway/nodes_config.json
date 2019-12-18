@@ -6,10 +6,6 @@
             "petname": "regtest",
             "id": "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206"
 	},
-	"bca": {
-            "petname": "chain_1",
-            "id": "58ebd25d25b128530d4d462c65a7e679b7e053e6f25ffb8ac63bc68832fda201"
-	},
 	"bcb": {
             "petname": "chain_2",
             "id": "e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7"
@@ -30,7 +26,7 @@
 
     "nodes":
     {
-	"58ebd25d25b128530d4d462c65a7e679b7e053e6f25ffb8ac63bc68832fda201": "/wd/daemon-data/bob_chain_1/lightning-rpc",
+	"0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206": "/wd/daemon-data/bob_regtest/lightning-rpc",
 	"e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7": "/wd/daemon-data/bob_chain_2/lightning-rpc"
     }
 }

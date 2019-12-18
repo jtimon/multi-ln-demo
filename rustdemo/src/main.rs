@@ -17,7 +17,7 @@ fn main() {
 
     let mut chains = std::collections::HashMap::new();
 
-    chains.insert("chain_1", ChainConfig {
+    chains.insert("regtest", ChainConfig {
         port_decimal: 4,
         users: vec![String::from("alice"), String::from("bob")],
     });

@@ -6,7 +6,7 @@ set -e
 mkdir -p /wd/daemon-data
 chown -R $user:$user /wd/daemon-data
 
-mkdir -p /wd/daemon-data/chain_1_bitcoind
+mkdir -p /wd/daemon-data/regtest_bitcoind
 mkdir -p /wd/daemon-data/chain_2_bitcoind
 mkdir -p /wd/daemon-data/chain_3_bitcoind
 mkdir -p /wd/daemon-data/chain_4_bitcoind
@@ -14,8 +14,6 @@ mkdir -p /wd/daemon-data/chain_5_bitcoind
 
 mkdir -p /wd/daemon-data/alice_regtest
 mkdir -p /wd/daemon-data/bob_regtest
-mkdir -p /wd/daemon-data/alice_chain_1
-mkdir -p /wd/daemon-data/bob_chain_1
 mkdir -p /wd/daemon-data/bob_chain_2
 mkdir -p /wd/daemon-data/carol_chain_2
 mkdir -p /wd/daemon-data/carol_chain_3
