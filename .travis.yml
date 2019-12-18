@@ -8,9 +8,9 @@ after_success:
 jobs:
   include:
 
-    - name: '5 chains'
+    - name: '3 chains'
       script:
-        - make docker-demo-5-chains
+        - make docker-demo-3-chains
 
     - name: '1 chain (regtest)'
       script:

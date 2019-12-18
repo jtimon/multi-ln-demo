@@ -2,7 +2,7 @@
 # A python script to make the rpc calls:
 
 # PYTHONUNBUFFERED is bad for performance https://honcho.readthedocs.io/en/latest/using_procfiles.html#buffered-output
-demo: PYTHONUNBUFFERED=true python /wd/multiln/bin/demo.py regtest chain_2 chain_3 chain_4 chain_5
+demo: PYTHONUNBUFFERED=true python /wd/multiln/bin/demo.py regtest chain_2 chain_3
 
 py_gateway: export FLASK_ENV=development export LC_ALL=C.UTF-8 export LANG=C.UTF-8 export FLASK_APP=/wd/py-ln-gateway/py_ln_gateway/app.py ; PYTHONUNBUFFERED=true flask run
 
@@ -18,10 +18,6 @@ chain_2_bitcoind: bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=
 
 chain_3_bitcoind: bitcoind -chain=chain_3 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_3_bitcoind/
 
-chain_4_bitcoind: bitcoind -chain=chain_4 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_4_bitcoind/
-
-chain_5_bitcoind: bitcoind -chain=chain_5 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_5_bitcoind/
-
 # clightning nodes:
 
 alice_regtest: sleep 1 ; lightningd --conf=/wd/conf/alice_regtest.conf --lightning-dir=/wd/daemon-data/alice_regtest/
@@ -35,11 +31,3 @@ carol_chain_2: sleep 1 ; lightningd --conf=/wd/conf/carol_chain_2.conf --lightni
 carol_chain_3: sleep 1 ; lightningd --conf=/wd/conf/carol_chain_3.conf --lightning-dir=/wd/daemon-data/carol_chain_3/
 
 david_chain_3: sleep 1 ; lightningd --conf=/wd/conf/david_chain_3.conf --lightning-dir=/wd/daemon-data/david_chain_3/
-
-david_chain_4: sleep 1 ; lightningd --conf=/wd/conf/david_chain_4.conf --lightning-dir=/wd/daemon-data/david_chain_4/
-
-ezra_chain_4: sleep 1 ; lightningd --conf=/wd/conf/ezra_chain_4.conf --lightning-dir=/wd/daemon-data/ezra_chain_4/
-
-ezra_chain_5: sleep 1 ; lightningd --conf=/wd/conf/ezra_chain_5.conf --lightning-dir=/wd/daemon-data/ezra_chain_5/
-
-fiona_chain_5: sleep 1 ; lightningd --conf=/wd/conf/fiona_chain_5.conf --lightning-dir=/wd/daemon-data/fiona_chain_5/
