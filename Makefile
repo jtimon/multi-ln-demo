@@ -6,13 +6,13 @@
 all: docker-demo-2-chains
 
 docker-demo-regtest:
-	cd docker/regtest && docker-compose up --build --force-recreate
+	export DEMO_ENTRYPOINT=/wd/docker/regtest/entrypoint.sh ; cd docker && docker-compose up --build --force-recreate
 
 docker-demo-2-chains:
-	cd docker/2-chains && docker-compose up --build --force-recreate
+	export DEMO_ENTRYPOINT=/wd/docker/2-chains/entrypoint.sh ; cd docker && docker-compose up --build --force-recreate
 
 docker-demo-3-chains:
-	cd docker/3-chains && docker-compose up --build --force-recreate
+	export DEMO_ENTRYPOINT=/wd/docker/3-chains/entrypoint.sh ; cd docker && docker-compose up --build --force-recreate
 
 docker-rust-2-chains:
 	cd docker/rustdemo-2-chains && docker-compose up --build --force-recreate

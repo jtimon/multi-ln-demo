@@ -1,9 +1,0 @@
-version: '3.6'
-
-services:
-
-  demo:
-    build:
-      context: ../../
-      dockerfile: docker/py-demo.Dockerfile
-    entrypoint: /wd/docker/regtest/entrypoint.sh
