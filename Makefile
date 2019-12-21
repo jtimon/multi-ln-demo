@@ -6,13 +6,16 @@
 all: docker-demo-2-chains
 
 docker-demo-regtest:
-	export DEMO_ENTRYPOINT=/wd/docker/regtest/entrypoint.sh ; cd docker && docker-compose up --build --force-recreate
+	export DEMO_ENTRYPOINT=/wd/docker/regtest/entrypoint.sh ; \
+	cd docker && docker-compose up --build --force-recreate --abort-on-container-exit
 
 docker-demo-2-chains:
-	export DEMO_ENTRYPOINT=/wd/docker/2-chains/entrypoint.sh ; cd docker && docker-compose up --build --force-recreate
+	export DEMO_ENTRYPOINT=/wd/docker/2-chains/entrypoint.sh ; \
+	cd docker && docker-compose up --build --force-recreate --abort-on-container-exit
 
 docker-demo-3-chains:
-	export DEMO_ENTRYPOINT=/wd/docker/3-chains/entrypoint.sh ; cd docker && docker-compose up --build --force-recreate
+	export DEMO_ENTRYPOINT=/wd/docker/3-chains/entrypoint.sh ; \
+	cd docker && docker-compose up --build --force-recreate --abort-on-container-exit
 
 docker-rust-2-chains:
-	cd docker/rustdemo-2-chains && docker-compose up --build --force-recreate
+	cd docker/rustdemo-2-chains && docker-compose up --build --force-recreate --abort-on-container-exit
