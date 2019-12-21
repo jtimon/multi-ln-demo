@@ -16,7 +16,6 @@ class Price(Base):
 
     # The id is composed by the src_chain_id followed by ':' and then the dest_chain_id
     src_dest = Column(String((2 * FIELD_32B_AS_HEX_STR) + 1), primary_key=True)
-    # TODO FIX Warning: Dialect sqlite+pysqlite does *not* support Decimal objects natively, and SQLAlchemy must convert from floating point - rounding errors and other issues may occur. Please consider storing Decimal numbers as strings or integers on this platform for lossless storage.
     price = Column(Numeric(10,4))
 
 class PendingRequest(Base):

@@ -1,5 +1,9 @@
 version: '3.6'
 
+networks:
+  backend-network:
+    driver: bridge
+
 services:
 
   demo:
@@ -7,3 +11,21 @@ services:
       context: ../
       dockerfile: docker/py-demo.Dockerfile
     entrypoint: ${DEMO_ENTRYPOINT}
+    depends_on:
+      - db
+    networks:
+      - backend-network
+
+  db:
+    image: postgres:11.1
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: gateway_db
+    restart: on-failure
+    networks:
+      - backend-network
