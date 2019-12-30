@@ -46,7 +46,17 @@ WORKDIR /wd
 RUN ln -s /usr/bin/python3 /usr/bin/python && \
     ln -s /usr/bin/pip3 /usr/bin/pip
 
-# TODO install pylightning in a simpler way
+# TODO Remove this, only needed for the cli for lightning
+COPY docker/build-daemon.sh /wd/build-daemon.sh
+# Build custom daemon able to produce and support an arbitrary number of chains
+# This corresponds to https://github.com/bitcoin/bitcoin/pull/17037
+ENV DAEMON_NAME=bitcoin
+ENV BRANCH_COMMIT=demo-multiln-6
+ENV REPO_HOST=https://github.com/jtimon
+ENV REPO_NAME=bitcoin
+RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
+ENV PATH="/wd/$REPO_NAME/src:${PATH}"
+
 COPY docker/build-clightning.sh /wd/build-clightning.sh
 ENV LN_BRANCH_COMMIT=v0.7.2.1-demo-3
 ENV LN_REPO_HOST=https://github.com/jtimon
@@ -54,19 +64,8 @@ ENV LN_REPO_NAME=lightning
 RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
 ENV PATH="/wd/$LN_REPO_NAME/lightningd:${PATH}"
 
-RUN cd /wd/$LN_REPO_NAME/contrib/pylightning && \
-    python3 setup.py develop
-
-COPY py-ln-gateway/requirements.txt /wd/py-ln-gateway/requirements.txt
-RUN pip install -r /wd/py-ln-gateway/requirements.txt --require-hashes
-COPY py-ln-gateway /wd/py-ln-gateway
-RUN cd /wd/py-ln-gateway && python setup.py install
-
-COPY docker/requirements.txt /wd/requirements.txt
-RUN pip install -r requirements.txt --require-hashes
-COPY multiln /wd/multiln
-COPY setup.py /wd/setup.py
-RUN python /wd/setup.py install
+COPY docker/honcho-requirements.txt /wd/honcho-requirements.txt
+RUN pip3 install -r honcho-requirements.txt --require-hashes
 
 COPY conf /wd/conf
 COPY docker /wd/docker

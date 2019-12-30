@@ -8,17 +8,23 @@ all: docker-demo-2-chains
 docker-demo-regtest:
 	export DEMO_ENTRYPOINT=/wd/docker/regtest/entrypoint.sh ; \
 	export BITCOIND_PROCFILE=/wd/docker/regtest/bitcoind.Procfile ; \
-	cd docker && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
+	export LIGHTNINGD_PROCFILE=/wd/docker/regtest/lightningd.Procfile ; \
+	cd docker && docker-compose down -v && \
+	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
 
 docker-demo-2-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/2-chains/entrypoint.sh ; \
 	export BITCOIND_PROCFILE=/wd/docker/2-chains/bitcoind.Procfile ; \
-	cd docker && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
+	export LIGHTNINGD_PROCFILE=/wd/docker/2-chains/lightningd.Procfile ; \
+	cd docker && docker-compose down -v && \
+	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
 
 docker-demo-3-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/3-chains/entrypoint.sh ; \
 	export BITCOIND_PROCFILE=/wd/docker/3-chains/bitcoind.Procfile ; \
-	cd docker && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
+	export LIGHTNINGD_PROCFILE=/wd/docker/3-chains/lightningd.Procfile ; \
+	cd docker && docker-compose down -v && \
+	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
 
 docker-rust-2-chains:
 	cd docker/rustdemo-2-chains && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit

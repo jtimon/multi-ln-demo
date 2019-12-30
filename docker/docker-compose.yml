@@ -14,6 +14,9 @@ services:
     depends_on:
       - db
       - daemons
+      - lightningds
+    volumes:
+      - "clightning_datadir:/wd/daemon-data"
     networks:
       - backend-network
 
@@ -35,6 +38,18 @@ services:
     networks:
       - backend-network
 
+  lightningds:
+    build:
+      context: ../
+      dockerfile: docker/clightning.Dockerfile
+    entrypoint: "/wd/docker/entrypoint-lightningd.sh"
+    environment:
+      LIGHTNINGD_PROCFILE: ${LIGHTNINGD_PROCFILE}
+    volumes:
+      - "clightning_datadir:/wd/daemon-data"
+    networks:
+      - backend-network
+
   db:
     image: postgres:11.1
     ports:
@@ -48,3 +63,6 @@ services:
     restart: on-failure
     networks:
       - backend-network
+
+volumes:
+  clightning_datadir:
