@@ -48,9 +48,9 @@ RUN ln -s /usr/bin/python3 /usr/bin/python && \
 
 COPY docker/build-daemon.sh /wd/build-daemon.sh
 # Build custom daemon able to produce and support an arbitrary number of chains
-# This corresponds to https://github.com/bitcoin/bitcoin/pull/8994
+# This corresponds to https://github.com/bitcoin/bitcoin/pull/17037
 ENV DAEMON_NAME=bitcoin
-ENV BRANCH_COMMIT=demo-multiln-4
+ENV BRANCH_COMMIT=demo-multiln-6
 ENV REPO_HOST=https://github.com/jtimon
 ENV REPO_NAME=bitcoin
 RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
