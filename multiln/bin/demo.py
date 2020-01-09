@@ -80,12 +80,12 @@ def demo_pay_every_chain(lightningd_map):
                     print(ln_caller_a.pay(invoice['bolt11']))
             break
 
-# Try to pay an invoice from carol on chain_2 from alice on regtest
-def demo_2_chains_fail(lightningd_map):
+# alice on regtest pays an invoice to carol on chain_2 through gateway bob with nodes on both chains
+def demo_2_chains_gateway_payment(lightningd_map):
     if N_CHAINS < 2:
         return
 
-    print('--------Running demo_2_chains_fail()...')
+    print('--------Running demo_2_chains_gateway_payment()...')
     # TODO Select the users in a more dynamic way
     user_name_a = 'alice'
     chain_name_a = 'regtest'
@@ -195,7 +195,7 @@ ln_listchannels(LIGHTNINGD)
 demo_pay_every_chain(LIGHTNINGD)
 
 # Try to pay an invoice from carol on chain_2 from alice on regtest
-demo_2_chains_fail(LIGHTNINGD)
+demo_2_chains_gateway_payment(LIGHTNINGD)
 
 # TODO Pay from alice to david using lightning
 
