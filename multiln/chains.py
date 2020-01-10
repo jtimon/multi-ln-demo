@@ -9,11 +9,11 @@ CHAINS = {
         'users': ['alice', 'bob'],
     },
 
-    'chain_2': {
-        'id': 'e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7',
-        'petname': 'chain_2',
-        'bip173_name': 'bcb',
-        'host_url': 'bitcoind_chain_2',
+    'liquid-regtest': {
+        'id': '9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6',
+        'petname': 'liquid-regtest',
+        'bip173_name': 'ert',
+        'host_url': 'elementsd_liquid_regtest',
         'port_decimal': 5,
         'users': ['bob', 'carol'],
     },

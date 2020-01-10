@@ -21,7 +21,7 @@ fn main() {
         port_decimal: 4,
         users: vec![String::from("alice"), String::from("bob")],
     });
-    chains.insert("chain_2", ChainConfig {
+    chains.insert("liquid-regtest", ChainConfig {
         port_decimal: 5,
         users: vec![String::from("bob"), String::from("carol")],
     });

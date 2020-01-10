@@ -6,9 +6,9 @@
             "petname": "regtest",
             "id": "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206"
 	},
-	"bcb": {
-            "petname": "chain_2",
-            "id": "e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7"
+	"ert": {
+            "petname": "liquid-regtest",
+            "id": "9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6"
 	},
 	"bcc": {
             "petname": "chain_3",
@@ -19,6 +19,6 @@
     "nodes":
     {
 	"0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206": "/wd/clightning_datadir_bob_regtest/lightning-rpc",
-	"e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7": "/wd/clightning_datadir_bob_chain_2/lightning-rpc"
+	"9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6": "/wd/clightning_datadir_bob_liquid_regtest/lightning-rpc"
     }
 }

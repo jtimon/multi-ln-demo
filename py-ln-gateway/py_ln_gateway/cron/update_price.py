@@ -24,7 +24,7 @@ def add_or_update_price(src_chain, dest_chain, next_price_val):
 
 # We really just need to set it once if it's going to be constant
 add_or_update_price('0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206',
-                    'e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7',
+                    '9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6',
                     1)
 
 count = 1
@@ -32,7 +32,7 @@ while True:
     print('total repetitions for %s = %s' % (__file__, count))
     # This could periodically call the API for exchanges to update prices
     add_or_update_price('0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206',
-                        'e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7',
+                        '9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6',
                         1)
     count = count + 1
     time.sleep(60)

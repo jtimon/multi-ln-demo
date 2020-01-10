@@ -6,7 +6,7 @@ from lightning import LightningRpc
 from multiln.util import wait_for
 
 def get_clightningd(user_name, chain_name):
-    return LightningRpc('/wd/clightning_datadir_%s_%s/lightning-rpc' % (user_name, chain_name))
+    return LightningRpc('/wd/clightning_datadir_%s_%s/lightning-rpc' % (user_name, chain_name.replace("-", "_")))
 
 def ln_init_global(chains):
     to_return = {}
@@ -115,5 +115,5 @@ def ln_connect_nodes(lightningd_map, ln_info):
                     print('Connecting %s to %s in chain %s, port %s id %s' % (
                         user_name_a, user_name_b, chain_name, info_b['binding'][0]['port'], info_b['id']))
                     rpccaller.connect(info_b['id'],
-                                      host='clightning_%s_%s' % (user_name_b, chain_name),
+                                      host='clightning_%s_%s' % (user_name_b, chain_name.replace("-", "_")),
                                       port=info_b['binding'][0]['port'])

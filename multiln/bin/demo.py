@@ -81,7 +81,7 @@ def demo_pay_every_chain(lightningd_map):
                     print(ln_caller_a.pay(invoice['bolt11']))
             break
 
-# alice on regtest pays an invoice to carol on chain_2 through gateway bob with nodes on both chains
+# alice on regtest pays an invoice to carol on liquid-regtest through gateway bob with nodes on both chains
 def demo_2_chains_gateway_payment(lightningd_map):
     if N_CHAINS < 2:
         return
@@ -92,7 +92,7 @@ def demo_2_chains_gateway_payment(lightningd_map):
     chain_name_a = 'regtest'
     user_name_gateway = 'bob'
     user_name_b = 'carol'
-    chain_name_b = 'chain_2'
+    chain_name_b = 'liquid-regtest'
 
     msatoshi = 1000
     print('%s on chain %s receives invoice for %s msatoshis from %s on chain %s' % (user_name_a, chain_name_a, msatoshi, user_name_b, chain_name_b))
@@ -108,9 +108,13 @@ def demo_2_chains_gateway_payment(lightningd_map):
         print(e.error['message'])
         assert(e.method == 'pay')
         assert(e.error['code'] == 205 # Invoice is for another network
-               or e.error['code'] == -32602) # Invalid bolt11: Unknown chain
+               or e.error['code'] == -32602 # Invalid bolt11: Unknown chain
+               or e.error['code'] == 205 # Could not find a route
+        )
         assert(e.error['message'] == 'Invoice is for another network %s' % chain_name_b
-               or e.error['message'] == 'Invalid bolt11: Unknown chain %s' % CHAINS[chain_name_b]['bip173_name'])
+               or e.error['message'] == 'Invalid bolt11: Unknown chain %s' % CHAINS[chain_name_b]['bip173_name']
+               or e.error['message'] == 'Could not find a route'
+        )
         assert('bolt11' in e.payload)
 
     print(requests.get(GATEWAY_URL + "/get_accepted_chains").json())
@@ -197,7 +201,7 @@ ln_listchannels(LIGHTNINGD)
 
 demo_pay_every_chain(LIGHTNINGD)
 
-# Try to pay an invoice from carol on chain_2 from alice on regtest
+# Try to pay an invoice to carol on liquid-regtest from alice on regtest
 demo_2_chains_gateway_payment(LIGHTNINGD)
 
 # TODO Pay from alice to david using lightning
