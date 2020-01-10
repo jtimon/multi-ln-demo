@@ -19,7 +19,7 @@ import json
 import re
 
 from hashlib import sha256
-from lightning import LightningRpc
+from pyln.client import LightningRpc
 
 from py_ln_gateway.bech32 import bech32_decode
 from py_ln_gateway.db import db_session
