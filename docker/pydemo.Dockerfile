@@ -48,7 +48,7 @@ RUN ln -s /usr/bin/python3 /usr/bin/python && \
 
 # TODO install pylightning in a simpler way
 COPY docker/build-clightning.sh /wd/build-clightning.sh
-ENV LN_BRANCH_COMMIT=v0.7.2.1-demo-3
+ENV LN_BRANCH_COMMIT=v0.7.3-demo-4
 ENV LN_REPO_HOST=https://github.com/jtimon
 ENV LN_REPO_NAME=lightning
 RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
