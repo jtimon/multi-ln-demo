@@ -7,20 +7,20 @@ all: docker-demo-2-chains
 
 docker-demo-regtest:
 	export DEMO_ENTRYPOINT=/wd/docker/regtest/entrypoint.sh ; \
-	cd docker && \
+	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale bitcoind_chain_2=0 \
 	--scale bitcoind_chain_3=0 \
 
 docker-demo-2-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/2-chains/entrypoint.sh ; \
-	cd docker && \
+	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale bitcoind_chain_3=0 \
 
 docker-demo-3-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/3-chains/entrypoint.sh ; \
-	cd docker && \
+	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 
 docker-rust-2-chains:
