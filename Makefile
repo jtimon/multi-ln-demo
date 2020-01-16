@@ -7,7 +7,6 @@ all: docker-demo-2-chains
 
 pydemo-regtest:
 	export PYDEMO_CHAINS=regtest ; \
-	export LIGHTNINGD_PROCFILE=/wd/docker/regtest/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale rsdemo=0 \
@@ -15,28 +14,33 @@ pydemo-regtest:
 	--scale bob_gateway=0 \
 	--scale bitcoind_chain_2=0 \
 	--scale bitcoind_chain_3=0 \
+	--scale clightning_bob_chain_2=0 \
+	--scale clightning_carol_chain_2=0 \
+	--scale clightning_carol_chain_3=0 \
+	--scale clightning_david_chain_3=0 \
 
 pydemo-2-chains:
 	export PYDEMO_CHAINS=regtest,chain_2 ; \
-	export LIGHTNINGD_PROCFILE=/wd/docker/2-chains/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale rsdemo=0 \
 	--scale bitcoind_chain_3=0 \
+	--scale clightning_carol_chain_3=0 \
+	--scale clightning_david_chain_3=0 \
 
 pydemo-3-chains:
 	export PYDEMO_CHAINS=regtest,chain_2,chain_3 ; \
-	export LIGHTNINGD_PROCFILE=/wd/docker/3-chains/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale rsdemo=0 \
 
 rsdemo-2-chains:
-	export LIGHTNINGD_PROCFILE=/wd/docker/2-chains/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale pydemo=0 \
 	--scale bitcoind_chain_3=0 \
+	--scale clightning_carol_chain_3=0 \
+	--scale clightning_david_chain_3=0 \
 
 # TODO fix this: $() isn't working properly
 docker-clean-containers:

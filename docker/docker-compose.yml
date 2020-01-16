@@ -18,7 +18,12 @@ services:
       - bitcoind_regtest
       - bitcoind_chain_2
       - bitcoind_chain_3
-      - lightningds
+      - clightning_alice_regtest
+      - clightning_bob_regtest
+      - clightning_bob_chain_2
+      - clightning_carol_chain_2
+      - clightning_carol_chain_3
+      - clightning_david_chain_3
       - bob_gateway
     volumes:
       - "clightning_datadir_alice_regtest:/wd/clightning_datadir_alice_regtest"
@@ -39,7 +44,12 @@ services:
       - bitcoind_regtest
       - bitcoind_chain_2
       - bitcoind_chain_3
-      - lightningds
+      - clightning_alice_regtest
+      - clightning_bob_regtest
+      - clightning_bob_chain_2
+      - clightning_carol_chain_2
+      - clightning_carol_chain_3
+      - clightning_david_chain_3
       - bob_gateway
     volumes:
       - "clightning_datadir_alice_regtest:/wd/clightning_datadir_alice_regtest"
@@ -62,7 +72,8 @@ services:
       - db
       - bitcoind_regtest
       - bitcoind_chain_2
-      - lightningds
+      - clightning_bob_regtest
+      - clightning_bob_chain_2
     volumes:
       - "clightning_datadir_bob_regtest:/wd/clightning_datadir_bob_regtest"
       - "clightning_datadir_bob_chain_2:/wd/clightning_datadir_bob_chain_2"
@@ -115,23 +126,86 @@ services:
     networks:
       - backend-network
 
-  lightningds:
+  clightning_alice_regtest:
     environment:
       PYTHONUNBUFFERED: "true"
     build:
       context: ../
       dockerfile: docker/clightning_custom.Dockerfile
-    command: "honcho start -f ${LIGHTNINGD_PROCFILE}"
+    command: "honcho start -f /wd/docker/clightning/alice_regtest.Procfile"
     depends_on:
       - bitcoind_regtest
-      - bitcoind_chain_2
-      - bitcoind_chain_3
     volumes:
       - "clightning_datadir_alice_regtest:/wd/clightning_datadir_alice_regtest"
+    networks:
+      - backend-network
+
+  clightning_bob_regtest:
+    environment:
+      PYTHONUNBUFFERED: "true"
+    depends_on:
+      - bitcoind_regtest
+    build:
+      context: ../
+      dockerfile: docker/clightning_custom.Dockerfile
+    command: "honcho start -f /wd/docker/clightning/bob_regtest.Procfile"
+    volumes:
       - "clightning_datadir_bob_regtest:/wd/clightning_datadir_bob_regtest"
+    networks:
+      - backend-network
+
+  clightning_bob_chain_2:
+    environment:
+      PYTHONUNBUFFERED: "true"
+    depends_on:
+      - bitcoind_chain_2
+    build:
+      context: ../
+      dockerfile: docker/clightning_custom.Dockerfile
+    command: "honcho start -f /wd/docker/clightning/bob_chain_2.Procfile"
+    volumes:
       - "clightning_datadir_bob_chain_2:/wd/clightning_datadir_bob_chain_2"
+    networks:
+      - backend-network
+
+  clightning_carol_chain_2:
+    environment:
+      PYTHONUNBUFFERED: "true"
+    depends_on:
+      - bitcoind_chain_2
+    build:
+      context: ../
+      dockerfile: docker/clightning_custom.Dockerfile
+    command: "honcho start -f /wd/docker/clightning/carol_chain_2.Procfile"
+    volumes:
       - "clightning_datadir_carol_chain_2:/wd/clightning_datadir_carol_chain_2"
+    networks:
+      - backend-network
+
+  clightning_carol_chain_3:
+    environment:
+      PYTHONUNBUFFERED: "true"
+    depends_on:
+      - bitcoind_chain_3
+    build:
+      context: ../
+      dockerfile: docker/clightning_custom.Dockerfile
+    command: "honcho start -f /wd/docker/clightning/carol_chain_3.Procfile"
+    volumes:
       - "clightning_datadir_carol_chain_3:/wd/clightning_datadir_carol_chain_3"
+    networks:
+      - backend-network
+
+  clightning_david_chain_3:
+    environment:
+      PYTHONUNBUFFERED: "true"
+    depends_on:
+      - bitcoind_chain_3
+    build:
+      context: ../
+      dockerfile: docker/clightning_custom.Dockerfile
+    command: "honcho start -f /wd/docker/clightning/david_chain_3.Procfile"
+    volumes:
       - "clightning_datadir_david_chain_3:/wd/clightning_datadir_david_chain_3"
     networks:
       - backend-network
