@@ -7,24 +7,27 @@ all: docker-demo-2-chains
 
 docker-demo-regtest:
 	export PYDEMO_CHAINS=regtest ; \
-	export LIGHTNINGD_PROCFILE=/wd/docker/regtest/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
+	--scale db=0 \
+	--scale bob_gateway=0 \
 	--scale bitcoind_chain_2=0 \
 	--scale bitcoind_chain_3=0 \
-	--scale bob_gateway=0 \
-	--scale db=0 \
+	--scale clightning_bob_chain_2=0 \
+	--scale clightning_carol_chain_2=0 \
+	--scale clightning_carol_chain_3=0 \
+	--scale clightning_david_chain_3=0 \
 
 docker-demo-2-chains:
 	export PYDEMO_CHAINS=regtest,chain_2 ; \
-	export LIGHTNINGD_PROCFILE=/wd/docker/2-chains/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale bitcoind_chain_3=0 \
+	--scale clightning_carol_chain_3=0 \
+	--scale clightning_david_chain_3=0 \
 
 docker-demo-3-chains:
 	export PYDEMO_CHAINS=regtest,chain_2,chain_3 ; \
-	export LIGHTNINGD_PROCFILE=/wd/docker/3-chains/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 

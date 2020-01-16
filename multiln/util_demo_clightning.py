@@ -114,4 +114,6 @@ def ln_connect_nodes(lightningd_map, ln_info):
                 if user_name_a != user_name_b:
                     print('Connecting %s to %s in chain %s, port %s id %s' % (
                         user_name_a, user_name_b, chain_name, info_b['binding'][0]['port'], info_b['id']))
-                    rpccaller.connect(info_b['id'], host='0.0.0.0', port=info_b['binding'][0]['port'])
+                    rpccaller.connect(info_b['id'],
+                                      host='clightning_%s_%s' % (user_name_b, chain_name),
+                                      port=info_b['binding'][0]['port'])
