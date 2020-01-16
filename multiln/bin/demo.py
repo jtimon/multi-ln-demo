@@ -46,7 +46,7 @@ print('Selected Chains:', SELECTED_CHAINS)
 if len(SELECTED_CHAINS) == 0:
     raise AssertionError("No chains selected to run the demo.")
 
-GATEWAY_URL = 'http://127.0.0.1:5000'
+GATEWAY_URL = 'http://gateway:5000'
 EXAMPLE_CHAIN = SELECTED_CHAINS[0]
 
 CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}

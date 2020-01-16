@@ -12,6 +12,22 @@ services:
       dockerfile: docker/py-demo.Dockerfile
     entrypoint: ${DEMO_ENTRYPOINT}
     depends_on:
+      - bitcoind_regtest
+      - bitcoind_chain_2
+      - bitcoind_chain_3
+      - lightningds
+      - gateway
+    volumes:
+      - "clightning_datadir:/wd/daemon-data"
+    networks:
+      - backend-network
+
+  gateway:
+    build:
+      context: ../
+      dockerfile: "docker/py-gateway.Dockerfile"
+    entrypoint: "/wd/docker/entrypoint-py-gateway.sh"
+    depends_on:
       - db
       - bitcoind_regtest
       - bitcoind_chain_2
@@ -19,6 +35,10 @@ services:
       - lightningds
     volumes:
       - "clightning_datadir:/wd/daemon-data"
+    ports:
+      - "5000:5000"
+    expose:
+      - "5000"
     networks:
       - backend-network
 

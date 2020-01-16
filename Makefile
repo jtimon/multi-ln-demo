@@ -12,6 +12,8 @@ docker-demo-regtest:
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale bitcoind_chain_2=0 \
 	--scale bitcoind_chain_3=0 \
+	--scale gateway=0 \
+	--scale db=0 \
 
 docker-demo-2-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/2-chains/entrypoint.sh ; \
