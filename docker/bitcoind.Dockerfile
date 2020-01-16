@@ -56,9 +56,8 @@ ENV REPO_NAME=bitcoin
 RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
 ENV PATH="/wd/$REPO_NAME/src:${PATH}"
 
-# TODO Currently this is only for honcho here
-COPY docker/requirements.txt /wd/requirements.txt
-RUN pip install -r requirements.txt --require-hashes
+COPY docker/honcho-requirements.txt /wd/honcho-requirements.txt
+RUN pip install -r honcho-requirements.txt --require-hashes
 
 COPY conf /wd/conf
 COPY docker /wd/docker
