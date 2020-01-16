@@ -21,7 +21,9 @@ services:
     build:
       context: ../
       dockerfile: docker/bitcoind.Dockerfile
-    entrypoint: ${BITCOIND_ENTRYPOINT}
+    entrypoint: "/wd/docker/entrypoint-bitcoind.sh"
+    environment:
+      BITCOIND_PROCFILE: ${BITCOIND_PROCFILE}
     ports:
       - "18515:18515"
       - "18555:18555"
