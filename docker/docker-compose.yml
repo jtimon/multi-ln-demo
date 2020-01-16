@@ -15,17 +15,17 @@ services:
       - db
       - bitcoind_regtest
       - bitcoind_chain_2
-      - daemons
+      - bitcoind_chain_3
     networks:
       - backend-network
 
-  daemons:
+  bitcoind_chain_3:
     build:
       context: ../
       dockerfile: docker/bitcoind.Dockerfile
     entrypoint: "/wd/docker/entrypoint-bitcoind.sh"
     environment:
-      BITCOIND_PROCFILE: ${BITCOIND_PROCFILE}
+      BITCOIND_PROCFILE: "/wd/docker/bitcoind_chain_3.Procfile"
     ports:
       - "18565:18565"
     expose:

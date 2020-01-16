@@ -10,17 +10,16 @@ docker-demo-regtest:
 	cd docker && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale bitcoind_chain_2=0 \
-	--scale daemons=0 \
+	--scale bitcoind_chain_3=0 \
 
 docker-demo-2-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/2-chains/entrypoint.sh ; \
 	cd docker && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
-	--scale daemons=0 \
+	--scale bitcoind_chain_3=0 \
 
 docker-demo-3-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/3-chains/entrypoint.sh ; \
-	export BITCOIND_PROCFILE=/wd/docker/3-chains/bitcoind.Procfile ; \
 	cd docker && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 
