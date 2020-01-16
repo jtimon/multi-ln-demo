@@ -1,18 +1,16 @@
 FROM ubuntu:18.04
 
-# TODO cleaunup dependencies
+# TODO don't use ppa:bitcoin for libdb4.8++
 RUN apt-get -yqq update \
   && apt-get install -y software-properties-common \
   && add-apt-repository ppa:bitcoin/bitcoin \
   && apt-get update \
   && apt-get install -qfy \
-    autoconf \
     automake \
     autotools-dev \
     bsdmainutils \
     build-essential \
     curl \
-    gettext \
     git \
     libboost-chrono-dev \
     libboost-filesystem-dev \
@@ -23,28 +21,17 @@ RUN apt-get -yqq update \
     libdb4.8++-dev \
     libdb4.8-dev \
     libevent-dev \
-    libgmp-dev \
     libminiupnpc-dev \
-    libsodium-dev \
-    libsqlite3-dev \
-    libssl-dev \
     libtool \
     libzmq3-dev \
     make \
-    net-tools \
     pkg-config \
     python3 \
-    python3-distutils \
-    python3-mako \
     python3-pip \
     tor \
-    zlib1g-dev \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /wd
-
-RUN ln -s /usr/bin/python3 /usr/bin/python && \
-    ln -s /usr/bin/pip3 /usr/bin/pip
 
 COPY docker/build-daemon.sh /wd/build-daemon.sh
 # Build custom daemon able to produce and support an arbitrary number of chains
@@ -57,7 +44,7 @@ RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
 ENV PATH="/wd/$REPO_NAME/src:${PATH}"
 
 COPY docker/honcho-requirements.txt /wd/honcho-requirements.txt
-RUN pip install -r honcho-requirements.txt --require-hashes
+RUN pip3 install -r honcho-requirements.txt --require-hashes
 
-COPY conf /wd/conf
+COPY conf/bitcoind.conf /wd/conf/bitcoind.conf
 COPY docker /wd/docker
