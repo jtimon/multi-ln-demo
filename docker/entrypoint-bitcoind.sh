@@ -10,4 +10,4 @@ mkdir -p /wd/daemon-data/regtest_bitcoind
 mkdir -p /wd/daemon-data/chain_2_bitcoind
 mkdir -p /wd/daemon-data/chain_3_bitcoind
 
-honcho start -f ${BITCOIND_PROCFILE}
+${BITCOIND_CALL}

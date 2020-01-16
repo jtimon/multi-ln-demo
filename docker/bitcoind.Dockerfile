@@ -26,8 +26,6 @@ RUN apt-get -yqq update \
     libzmq3-dev \
     make \
     pkg-config \
-    python3 \
-    python3-pip \
     tor \
   && rm -rf /var/lib/apt/lists/*
 
@@ -43,11 +41,5 @@ ENV REPO_NAME=bitcoin
 RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
 ENV PATH="/wd/$REPO_NAME/src:${PATH}"
 
-COPY docker/honcho-requirements.txt /wd/honcho-requirements.txt
-RUN pip3 install -r honcho-requirements.txt --require-hashes
-
 COPY conf/bitcoind.conf /wd/conf/bitcoind.conf
 COPY docker/entrypoint-bitcoind.sh /wd/docker/entrypoint-bitcoind.sh
-COPY docker/bitcoind_regtest.Procfile /wd/docker/bitcoind_regtest.Procfile
-COPY docker/bitcoind_chain_2.Procfile /wd/docker/bitcoind_chain_2.Procfile
-COPY docker/bitcoind_chain_3.Procfile /wd/docker/bitcoind_chain_3.Procfile
