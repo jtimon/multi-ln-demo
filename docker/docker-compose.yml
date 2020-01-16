@@ -13,6 +13,7 @@ services:
     entrypoint: ${DEMO_ENTRYPOINT}
     depends_on:
       - db
+      - bitcoind_regtest
       - daemons
     networks:
       - backend-network
@@ -25,13 +26,25 @@ services:
     environment:
       BITCOIND_PROCFILE: ${BITCOIND_PROCFILE}
     ports:
-      - "18515:18515"
       - "18555:18555"
       - "18565:18565"
     expose:
-      - "18515"
       - "18555"
       - "18565"
+    networks:
+      - backend-network
+
+  bitcoind_regtest:
+    build:
+      context: ../
+      dockerfile: docker/bitcoind.Dockerfile
+    entrypoint: "/wd/docker/entrypoint-bitcoind.sh"
+    environment:
+      BITCOIND_PROCFILE: "/wd/docker/bitcoind_regtest.Procfile"
+    ports:
+      - "18515:18515"
+    expose:
+      - "18515"
     networks:
       - backend-network
 

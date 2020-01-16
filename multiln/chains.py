@@ -3,7 +3,7 @@ CHAINS = {
     'regtest': {
         'id': '0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206',
         'petname': 'regtest',
-        'host_url': 'daemons',
+        'host_url': 'bitcoind_regtest',
         'port_decimal': 1,
         'users': ['alice', 'bob'],
     },

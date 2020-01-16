@@ -7,8 +7,7 @@ all: docker-demo-2-chains
 
 docker-demo-regtest:
 	export DEMO_ENTRYPOINT=/wd/docker/regtest/entrypoint.sh ; \
-	export BITCOIND_PROCFILE=/wd/docker/regtest/bitcoind.Procfile ; \
-	cd docker && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
+	cd docker && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit --scale daemons=0
 
 docker-demo-2-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/2-chains/entrypoint.sh ; \

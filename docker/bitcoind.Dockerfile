@@ -48,6 +48,6 @@ RUN pip3 install -r honcho-requirements.txt --require-hashes
 
 COPY conf/bitcoind.conf /wd/conf/bitcoind.conf
 COPY docker/entrypoint-bitcoind.sh /wd/docker/entrypoint-bitcoind.sh
-COPY docker/regtest/bitcoind.Procfile /wd/docker/regtest/bitcoind.Procfile
+COPY docker/bitcoind_regtest.Procfile /wd/docker/bitcoind_regtest.Procfile
 COPY docker/2-chains/bitcoind.Procfile /wd/docker/2-chains/bitcoind.Procfile
 COPY docker/3-chains/bitcoind.Procfile /wd/docker/3-chains/bitcoind.Procfile
