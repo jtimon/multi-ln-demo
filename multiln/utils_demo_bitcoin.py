@@ -6,9 +6,9 @@ from multiln.rpccaller import RpcCaller
 def btc_init_bitcoind_global(chains):
     to_return = {}
     for chain_name in chains:
-        port_chain = '185%s5' % chains[chain_name]['port_decimal']
+        port_chain = '185%s5' % (chains[chain_name]['port_decimal'])
         to_return[chain_name] = RpcCaller(
-            'daemons:%s' % port_chain,
+            '%s:%s' % (chains[chain_name]['host_url'], port_chain),
             'user%s' % port_chain,
             'password%s' % port_chain,
         )
