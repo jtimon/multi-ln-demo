@@ -7,17 +7,22 @@ all: docker-demo-2-chains
 
 docker-demo-regtest:
 	export DEMO_ENTRYPOINT=/wd/docker/regtest/entrypoint.sh ; \
-	cd docker && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit --scale daemons=0
+	cd docker && \
+	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
+	--scale bitcoind_chain_2=0 \
+	--scale daemons=0 \
 
 docker-demo-2-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/2-chains/entrypoint.sh ; \
-	export BITCOIND_PROCFILE=/wd/docker/2-chains/bitcoind.Procfile ; \
-	cd docker && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
+	cd docker && \
+	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
+	--scale daemons=0 \
 
 docker-demo-3-chains:
 	export DEMO_ENTRYPOINT=/wd/docker/3-chains/entrypoint.sh ; \
 	export BITCOIND_PROCFILE=/wd/docker/3-chains/bitcoind.Procfile ; \
-	cd docker && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
+	cd docker && \
+	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 
 docker-rust-2-chains:
 	cd docker/rustdemo-2-chains && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit

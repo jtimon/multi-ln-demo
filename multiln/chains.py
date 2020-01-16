@@ -11,7 +11,7 @@ CHAINS = {
     'chain_2': {
         'id': 'e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7',
         'petname': 'chain_2',
-        'host_url': 'daemons',
+        'host_url': 'bitcoind_chain_2',
         'port_decimal': 5,
         'users': ['bob', 'carol'],
     },
