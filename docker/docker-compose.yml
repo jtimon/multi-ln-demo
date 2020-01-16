@@ -19,20 +19,6 @@ services:
     networks:
       - backend-network
 
-  bitcoind_chain_3:
-    build:
-      context: ../
-      dockerfile: docker/bitcoind.Dockerfile
-    entrypoint: "/wd/docker/entrypoint-bitcoind.sh"
-    environment:
-      BITCOIND_CALL: "bitcoind -chain=chain_3 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_3_bitcoind/"
-    ports:
-      - "18565:18565"
-    expose:
-      - "18565"
-    networks:
-      - backend-network
-
   bitcoind_regtest:
     build:
       context: ../
@@ -58,6 +44,20 @@ services:
       - "18555:18555"
     expose:
       - "18555"
+    networks:
+      - backend-network
+
+  bitcoind_chain_3:
+    build:
+      context: ../
+      dockerfile: docker/bitcoind.Dockerfile
+    entrypoint: "/wd/docker/entrypoint-bitcoind.sh"
+    environment:
+      BITCOIND_CALL: "bitcoind -chain=chain_3 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_3_bitcoind/"
+    ports:
+      - "18565:18565"
+    expose:
+      - "18565"
     networks:
       - backend-network
 
