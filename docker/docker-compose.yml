@@ -19,7 +19,7 @@ services:
       - bitcoind_chain_2
       - bitcoind_chain_3
       - lightningds
-      - gateway
+      - bob_gateway
     volumes:
       - "clightning_alice_regtest_datadir:/wd/daemon-data/alice_regtest"
       - "clightning_bob_regtest_datadir:/wd/daemon-data/bob_regtest"
@@ -30,7 +30,7 @@ services:
     networks:
       - backend-network
 
-  gateway:
+  bob_gateway:
     build:
       context: ../
       dockerfile: "docker/py-gateway.Dockerfile"
@@ -39,7 +39,6 @@ services:
       - db
       - bitcoind_regtest
       - bitcoind_chain_2
-      - bitcoind_chain_3
       - lightningds
     volumes:
       - "clightning_bob_regtest_datadir:/wd/daemon-data/bob_regtest"
