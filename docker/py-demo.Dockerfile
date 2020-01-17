@@ -62,6 +62,3 @@ RUN pip install -r requirements.txt --require-hashes
 COPY multiln /wd/multiln
 COPY setup.py /wd/setup.py
 RUN python /wd/setup.py install
-
-COPY conf /wd/conf
-COPY docker /wd/docker
