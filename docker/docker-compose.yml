@@ -54,9 +54,7 @@ services:
     build:
       context: ../
       dockerfile: docker/bitcoind.Dockerfile
-    entrypoint: "/wd/docker/entrypoint-bitcoind.sh"
-    environment:
-      BITCOIND_CALL: "bitcoind -chain=regtest -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/regtest_bitcoind/"
+    command: "bitcoind -chain=regtest -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/regtest_bitcoind/"
     ports:
       - "18515:18515"
     expose:
@@ -70,9 +68,7 @@ services:
     build:
       context: ../
       dockerfile: docker/bitcoind.Dockerfile
-    entrypoint: "/wd/docker/entrypoint-bitcoind.sh"
-    environment:
-      BITCOIND_CALL: "bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_2_bitcoind/"
+    command: "bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_2_bitcoind/"
     ports:
       - "18555:18555"
     expose:
@@ -86,9 +82,7 @@ services:
     build:
       context: ../
       dockerfile: docker/bitcoind.Dockerfile
-    entrypoint: "/wd/docker/entrypoint-bitcoind.sh"
-    environment:
-      BITCOIND_CALL: "bitcoind -chain=chain_3 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_3_bitcoind/"
+    command: "bitcoind -chain=chain_3 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_3_bitcoind/"
     ports:
       - "18565:18565"
     expose:

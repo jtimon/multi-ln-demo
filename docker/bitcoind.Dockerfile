@@ -42,4 +42,3 @@ RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
 ENV PATH="/wd/$REPO_NAME/src:${PATH}"
 
 COPY conf/bitcoind.conf /wd/conf/bitcoind.conf
-COPY docker/entrypoint-bitcoind.sh /wd/docker/entrypoint-bitcoind.sh
