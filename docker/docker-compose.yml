@@ -12,7 +12,7 @@ services:
       dockerfile: docker/py-demo.Dockerfile
     entrypoint: "/wd/docker/entrypoint-py-demo.sh"
     environment:
-      PYDEMO_PROCFILE: ${PYDEMO_PROCFILE}
+      PYDEMO_CHAINS: ${PYDEMO_CHAINS}
     depends_on:
       - bitcoind_regtest
       - bitcoind_chain_2

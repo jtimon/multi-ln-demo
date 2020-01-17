@@ -6,7 +6,7 @@
 all: docker-demo-2-chains
 
 docker-demo-regtest:
-	export PYDEMO_PROCFILE=/wd/docker/regtest/Procfile ; \
+	export PYDEMO_CHAINS=regtest ; \
 	export LIGHTNINGD_PROCFILE=/wd/docker/regtest/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
@@ -16,14 +16,14 @@ docker-demo-regtest:
 	--scale db=0 \
 
 docker-demo-2-chains:
-	export PYDEMO_PROCFILE=/wd/docker/2-chains/Procfile ; \
+	export PYDEMO_CHAINS=regtest,chain_2 ; \
 	export LIGHTNINGD_PROCFILE=/wd/docker/2-chains/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale bitcoind_chain_3=0 \
 
 docker-demo-3-chains:
-	export PYDEMO_PROCFILE=/wd/docker/3-chains/Procfile ; \
+	export PYDEMO_CHAINS=regtest,chain_2,chain_3 ; \
 	export LIGHTNINGD_PROCFILE=/wd/docker/3-chains/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
