@@ -39,8 +39,9 @@ def check_hash_preimage(payment_hash, payment_preimage):
     return hashed_result == payment_hash
 
 print('This is a demo demonstrating lightning payments across several different regtest chains')
+print('USAGE: single parameter containing selected chains separated by commas')
 
-SELECTED_CHAINS = sys.argv[1:]
+SELECTED_CHAINS = sys.argv[1].split(',')
 print('Selected Chains:', SELECTED_CHAINS)
 
 if len(SELECTED_CHAINS) == 0:
