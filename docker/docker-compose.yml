@@ -21,7 +21,12 @@ services:
       - lightningds
       - gateway
     volumes:
-      - "clightning_datadir:/wd/daemon-data"
+      - "clightning_alice_regtest_datadir:/wd/daemon-data/alice_regtest"
+      - "clightning_bob_regtest_datadir:/wd/daemon-data/bob_regtest"
+      - "clightning_bob_chain_2_datadir:/wd/daemon-data/bob_chain_2"
+      - "clightning_carol_chain_2_datadir:/wd/daemon-data/carol_chain_2"
+      - "clightning_carol_chain_3_datadir:/wd/daemon-data/carol_chain_3"
+      - "clightning_david_chain_3_datadir:/wd/daemon-data/david_chain_3"
     networks:
       - backend-network
 
@@ -37,7 +42,8 @@ services:
       - bitcoind_chain_3
       - lightningds
     volumes:
-      - "clightning_datadir:/wd/daemon-data"
+      - "clightning_bob_regtest_datadir:/wd/daemon-data/bob_regtest"
+      - "clightning_bob_chain_2_datadir:/wd/daemon-data/bob_chain_2"
     ports:
       - "5000:5000"
     expose:
@@ -99,7 +105,12 @@ services:
     environment:
       LIGHTNINGD_PROCFILE: ${LIGHTNINGD_PROCFILE}
     volumes:
-      - "clightning_datadir:/wd/daemon-data"
+      - "clightning_alice_regtest_datadir:/wd/daemon-data/alice_regtest"
+      - "clightning_bob_regtest_datadir:/wd/daemon-data/bob_regtest"
+      - "clightning_bob_chain_2_datadir:/wd/daemon-data/bob_chain_2"
+      - "clightning_carol_chain_2_datadir:/wd/daemon-data/carol_chain_2"
+      - "clightning_carol_chain_3_datadir:/wd/daemon-data/carol_chain_3"
+      - "clightning_david_chain_3_datadir:/wd/daemon-data/david_chain_3"
     networks:
       - backend-network
 
@@ -118,4 +129,9 @@ services:
       - backend-network
 
 volumes:
-  clightning_datadir:
+  clightning_alice_regtest_datadir:
+  clightning_bob_regtest_datadir:
+  clightning_bob_chain_2_datadir:
+  clightning_carol_chain_2_datadir:
+  clightning_carol_chain_3_datadir:
+  clightning_david_chain_3_datadir:
