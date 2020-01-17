@@ -10,7 +10,9 @@ services:
     build:
       context: ../
       dockerfile: docker/py-demo.Dockerfile
-    entrypoint: ${DEMO_ENTRYPOINT}
+    entrypoint: "/wd/docker/entrypoint-py-demo.sh"
+    environment:
+      PYDEMO_PROCFILE: ${PYDEMO_PROCFILE}
     depends_on:
       - bitcoind_regtest
       - bitcoind_chain_2
