@@ -61,6 +61,8 @@ services:
       - "18515:18515"
     expose:
       - "18515"
+    volumes:
+      - "bitcoind_regtest_datadir:/wd/daemon-data/regtest_bitcoind"
     networks:
       - backend-network
 
@@ -75,6 +77,8 @@ services:
       - "18555:18555"
     expose:
       - "18555"
+    volumes:
+      - "bitcoind_chain_2_datadir:/wd/daemon-data/chain_2_bitcoind"
     networks:
       - backend-network
 
@@ -89,6 +93,8 @@ services:
       - "18565:18565"
     expose:
       - "18565"
+    volumes:
+      - "bitcoind_chain_3_datadir:/wd/daemon-data/chain_3_bitcoind"
     networks:
       - backend-network
 
@@ -132,3 +138,6 @@ volumes:
   clightning_carol_chain_2_datadir:
   clightning_carol_chain_3_datadir:
   clightning_david_chain_3_datadir:
+  bitcoind_regtest_datadir:
+  bitcoind_chain_2_datadir:
+  bitcoind_chain_3_datadir:
