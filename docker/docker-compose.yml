@@ -97,13 +97,11 @@ services:
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile
-    entrypoint: "/wd/docker/entrypoint-lightningd.sh"
+    command: "honcho start -f ${LIGHTNINGD_PROCFILE}"
     depends_on:
       - bitcoind_regtest
       - bitcoind_chain_2
       - bitcoind_chain_3
-    environment:
-      LIGHTNINGD_PROCFILE: ${LIGHTNINGD_PROCFILE}
     volumes:
       - "clightning_alice_regtest_datadir:/wd/daemon-data/alice_regtest"
       - "clightning_bob_regtest_datadir:/wd/daemon-data/bob_regtest"
