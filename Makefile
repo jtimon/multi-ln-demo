@@ -30,3 +30,7 @@ docker-demo-3-chains:
 
 docker-rust-2-chains:
 	cd docker/rustdemo-2-chains && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
+
+# TODO fix this: $() isn't working properly
+docker-clean-containers:
+	docker stop $(docker ps -aq) ; docker rm $(docker ps -aq)
