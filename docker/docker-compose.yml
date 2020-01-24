@@ -55,7 +55,7 @@ services:
   bitcoind_regtest:
     build:
       context: ../
-      dockerfile: docker/bitcoind.Dockerfile
+      dockerfile: docker/bitcoind_custom.Dockerfile
     command: "bitcoind -chain=regtest -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/regtest_bitcoind/"
     ports:
       - "18515:18515"
@@ -69,7 +69,7 @@ services:
   bitcoind_chain_2:
     build:
       context: ../
-      dockerfile: docker/bitcoind.Dockerfile
+      dockerfile: docker/bitcoind_custom.Dockerfile
     command: "bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_2_bitcoind/"
     ports:
       - "18555:18555"
@@ -83,7 +83,7 @@ services:
   bitcoind_chain_3:
     build:
       context: ../
-      dockerfile: docker/bitcoind.Dockerfile
+      dockerfile: docker/bitcoind_custom.Dockerfile
     command: "bitcoind -chain=chain_3 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_3_bitcoind/"
     ports:
       - "18565:18565"
