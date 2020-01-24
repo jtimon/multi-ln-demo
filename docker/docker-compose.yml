@@ -99,7 +99,7 @@ services:
       PYTHONUNBUFFERED: "true"
     build:
       context: ../
-      dockerfile: docker/clightning.Dockerfile
+      dockerfile: docker/clightning_custom.Dockerfile
     command: "honcho start -f ${LIGHTNINGD_PROCFILE}"
     depends_on:
       - bitcoind_regtest
