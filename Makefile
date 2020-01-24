@@ -5,7 +5,7 @@
 .PHONY: docker-demo-regtest docker-demo-2-chains docker-rust-2-chains docker-run-3-chains
 all: docker-demo-2-chains
 
-docker-demo-regtest:
+pydemo-regtest:
 	export PYDEMO_CHAINS=regtest ; \
 	export LIGHTNINGD_PROCFILE=/wd/docker/regtest/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
@@ -15,20 +15,20 @@ docker-demo-regtest:
 	--scale bob_gateway=0 \
 	--scale db=0 \
 
-docker-demo-2-chains:
+pydemo-2-chains:
 	export PYDEMO_CHAINS=regtest,chain_2 ; \
 	export LIGHTNINGD_PROCFILE=/wd/docker/2-chains/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale bitcoind_chain_3=0 \
 
-docker-demo-3-chains:
+pydemo-3-chains:
 	export PYDEMO_CHAINS=regtest,chain_2,chain_3 ; \
 	export LIGHTNINGD_PROCFILE=/wd/docker/3-chains/lightningd.Procfile ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 
-docker-rust-2-chains:
+rsdemo-2-chains:
 	cd docker/rustdemo-2-chains && docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit
 
 # TODO fix this: $() isn't working properly

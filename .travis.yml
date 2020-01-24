@@ -10,16 +10,16 @@ jobs:
 
     - name: '3 chains'
       script:
-        - make docker-demo-3-chains
+        - make pydemo-3-chains
 
     - name: '1 chain (regtest)'
       script:
-        - make docker-demo-regtest
+        - make pydemo-regtest
 
     - name: '2 chains'
       script:
-        - make docker-demo-2-chains
+        - make pydemo-2-chains
 
     # - name: 'rustdemo 2 chains'
     #   script:
-    #     - make docker-rust-2-chains
+    #     - make rsdemo-2-chains
