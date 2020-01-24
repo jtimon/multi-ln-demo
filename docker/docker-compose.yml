@@ -7,12 +7,12 @@ networks:
 services:
 
   demo:
+    environment:
+# TODO REM PYTHONUNBUFFERED is bad for performance https://honcho.readthedocs.io/en/latest/using_procfiles.html#buffered-output
+      PYTHONUNBUFFERED: "true"
     build:
       context: ../
       dockerfile: docker/py-demo.Dockerfile
-    environment:
-# PYTHONUNBUFFERED is bad for performance https://honcho.readthedocs.io/en/latest/using_procfiles.html#buffered-output
-      PYTHONUNBUFFERED: "true"
     command: "python /wd/multiln/bin/demo.py ${PYDEMO_CHAINS}"
     depends_on:
       - bitcoind_regtest
@@ -31,6 +31,8 @@ services:
       - backend-network
 
   bob_gateway:
+    environment:
+      PYTHONUNBUFFERED: "true"
     build:
       context: ../
       dockerfile: "docker/py-gateway.Dockerfile"
@@ -93,6 +95,8 @@ services:
       - backend-network
 
   lightningds:
+    environment:
+      PYTHONUNBUFFERED: "true"
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile
