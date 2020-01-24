@@ -131,7 +131,7 @@ services:
       PYTHONUNBUFFERED: "true"
     build:
       context: ../
-      dockerfile: docker/clightning_custom.Dockerfile
+      dockerfile: docker/clightning.Dockerfile
     command: "honcho start -f /wd/docker/clightning/alice_regtest.Procfile"
     depends_on:
       - bitcoind_regtest
@@ -147,7 +147,7 @@ services:
       - bitcoind_regtest
     build:
       context: ../
-      dockerfile: docker/clightning_custom.Dockerfile
+      dockerfile: docker/clightning.Dockerfile
     command: "honcho start -f /wd/docker/clightning/bob_regtest.Procfile"
     volumes:
       - "clightning_datadir_bob_regtest:/wd/clightning_datadir_bob_regtest"

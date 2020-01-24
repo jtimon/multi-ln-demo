@@ -46,7 +46,7 @@ WORKDIR /wd
 RUN ln -s /usr/bin/python3 /usr/bin/python && \
     ln -s /usr/bin/pip3 /usr/bin/pip
 
-# TODO Remove this, only needed for the cli for lightning
+# TODO Remove this, only needed for bitcoin-cli for lightning
 COPY docker/build-daemon.sh /wd/build-daemon.sh
 # Build custom daemon able to produce and support an arbitrary number of chains
 # This corresponds to https://github.com/bitcoin/bitcoin/pull/17037
@@ -68,4 +68,4 @@ COPY docker/honcho-requirements.txt /wd/honcho-requirements.txt
 RUN pip3 install -r honcho-requirements.txt --require-hashes
 
 COPY conf /wd/conf
-COPY docker /wd/docker
+COPY docker/clightning /wd/docker/clightning
