@@ -132,7 +132,7 @@ services:
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile
-    command: "honcho start -f /wd/docker/clightning/alice_regtest.Procfile"
+    command: "lightningd --conf=/wd/conf/alice_regtest.conf --lightning-dir=/wd/clightning_datadir_alice_regtest"
     depends_on:
       - bitcoind_regtest
     volumes:
@@ -141,70 +141,60 @@ services:
       - backend-network
 
   clightning_bob_regtest:
-    environment:
-      PYTHONUNBUFFERED: "true"
     depends_on:
       - bitcoind_regtest
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile
-    command: "honcho start -f /wd/docker/clightning/bob_regtest.Procfile"
+    command: "lightningd --conf=/wd/conf/bob_regtest.conf --lightning-dir=/wd/clightning_datadir_bob_regtest"
     volumes:
       - "clightning_datadir_bob_regtest:/wd/clightning_datadir_bob_regtest"
     networks:
       - backend-network
 
   clightning_bob_chain_2:
-    environment:
-      PYTHONUNBUFFERED: "true"
     depends_on:
       - bitcoind_chain_2
     build:
       context: ../
       dockerfile: docker/clightning_custom.Dockerfile
-    command: "honcho start -f /wd/docker/clightning/bob_chain_2.Procfile"
+    command: "lightningd --conf=/wd/conf/bob_chain_2.conf --lightning-dir=/wd/clightning_datadir_bob_chain_2"
     volumes:
       - "clightning_datadir_bob_chain_2:/wd/clightning_datadir_bob_chain_2"
     networks:
       - backend-network
 
   clightning_carol_chain_2:
-    environment:
-      PYTHONUNBUFFERED: "true"
     depends_on:
       - bitcoind_chain_2
     build:
       context: ../
       dockerfile: docker/clightning_custom.Dockerfile
-    command: "honcho start -f /wd/docker/clightning/carol_chain_2.Procfile"
+    command: "lightningd --conf=/wd/conf/carol_chain_2.conf --lightning-dir=/wd/clightning_datadir_carol_chain_2"
     volumes:
       - "clightning_datadir_carol_chain_2:/wd/clightning_datadir_carol_chain_2"
     networks:
       - backend-network
 
   clightning_carol_chain_3:
-    environment:
-      PYTHONUNBUFFERED: "true"
     depends_on:
       - bitcoind_chain_3
     build:
       context: ../
       dockerfile: docker/clightning_custom.Dockerfile
-    command: "honcho start -f /wd/docker/clightning/carol_chain_3.Procfile"
+    command: "lightningd --conf=/wd/conf/carol_chain_3.conf --lightning-dir=/wd/clightning_datadir_carol_chain_3"
     volumes:
       - "clightning_datadir_carol_chain_3:/wd/clightning_datadir_carol_chain_3"
     networks:
       - backend-network
 
   clightning_david_chain_3:
-    environment:
-      PYTHONUNBUFFERED: "true"
     depends_on:
       - bitcoind_chain_3
     build:
       context: ../
       dockerfile: docker/clightning_custom.Dockerfile
-    command: "honcho start -f /wd/docker/clightning/david_chain_3.Procfile"
+    command: "lightningd --conf=/wd/conf/david_chain_3.conf --lightning-dir=/wd/clightning_datadir_david_chain_3"
     volumes:
       - "clightning_datadir_david_chain_3:/wd/clightning_datadir_david_chain_3"
     networks:

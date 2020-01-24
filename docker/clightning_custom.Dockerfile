@@ -64,8 +64,4 @@ ENV LN_REPO_NAME=lightning
 RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
 ENV PATH="/wd/$LN_REPO_NAME/lightningd:${PATH}"
 
-COPY docker/honcho-requirements.txt /wd/honcho-requirements.txt
-RUN pip3 install -r honcho-requirements.txt --require-hashes
-
 COPY conf /wd/conf
-COPY docker/clightning /wd/docker/clightning

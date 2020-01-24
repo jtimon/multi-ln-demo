@@ -4,15 +4,10 @@ RUN apt-get -yqq update \
   && apt-get install -qfy \
     curl \
     libsodium-dev \
-    python3 \
-    python3-pip \
     xz-utils \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /wd
-
-COPY docker/honcho-requirements.txt /wd/honcho-requirements.txt
-RUN pip3 install -r honcho-requirements.txt --require-hashes
 
 # TODO remove everything except /wd/bitcoin-0.19.0.1/bin/bitcoin-cli
 # This is only needed for bitcoin-cli for lightning
@@ -34,4 +29,3 @@ RUN curl -sL -o lighting.tar.gz https://github.com/ElementsProject/lightning/rel
 ENV PATH="/wd/usr/bin:${PATH}"
 
 COPY conf /wd/conf
-COPY docker/clightning /wd/docker/clightning
