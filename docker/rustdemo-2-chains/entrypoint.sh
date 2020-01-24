@@ -9,9 +9,9 @@ chown -R $user:$user /wd/daemon-data
 mkdir -p /wd/daemon-data/bitcoind_regtest
 mkdir -p /wd/daemon-data/bitcoind_chain_2
 
-mkdir -p /wd/daemon-data/alice_regtest
-mkdir -p /wd/daemon-data/bob_regtest
-mkdir -p /wd/daemon-data/bob_chain_2
-mkdir -p /wd/daemon-data/carol_chain_2
+mkdir -p /wd/clightning_datadir_alice_regtest
+mkdir -p /wd/clightning_datadir_bob_regtest
+mkdir -p /wd/clightning_datadir_bob_chain_2
+mkdir -p /wd/clightning_datadir_carol_chain_2
 
 honcho start -e /wd/docker/rustdemo-2-chains/.env -f /wd/docker/rustdemo-2-chains/Procfile
