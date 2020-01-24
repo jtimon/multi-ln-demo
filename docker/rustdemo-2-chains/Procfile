@@ -5,9 +5,9 @@ rustdemo: /wd/rustdemo/target/release/rustdemo
 
 # bitcoind nodes:
 
-regtest_bitcoind: bitcoind -chain=regtest -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/regtest_bitcoind/
+bitcoind_regtest: bitcoind -chain=regtest -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/bitcoind_regtest/
 
-chain_2_bitcoind: bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_2_bitcoind/
+bitcoind_chain_2: bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/bitcoind_chain_2/
 
 
 # clightning nodes:

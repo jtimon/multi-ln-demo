@@ -56,13 +56,13 @@ services:
     build:
       context: ../
       dockerfile: docker/bitcoind.Dockerfile
-    command: "bitcoind -chain=regtest -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/regtest_bitcoind/"
+    command: "bitcoind -chain=regtest -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/bitcoind_regtest/"
     ports:
       - "18515:18515"
     expose:
       - "18515"
     volumes:
-      - "bitcoind_regtest_datadir:/wd/daemon-data/regtest_bitcoind"
+      - "bitcoind_regtest_datadir:/wd/daemon-data/bitcoind_regtest"
     networks:
       - backend-network
 
@@ -70,13 +70,13 @@ services:
     build:
       context: ../
       dockerfile: docker/bitcoind_custom.Dockerfile
-    command: "bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_2_bitcoind/"
+    command: "bitcoind -chain=chain_2 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/bitcoind_chain_2/"
     ports:
       - "18555:18555"
     expose:
       - "18555"
     volumes:
-      - "bitcoind_chain_2_datadir:/wd/daemon-data/chain_2_bitcoind"
+      - "bitcoind_chain_2_datadir:/wd/daemon-data/bitcoind_chain_2"
     networks:
       - backend-network
 
@@ -84,13 +84,13 @@ services:
     build:
       context: ../
       dockerfile: docker/bitcoind_custom.Dockerfile
-    command: "bitcoind -chain=chain_3 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/chain_3_bitcoind/"
+    command: "bitcoind -chain=chain_3 -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/bitcoind_chain_3/"
     ports:
       - "18565:18565"
     expose:
       - "18565"
     volumes:
-      - "bitcoind_chain_3_datadir:/wd/daemon-data/chain_3_bitcoind"
+      - "bitcoind_chain_3_datadir:/wd/daemon-data/bitcoind_chain_3"
     networks:
       - backend-network
 
