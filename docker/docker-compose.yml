@@ -55,7 +55,7 @@ services:
   bitcoind_regtest:
     build:
       context: ../
-      dockerfile: docker/bitcoind_custom.Dockerfile
+      dockerfile: docker/bitcoind.Dockerfile
     command: "bitcoind -chain=regtest -conf=/wd/conf/bitcoind.conf -datadir=/wd/daemon-data/regtest_bitcoind/"
     ports:
       - "18515:18515"
