@@ -6,14 +6,35 @@ networks:
 
 services:
 
-  demo:
+  pydemo:
     environment:
 # TODO REM PYTHONUNBUFFERED is bad for performance https://honcho.readthedocs.io/en/latest/using_procfiles.html#buffered-output
       PYTHONUNBUFFERED: "true"
     build:
       context: ../
-      dockerfile: docker/py-demo.Dockerfile
+      dockerfile: docker/pydemo.Dockerfile
     command: "python /wd/multiln/bin/demo.py ${PYDEMO_CHAINS}"
+    depends_on:
+      - bitcoind_regtest
+      - bitcoind_chain_2
+      - bitcoind_chain_3
+      - lightningds
+      - bob_gateway
+    volumes:
+      - "clightning_datadir_alice_regtest:/wd/clightning_datadir_alice_regtest"
+      - "clightning_datadir_bob_regtest:/wd/clightning_datadir_bob_regtest"
+      - "clightning_datadir_bob_chain_2:/wd/clightning_datadir_bob_chain_2"
+      - "clightning_datadir_carol_chain_2:/wd/clightning_datadir_carol_chain_2"
+      - "clightning_datadir_carol_chain_3:/wd/clightning_datadir_carol_chain_3"
+      - "clightning_datadir_david_chain_3:/wd/clightning_datadir_david_chain_3"
+    networks:
+      - backend-network
+
+  rsdemo:
+    build:
+      context: ../
+      dockerfile: docker/rsdemo.Dockerfile
+    command: "/wd/rustdemo/target/release/rustdemo"
     depends_on:
       - bitcoind_regtest
       - bitcoind_chain_2
