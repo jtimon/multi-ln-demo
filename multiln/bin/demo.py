@@ -107,8 +107,10 @@ def demo_2_chains_gateway_payment(lightningd_map):
         print(type(e))
         print(e.error['message'])
         assert(e.method == 'pay')
-        assert(e.error['code'] == 205)
-        assert(e.error['message'] == 'Invoice is for another network %s' % chain_name_b)
+        assert(e.error['code'] == 205 # Invoice is for another network
+               or e.error['code'] == -32602) # Invalid bolt11: Unknown chain
+        assert(e.error['message'] == 'Invoice is for another network %s' % chain_name_b
+               or e.error['message'] == 'Invalid bolt11: Unknown chain %s' % CHAINS[chain_name_b]['bip173_name'])
         assert('bolt11' in e.payload)
 
     print(requests.get(GATEWAY_URL + "/get_accepted_chains").json())
