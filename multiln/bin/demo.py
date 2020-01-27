@@ -138,6 +138,7 @@ def demo_2_chains_gateway_payment(lightningd_map):
         }).json()
         print('...this is what %s gateway inc responds:' % (user_name_gateway))
         print(gateway_confirm_payment_result)
+        assert(not 'error' in gateway_confirm_payment_result)
         print('...%s confirms that the payment preimage given corresponds to the original invoice to be paid by %s gateway inc too.' % (user_name_a, user_name_gateway))
         if check_hash_preimage(invoice['payment_hash'], gateway_confirm_payment_result['payment_preimage']):
             print('Preimage corresponds to payment hash')
