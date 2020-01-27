@@ -18,8 +18,7 @@ def add_or_update_price(src_chain, dest_chain, next_price_val):
         price.price = next_price_val
     else:
         db_session.add(Price(
-            src_dest = '%s:%s' % ('0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206',
-                                  'e07d79a4f8f1525814e421eb71aa9527fe8a25091fe1b9c5c312939c887aadc7'),
+            src_dest = '%s:%s' % (src_chain, dest_chain),
             price = next_price_val))
     db_session.commit()
 
