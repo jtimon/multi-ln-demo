@@ -58,7 +58,7 @@ RUN cd /wd/$LN_REPO_NAME/contrib/pylightning && \
     python3 setup.py develop
 
 COPY docker/requirements.txt /wd/requirements.txt
-RUN pip install -r requirements.txt --require-hashes
+RUN pip3 install -r requirements.txt --require-hashes
 COPY multiln /wd/multiln
 COPY setup.py /wd/setup.py
-RUN python /wd/setup.py install
+RUN python3 /wd/setup.py install

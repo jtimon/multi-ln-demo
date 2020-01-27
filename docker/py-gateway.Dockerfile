@@ -58,9 +58,9 @@ RUN cd /wd/$LN_REPO_NAME/contrib/pylightning && \
     python3 setup.py develop
 
 COPY py-ln-gateway/requirements.txt /wd/py-ln-gateway/requirements.txt
-RUN pip install -r /wd/py-ln-gateway/requirements.txt --require-hashes
+RUN pip3 install -r /wd/py-ln-gateway/requirements.txt --require-hashes
 COPY py-ln-gateway /wd/py-ln-gateway
-RUN cd /wd/py-ln-gateway && python setup.py install
+RUN cd /wd/py-ln-gateway && python3 setup.py install
 
 COPY docker/py-gateway.Procfile /wd/docker/py-gateway.Procfile
 COPY docker/entrypoint-py-gateway.sh /wd/docker/entrypoint-py-gateway.sh
