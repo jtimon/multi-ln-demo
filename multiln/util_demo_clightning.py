@@ -6,7 +6,7 @@ from pyln.client import LightningRpc
 from multiln.util import wait_for
 
 def get_clightningd(user_name, chain_name):
-    return LightningRpc('/wd/clightning_datadir_%s_%s/%s/lightning-rpc' % (user_name, chain_name.replace("-", "_"), chain_name))
+    return LightningRpc('/wd/clightning_datadir_%s/%s/lightning-rpc' % (user_name, chain_name))
 
 def ln_init_global(chains):
     to_return = {}
