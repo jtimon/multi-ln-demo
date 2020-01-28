@@ -19,10 +19,10 @@ CHAINS = {
     },
 
     'chain_3': {
-        'id': 'de650213b96a541df3bd9ee530cc3da4e9424d3617f95e6b2a0d5452e23412b9',
+        'id': '34bf1751fd81087a81aae0b16c6e7bffcfe5574fce013e9ddd2e100c038f9046',
         'petname': 'chain_3',
         'bip173_name': 'bcc',
-        'host_url': 'bitcoind_chain_3',
+        'host_url': 'elementsd_chain_3',
         'port_decimal': 6,
         'users': ['carol', 'david'],
     },

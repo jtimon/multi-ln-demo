@@ -46,19 +46,17 @@ WORKDIR /wd
 RUN ln -s /usr/bin/python3 /usr/bin/python && \
     ln -s /usr/bin/pip3 /usr/bin/pip
 
-# TODO Remove this, only needed for bitcoin-cli for lightning
-COPY docker/build-daemon.sh /wd/build-daemon.sh
-# Build custom daemon able to produce and support an arbitrary number of chains
-# This corresponds to https://github.com/bitcoin/bitcoin/pull/17037
-ENV DAEMON_NAME=bitcoin
-ENV BRANCH_COMMIT=demo-multiln-6
-ENV REPO_HOST=https://github.com/jtimon
-ENV REPO_NAME=bitcoin
-RUN bash build-daemon.sh $BRANCH_COMMIT $REPO_NAME $REPO_HOST $DAEMON_NAME
-ENV PATH="/wd/$REPO_NAME/src:${PATH}"
+# TODO remove everything except /wd/elements-0.17.0.3/bin/elements-cli
+# This is only needed for elements-cli for lightning
+ENV SHA256SUM_ELEMENTS=8119ec068f3b143a745d4731a9221b9e6d0df2340a357147c9c9f68db74204a1
+RUN curl -sL -o elements.tar.gz https://github.com/ElementsProject/elements/releases/download/elements-0.17.0.3/elements-0.17.0.3-x86_64-linux-gnu.tar.gz \
+ && echo "${SHA256SUM_ELEMENTS}  elements.tar.gz" | sha256sum --check \
+ && tar xzf elements.tar.gz \
+ && rm elements.tar.gz
+ENV PATH="/wd/elements-0.17.0/bin:${PATH}"
 
 COPY docker/build-clightning.sh /wd/build-clightning.sh
-ENV LN_BRANCH_COMMIT=v0.8.0-demo-7
+ENV LN_BRANCH_COMMIT=v0.8.0-demo-10
 ENV LN_REPO_HOST=https://github.com/jtimon
 ENV LN_REPO_NAME=lightning
 RUN bash build-clightning.sh $LN_BRANCH_COMMIT $LN_REPO_NAME $LN_REPO_HOST
