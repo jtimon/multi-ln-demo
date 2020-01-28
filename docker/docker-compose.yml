@@ -17,7 +17,7 @@ services:
     depends_on:
       - bitcoind_regtest
       - elementsd_liquid_regtest
-      - bitcoind_chain_3
+      - elementsd_chain_3
       - clightning_alice_regtest
       - clightning_bob_regtest
       - clightning_bob_liquid_regtest
@@ -43,7 +43,7 @@ services:
     depends_on:
       - bitcoind_regtest
       - elementsd_liquid_regtest
-      - bitcoind_chain_3
+      - elementsd_chain_3
       - clightning_alice_regtest
       - clightning_bob_regtest
       - clightning_bob_liquid_regtest
@@ -112,17 +112,17 @@ services:
     networks:
       - backend-network
 
-  bitcoind_chain_3:
+  elementsd_chain_3:
     build:
       context: ../
-      dockerfile: docker/bitcoind_custom.Dockerfile
-    command: "bitcoind -chain=chain_3 -conf=/wd/conf/bitcoind.conf -datadir=/wd/bitcoind_chain_3/"
+      dockerfile: docker/elementsd.Dockerfile
+    command: "elementsd -chain=chain_3 -conf=/wd/conf/bitcoind.conf -datadir=/wd/elementsd_chain_3/"
     ports:
       - "18565:18565"
     expose:
       - "18565"
     volumes:
-      - "bitcoind_chain_3_datadir:/wd/bitcoind_chain_3"
+      - "elementsd_chain_3_datadir:/wd/elementsd_chain_3"
     networks:
       - backend-network
 
@@ -178,7 +178,7 @@ services:
 
   clightning_carol_chain_3:
     depends_on:
-      - bitcoind_chain_3
+      - elementsd_chain_3
     build:
       context: ../
       dockerfile: docker/clightning_custom.Dockerfile
@@ -190,7 +190,7 @@ services:
 
   clightning_david_chain_3:
     depends_on:
-      - bitcoind_chain_3
+      - elementsd_chain_3
     build:
       context: ../
       dockerfile: docker/clightning_custom.Dockerfile
@@ -223,4 +223,4 @@ volumes:
   clightning_datadir_david_chain_3:
   bitcoind_regtest_datadir:
   elementsd_liquid_regtest_datadir:
-  bitcoind_chain_3_datadir:
+  elementsd_chain_3_datadir:
