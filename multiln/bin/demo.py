@@ -211,7 +211,4 @@ if N_CHAINS > 1:
 
 # TODO Pay from alice to david using lightning
 
-# import json
-# print(json.dumps(LIGHTNINGD[EXAMPLE_CHAIN]['alice'].help(), indent=4, sort_keys=True))
-
 print('All done for selected chains %s' % SELECTED_CHAINS)
