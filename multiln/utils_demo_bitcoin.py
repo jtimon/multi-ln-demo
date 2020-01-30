@@ -1,4 +1,5 @@
 
+from pprint import pprint
 import time
 
 from multiln.rpccaller import RpcCaller
@@ -37,3 +38,13 @@ def print_balances(bitcoind_map):
     for chain_name, rpccaller in bitcoind_map.items():
         print('getbalance', chain_name, rpccaller.call('getbalance', {}))
         print('getbalances', chain_name, rpccaller.call('getbalances', {}))
+
+def btc_print_block_at_height(bitcoind_map, height):
+    for chain_name, rpccaller in bitcoind_map.items():
+        blockhash = rpccaller.call('getblockhash', {'height': height})
+        print('getblockhash', chain_name, blockhash)
+        block = rpccaller.call('getblock', {'blockhash': blockhash})
+        for txid in block['tx']:
+            tx = rpccaller.call('getrawtransaction', {'blockhash': blockhash, 'txid': txid, 'verbose': 1})
+            print('getrawtransaction', chain_name)
+            pprint(tx)

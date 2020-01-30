@@ -13,6 +13,7 @@ from hashlib import sha256
 from multiln.utils_demo_bitcoin import (
     btc_generate_all_chains,
     btc_init_bitcoind_global,
+    btc_print_block_at_height,
     btc_wait_deamons_start,
     generate_blocks,
     print_balances,
@@ -156,6 +157,7 @@ btc_wait_deamons_start(BITCOIND)
 # Generate and mature the coins in each chain
 btc_generate_all_chains(BITCOIND, 101)
 print_balances(BITCOIND)
+btc_print_block_at_height(BITCOIND, 1)
 
 # lightning-specific things from here
 ln_wait_deamons_start(LIGHTNINGD)
