@@ -1,11 +1,13 @@
 
+import os
+
 from flask import Blueprint, request
 
 from py_ln_gateway.gateway import Gateway
 
 gateway_blueprint = Blueprint('gateway_blueprint', __name__)
 
-gateway = Gateway('/wd/py-ln-gateway/py_ln_gateway/nodes_config.json')
+gateway = Gateway(os.environ.get('PYGATEWAY_CONF'))
 
 @gateway_blueprint.route('/get_accepted_chains', methods = ['GET'])
 def get_accepted_chains():
