@@ -68,7 +68,7 @@ services:
       POSTGRES_PASSWORD: "password"
       POSTGRES_DB: "gateway_db"
       POSTGRES_URL: "db:5432"
-      PYGATEWAY_CONF: "/wd/py-ln-gateway/py_ln_gateway/nodes_config.json"
+      PYGATEWAY_CONF: "/wd/conf/bob_gateway.json"
     build:
       context: ../
       dockerfile: "docker/py-gateway.Dockerfile"
