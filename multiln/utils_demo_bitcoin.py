@@ -35,4 +35,5 @@ def btc_generate_all_chains(bitcoind_map, nblocks):
 
 def print_balances(bitcoind_map):
     for chain_name, rpccaller in bitcoind_map.items():
-        print(chain_name, rpccaller.call('getbalances', {}))
+        print('getbalance', chain_name, rpccaller.call('getbalance', {}))
+        print('getbalances', chain_name, rpccaller.call('getbalances', {}))
