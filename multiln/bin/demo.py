@@ -84,17 +84,13 @@ def demo_pay_every_chain(lightningd_map):
             break
 
 # alice on regtest pays an invoice to carol on liquid-regtest through gateway bob with nodes on both chains
-def demo_2_chains_gateway_payment(lightningd_map):
-    if N_CHAINS < 2:
-        return
-
+def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, user_name_gateway, user_name_b, chain_name_b):
     print('--------Running demo_2_chains_gateway_payment()...')
-    # TODO Select the users in a more dynamic way
-    user_name_a = 'alice'
-    chain_name_a = 'regtest'
-    user_name_gateway = 'bob'
-    user_name_b = 'carol'
-    chain_name_b = 'liquid-regtest'
+    print('user_name_a = %s' % user_name_a)
+    print('chain_name_a = %s' % chain_name_a)
+    print('user_name_gateway = %s' % user_name_gateway)
+    print('user_name_b = %s' % user_name_b)
+    print('chain_name_b = %s' % chain_name_b)
 
     msatoshi = 1000
     print('%s on chain %s receives invoice for %s msatoshis from %s on chain %s' % (user_name_a, chain_name_a, msatoshi, user_name_b, chain_name_b))
@@ -204,8 +200,14 @@ ln_listchannels(LIGHTNINGD)
 
 demo_pay_every_chain(LIGHTNINGD)
 
-# Try to pay an invoice to carol on liquid-regtest from alice on regtest
-demo_2_chains_gateway_payment(LIGHTNINGD)
+# Pay an invoice to carol on liquid-regtest from alice on regtest
+if N_CHAINS > 1:
+    demo_2_chains_gateway_payment(LIGHTNINGD,
+                                  user_name_a = 'alice',
+                                  chain_name_a = 'regtest',
+                                  user_name_gateway = 'bob',
+                                  user_name_b = 'carol',
+                                  chain_name_b = 'liquid-regtest')
 
 # TODO Pay from alice to david using lightning
 
