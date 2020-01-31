@@ -69,6 +69,12 @@ services:
       POSTGRES_DB: "gateway_db"
       POSTGRES_URL: "db_bob:5432"
       PYGATEWAY_CONF: "/wd/conf/bob_gateway.json"
+      FLASK_ENV: development
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      FLASK_APP: /wd/py-ln-gateway/py_ln_gateway/app.py
+      FLASK_RUN_HOST: 0.0.0.0
+      FLASK_RUN_PORT: 5000
     build:
       context: ../
       dockerfile: "docker/py-gateway.Dockerfile"
