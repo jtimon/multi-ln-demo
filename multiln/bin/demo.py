@@ -54,9 +54,6 @@ EXAMPLE_CHAIN = SELECTED_CHAINS[0]
 CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
 N_CHAINS = len(CHAINS)
 
-def chain_petname_to_id(petname):
-    return CHAINS[petname]['id']
-
 print('Chains considered (%s):' % N_CHAINS)
 print(CHAINS)
 
@@ -122,7 +119,7 @@ def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, use
     print(requests.get(GATEWAY_URL[user_name_gateway] + "/get_prices").json())
     src_invoice = requests.post(GATEWAY_URL[user_name_gateway] + "/request_dest_payment", data={
         'bolt11': invoice['bolt11'],
-        'src_chain_ids': [chain_petname_to_id(chain_name_a)],
+        'src_chain_ids': [CHAINS[chain_name_a]['id']],
     }).json()
     print("...but since %s can't pay to chain %s, pays the following invoice to %s gateway inc in chain %s instead..." % (user_name_a, chain_name_b, user_name_gateway, chain_name_a))
     print('src_invoice:', src_invoice)
