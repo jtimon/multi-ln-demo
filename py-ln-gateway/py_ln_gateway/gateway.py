@@ -37,6 +37,9 @@ def check_hash_preimage(payment_hash, payment_preimage):
 
 MIN_OFFER = 1000
 
+def is_with_error(result):
+    return isinstance(result, dict) and 'error' in result
+
 class Gateway(object):
 
     def __init__(self, nodes_config_path):
@@ -78,6 +81,27 @@ class Gateway(object):
                     break
         return src_chain_id
 
+    def _get_chainid_from_bolt11(self, dest_bolt11):
+        if len(dest_bolt11) > MAX_BOLT11:
+            return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
+
+        dest_chain_hrp, data = bech32_decode(dest_bolt11)
+        if not dest_chain_hrp:
+            return {'error': "Bad bech32 checksum for bolt11"}
+
+        if not dest_chain_hrp.startswith('ln'):
+            return {'error': "Bad bolt11, hrp does not start with ln"}
+
+        m = re.search("[^\d]+", dest_chain_hrp[2:])
+        if not m:
+            return {'error': "No chain bip173 name in bolt11"}
+
+        dest_chain_bip173_name = m.group(0)
+        if not dest_chain_bip173_name in self.chains_by_bip173:
+            return {'error': "gateway won't pay to chain with bip173 name (hrp) %s" % dest_chain_bip173_name}
+
+        return self.chains_by_bip173[dest_chain_bip173_name]['id']
+
     # Check that there's actually a route before accepting the request
     def _check_route(self, dest_chain_id, payee, amount_msats, risk_factor=1):
         try:
@@ -109,31 +133,16 @@ class Gateway(object):
         if error: return error
         print('Received valid req for %s:' % 'request_dest_payment', req)
 
-        dest_bolt11 = req['bolt11']
-        if len(dest_bolt11) > MAX_BOLT11:
-            return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
-
         src_chain_id = self._choose_src_chain(req.getlist('src_chain_ids'))
         if not src_chain_id:
             return {'error': "Offered chains not accepted. Accepted chains %s" % (
                 str(list(self.sibling_nodes.keys())))}
 
-        dest_chain_hrp, data = bech32_decode(dest_bolt11)
-        if not dest_chain_hrp:
-            return {'error': "Bad bech32 checksum for bolt11"}
+        dest_bolt11 = req['bolt11']
+        dest_chain_id = self._get_chainid_from_bolt11(dest_bolt11)
+        if is_with_error(dest_chain_id):
+            return dest_chain_id
 
-        if not dest_chain_hrp.startswith('ln'):
-            return {'error': "Bad bolt11, hrp does not start with ln"}
-
-        m = re.search("[^\d]+", dest_chain_hrp[2:])
-        if not m:
-            return {'error': "No chain bip173 name in bolt11"}
-
-        dest_chain_bip173_name = m.group(0)
-        if not dest_chain_bip173_name in self.chains_by_bip173:
-            return {'error': "gateway won't pay to chain with bip173 name (hrp) %s" % dest_chain_bip173_name}
-
-        dest_chain_id = self.chains_by_bip173[dest_chain_bip173_name]['id']
         if dest_chain_id not in self.sibling_nodes:
             return {'error': "gateway can't pay to chain %s" % dest_chain_id}
 
@@ -172,7 +181,7 @@ class Gateway(object):
             return {'error': "No route found to pay dest_bolt11"}
 
         label = 'from_%s_to_%s_label' % (self.chainparams_from_id(src_chain_id)['petname'],
-                                         self.chains_by_bip173[dest_chain_bip173_name]['petname'])
+                                         self.chainparams_from_id(dest_chain_id)['petname'])
         description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_bolt11)
         src_invoice = self.sibling_nodes[src_chain_id].invoice(str(int(offer_msats)), label, description, expiry=self.invoices_expiry)
         print('src_invoice:')
