@@ -3,6 +3,8 @@
 if __name__ != '__main__':
     raise ImportError(u"%s may only be run as a script" % __file__)
 
+import json
+import os
 import time
 
 from py_ln_gateway.app import app
@@ -23,16 +25,14 @@ def add_or_update_price(src_chain, dest_chain, next_price_val):
     db_session.commit()
 
 # We really just need to set it once if it's going to be constant
-add_or_update_price('0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206',
-                    '9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6',
-                    1)
+with open(os.environ.get('PYGATEWAY_CONF')) as json_file:
+    data = json.load(json_file)
+    for d_price in data['default_prices']:
+        add_or_update_price(d_price['src_chain'], d_price['dest_chain'], d_price['price'])
 
 count = 1
 while True:
     print('total repetitions for %s = %s' % (__file__, count))
-    # This could periodically call the API for exchanges to update prices
-    add_or_update_price('0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206',
-                        '9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6',
-                        1)
+    # This could periodically call the APIs of exchanges to update prices dynamically if necessary
     count = count + 1
-    time.sleep(60)
+    time.sleep(600)
