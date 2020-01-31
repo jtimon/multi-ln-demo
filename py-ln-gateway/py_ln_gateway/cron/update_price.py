@@ -27,9 +27,9 @@ with open(os.environ.get('PYGATEWAY_CONF')) as json_file:
     for d_price in data['default_prices']:
         add_or_update_price(d_price['src_chain'], d_price['dest_chain'], d_price['price'])
 
-count = 1
-while True:
-    print('total repetitions for %s = %s' % (__file__, count))
-    # This could periodically call the APIs of exchanges to update prices dynamically if necessary
-    count = count + 1
-    time.sleep(600)
+# This could periodically call the APIs of exchanges to update prices dynamically if necessary
+# count = 1
+# while True:
+#     print('total repetitions for %s = %s' % (__file__, count))
+#     count = count + 1
+#     time.sleep(600)
