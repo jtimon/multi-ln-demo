@@ -49,7 +49,6 @@ print('Selected Chains:', SELECTED_CHAINS)
 if len(SELECTED_CHAINS) == 0:
     raise AssertionError("No chains selected to run the demo.")
 
-GATEWAY_URL = 'http://bob_gateway:5000'
 EXAMPLE_CHAIN = SELECTED_CHAINS[0]
 
 CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
@@ -60,6 +59,10 @@ def chain_petname_to_id(petname):
 
 print('Chains considered (%s):' % N_CHAINS)
 print(CHAINS)
+
+GATEWAY_URL = {
+    'bob': 'http://bob_gateway:5000',
+}
 
 BITCOIND = btc_init_bitcoind_global(CHAINS)
 LIGHTNINGD = ln_init_global(CHAINS)
@@ -115,9 +118,9 @@ def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, use
         )
         assert('bolt11' in e.payload)
 
-    print(requests.get(GATEWAY_URL + "/get_accepted_chains").json())
-    print(requests.get(GATEWAY_URL + "/get_prices").json())
-    src_invoice = requests.post(GATEWAY_URL + "/request_dest_payment", data={
+    print(requests.get(GATEWAY_URL[user_name_gateway] + "/get_accepted_chains").json())
+    print(requests.get(GATEWAY_URL[user_name_gateway] + "/get_prices").json())
+    src_invoice = requests.post(GATEWAY_URL[user_name_gateway] + "/request_dest_payment", data={
         'bolt11': invoice['bolt11'],
         'src_chain_ids': [chain_petname_to_id(chain_name_a)],
     }).json()
@@ -130,7 +133,7 @@ def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, use
         print('payment succesful:')
         print(src_payment_result)
         print('...and after a successful payment to %s gateway inc, %s calls again with the proof of payment...' % (user_name_gateway, user_name_a))
-        gateway_confirm_payment_result = requests.post(GATEWAY_URL + "/confirm_src_payment", data={
+        gateway_confirm_payment_result = requests.post(GATEWAY_URL[user_name_gateway] + "/confirm_src_payment", data={
             'payment_hash': src_payment_result['payment_hash'],
             'payment_preimage': src_payment_result['payment_preimage'],
         }).json()
