@@ -65,12 +65,8 @@ GATEWAY_URL = {
 BITCOIND = btc_init_bitcoind_global(CHAINS)
 LIGHTNINGD = ln_init_global(CHAINS)
 
-# pay an invoice on every chain
+# A node receives invoices for every other node in the chain and pays it
 def demo_pay_every_chain(lightningd_map):
-    if N_CHAINS == 2:
-        return
-
-    # A node receives invoices for every other node in the chain and pays it
     for chain_name, ln_daemons in lightningd_map.items():
         for user_name_a, ln_caller_a in ln_daemons.items():
             for user_name_b, ln_caller_b in ln_daemons.items():
@@ -198,6 +194,7 @@ ln_wait_channels_state(LIGHTNINGD, 'CHANNELD_NORMAL', wait_interval=5)
 
 ln_listchannels(LIGHTNINGD)
 
+# Pay an invoice on every chain
 demo_pay_every_chain(LIGHTNINGD)
 
 # Alice on regtest pays an invoice to carol on liquid-regtest through gateway bob with nodes on both chains
