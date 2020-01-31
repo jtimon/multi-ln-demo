@@ -7,11 +7,8 @@ import json
 import os
 import time
 
-from py_ln_gateway.app import app
 from py_ln_gateway.db import db_session
 from py_ln_gateway.models import Price
-
-app.app_context().push()
 
 def add_or_update_price(src_chain, dest_chain, next_price_val):
     print('Updating price to %s for chain trade %s:%s' % (next_price_val, src_chain, dest_chain))

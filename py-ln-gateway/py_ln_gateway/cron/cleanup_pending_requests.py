@@ -8,14 +8,11 @@ import time
 
 from sqlalchemy import or_
 
-from py_ln_gateway.app import app
 from py_ln_gateway.db import db_session
 from py_ln_gateway.models import (
     FailedRequest,
     PendingRequest,
 )
-
-app.app_context().push()
 
 count = 1
 while True:
