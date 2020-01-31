@@ -10,7 +10,7 @@ pydemo-regtest:
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale rsdemo=0 \
-	--scale db=0 \
+	--scale db_bob=0 \
 	--scale bob_gateway=0 \
 	--scale elementsd_liquid_regtest=0 \
 	--scale elementsd_chain_3=0 \

@@ -67,14 +67,14 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "password"
       POSTGRES_DB: "gateway_db"
-      POSTGRES_URL: "db:5432"
+      POSTGRES_URL: "db_bob:5432"
       PYGATEWAY_CONF: "/wd/conf/bob_gateway.json"
     build:
       context: ../
       dockerfile: "docker/py-gateway.Dockerfile"
     entrypoint: "/wd/docker/entrypoint-py-gateway.sh"
     depends_on:
-      - db
+      - db_bob
       - bitcoind_regtest
       - elementsd_liquid_regtest
       - clightning_bob_regtest
@@ -205,7 +205,7 @@ services:
     networks:
       - backend-network
 
-  db:
+  db_bob:
     image: postgres:11.1
     ports:
       - "5432:5432"
