@@ -59,6 +59,7 @@ print(CHAINS)
 
 GATEWAY_URL = {
     'bob': 'http://bob_gateway:5000',
+    'carol': 'http://carol_gateway:6000',
 }
 
 BITCOIND = btc_init_bitcoind_global(CHAINS)
@@ -83,7 +84,6 @@ def demo_pay_every_chain(lightningd_map):
                     print(ln_caller_a.pay(invoice['bolt11']))
             break
 
-# alice on regtest pays an invoice to carol on liquid-regtest through gateway bob with nodes on both chains
 def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, user_name_gateway, user_name_b, chain_name_b):
     print('--------Running demo_2_chains_gateway_payment()...')
     print('user_name_a = %s' % user_name_a)
@@ -200,7 +200,7 @@ ln_listchannels(LIGHTNINGD)
 
 demo_pay_every_chain(LIGHTNINGD)
 
-# Pay an invoice to carol on liquid-regtest from alice on regtest
+# Alice on regtest pays an invoice to carol on liquid-regtest through gateway bob with nodes on both chains
 if N_CHAINS > 1:
     demo_2_chains_gateway_payment(LIGHTNINGD,
                                   user_name_a = 'alice',
@@ -208,6 +208,15 @@ if N_CHAINS > 1:
                                   user_name_gateway = 'bob',
                                   user_name_b = 'carol',
                                   chain_name_b = 'liquid-regtest')
+
+if N_CHAINS > 2:
+    # Bob on liquid-regtest pays an invoice to david on chain_3 through gateway carol with nodes on both chains
+    demo_2_chains_gateway_payment(LIGHTNINGD,
+                                  user_name_a = 'bob',
+                                  chain_name_a = 'liquid-regtest',
+                                  user_name_gateway = 'carol',
+                                  user_name_b = 'david',
+                                  chain_name_b = 'chain_3')
 
 # TODO Pay from alice to david using lightning
 
