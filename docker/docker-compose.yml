@@ -95,6 +95,40 @@ services:
     networks:
       - backend-network
 
+  carol_gateway:
+    environment:
+      PYTHONUNBUFFERED: "true"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "gateway_db"
+      POSTGRES_URL: "db_carol:5432"
+      PYGATEWAY_CONF: "/wd/conf/carol_gateway.json"
+      FLASK_ENV: development
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      FLASK_APP: /wd/py-ln-gateway/py_ln_gateway/app.py
+      FLASK_RUN_HOST: 0.0.0.0
+      FLASK_RUN_PORT: 6000
+    build:
+      context: ../
+      dockerfile: "docker/py-gateway.Dockerfile"
+    entrypoint: "/wd/docker/entrypoint-py-gateway.sh"
+    depends_on:
+      - db_carol
+      - elementsd_liquid_regtest
+      - elementsd_chain_3
+      - clightning_carol_liquid_regtest
+      - clightning_carol_chain_3
+    volumes:
+      - "clightning_datadir_carol_liquid_regtest:/wd/clightning_datadir_carol/liquid-regtest"
+      - "clightning_datadir_carol_chain_3:/wd/clightning_datadir_carol/chain_3"
+    ports:
+      - "6000:6000"
+    expose:
+      - "6000"
+    networks:
+      - backend-network
+
   bitcoind_regtest:
     build:
       context: ../
@@ -217,6 +251,20 @@ services:
       - "5432:5432"
     expose:
       - "5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_DB: "gateway_db"
+    restart: on-failure
+    networks:
+      - backend-network
+
+  db_carol:
+    image: postgres:11.1
+    ports:
+      - "5433:5432"
+    expose:
+      - "5433"
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "password"

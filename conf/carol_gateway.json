@@ -1,0 +1,32 @@
+{
+    "invoices_expiry": 60,
+    "chains_by_bip173":
+    {
+	"bcrt": {
+            "petname": "regtest",
+            "id": "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206"
+	},
+	"ert": {
+            "petname": "liquid-regtest",
+            "id": "9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6"
+	},
+	"bcc": {
+            "petname": "chain_3",
+            "id": "34bf1751fd81087a81aae0b16c6e7bffcfe5574fce013e9ddd2e100c038f9046"
+	}
+    },
+
+    "nodes":
+    {
+	"9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6": "/wd/clightning_datadir_carol/liquid-regtest/lightning-rpc",
+	"34bf1751fd81087a81aae0b16c6e7bffcfe5574fce013e9ddd2e100c038f9046": "/wd/clightning_datadir_carol/chain_3/lightning-rpc"
+    },
+
+    "default_prices": [
+	{
+	    "src_chain": "9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6",
+	    "dest_chain": "34bf1751fd81087a81aae0b16c6e7bffcfe5574fce013e9ddd2e100c038f9046",
+	    "price": 1
+	}
+    ]
+}
