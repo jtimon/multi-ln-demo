@@ -28,5 +28,15 @@
 	    "dest_chain": "9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6",
 	    "price": 1
 	}
-    ]
+    ],
+
+    "other_gateways":
+    {
+	"9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6": [
+	    "http://carol_gateway:6000"
+	],
+	"34bf1751fd81087a81aae0b16c6e7bffcfe5574fce013e9ddd2e100c038f9046": [
+	    "http://carol_gateway:6000"
+	]
+    }
 }

@@ -93,6 +93,7 @@ class Gateway(object):
             for chain_id, node_config in data['nodes'].items():
                 print(chain_id, node_config)
                 self.sibling_nodes[chain_id] = LightningRpc(node_config)
+            self.other_gateways = data['other_gateways']
 
     def chainparams_from_id(self, chain_id):
         for key, val in self.chains_by_bip173.items():
