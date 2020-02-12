@@ -2,8 +2,8 @@
 #  awk cat cmp cp diff echo egrep expr false grep install-info ln ls
 #  mkdir mv printf pwd rm rmdir sed sleep sort tar test touch tr true
 
-.PHONY: docker-demo-regtest docker-demo-2-chains docker-rust-2-chains docker-run-3-chains
-all: docker-demo-2-chains
+.PHONY: pydemo-regtest pydemo-2-chains pydemo-3-chains rsdemo-2-chains docker-clean-containers
+all: pydemo-3-chains
 
 pydemo-regtest:
 	export PYDEMO_CHAINS=regtest ; \
