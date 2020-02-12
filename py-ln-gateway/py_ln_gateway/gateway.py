@@ -78,6 +78,16 @@ class Gateway(object):
                     break
         return src_chain_id
 
+    # Check that there's actually a route before accepting the request
+    def _check_route(self, dest_chain_id, payee, amount_msats, risk_factor=1):
+        try:
+            route = self.sibling_nodes[dest_chain_id].getroute(payee, amount_msats, risk_factor)
+            pprint(route)
+            return 'route' in route
+        except Exception as e:
+            print(e)
+            return False
+
     def get_accepted_chains(self):
         return {'accepted_chains': list(self.sibling_nodes.keys())}
 
@@ -158,13 +168,7 @@ class Gateway(object):
                 'src_min_amount': str(MIN_OFFER),
             }
 
-        # Check that there's actually a route before accepting the request
-        try:
-            risk_factor = 1
-            route = self.sibling_nodes[dest_chain_id].getroute(dest_invoice['payee'], dest_amount_msats, risk_factor)
-            assert('route' in route)
-            print('route:', route['route'])
-        except Exception as e:
+        if not self._check_route(dest_chain_id, dest_invoice['payee'], dest_amount_msats):
             return {'error': "No route found to pay dest_bolt11"}
 
         label = 'from_%s_to_%s_label' % (self.chainparams_from_id(src_chain_id)['petname'],
