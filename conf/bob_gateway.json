@@ -28,5 +28,7 @@
 	    "dest_chain": "9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6",
 	    "price": 1
 	}
-    ]
+    ],
+
+    "other_gateways": {}
 }

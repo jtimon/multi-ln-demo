@@ -20,10 +20,9 @@ See Makefile and docker-compose documentation
 
 # Incremental goals
 
-- [x] 2 chains, 1 asset (non atomic, trusted)
 - [x] 2 chains, 2 asset (non atomic, trusted)
-- [ ] 2 chains, 1 asset (atomic, trustless)
-- [ ] 2 chains, 2 asset
+- [x] N chains, N asset (non atomic, trusted)
+- [ ] 2 chains, 2 asset (atomic, trustless)
 - [ ] N chains, N assets
 - [ ] 1 chain, 2 assets
 - [ ] 1 chain, M assets
