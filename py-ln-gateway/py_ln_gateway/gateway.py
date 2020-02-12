@@ -17,6 +17,7 @@ from pprint import pprint
 import binascii
 import json
 import re
+import requests
 
 from hashlib import sha256
 from pyln.client import LightningRpc
@@ -202,6 +203,66 @@ class Gateway(object):
 
         return src_invoice
 
+    # TODO Allow gateway to call other gateways to serve requests
+    def _other_gateway_pays(self, dest_bolt11, src_chain_id, dest_chain_id):
+        error_result = {'error': "No route found to pay bolt11 %s" % dest_bolt11}
+        # TODO Support several gateways per chain
+        other_url = self.other_gateways[dest_chain_id][0]
+        other_gw_invoice = requests.post(other_url + "/request_dest_payment", data={
+            'bolt11': dest_bolt11,
+            'src_chain_ids': list(self.sibling_nodes.keys()),
+        }).json()
+        if is_with_error(other_gw_invoice):
+            print('Error returned by the other gateway on the first request:')
+            pprint(other_gw_invoice)
+            return error_result
+
+        other_gw_bolt11 = other_gw_invoice['bolt11']
+        other_gw_chain_id = self._get_chainid_from_bolt11(other_gw_bolt11)
+        if is_with_error(other_gw_chain_id):
+            print('Error parsing the other gateway\'s invoice:')
+            pprint(other_gw_chain_id)
+            return error_result
+
+        if other_gw_chain_id not in self.sibling_nodes:
+            print('Error: the other gateway demands payment in a chain we don\'t support')
+            return error_result
+
+        other_gw_invoice = self._decode_check_bolt11(other_gw_chain_id, other_gw_bolt11)
+        if is_with_error(other_gw_invoice):
+            print('Error decoding the other gateway\'s invoice:')
+            pprint(other_gw_invoice)
+            return error_result
+
+        if not self._check_route(other_gw_chain_id, other_gw_invoice['payee'], other_gw_invoice['msatoshi']):
+            print("No route found to pay other_gw_bolt11 %s" % other_gw_bolt11)
+            return error_result
+
+        src_invoice = self._calculate_src_invoice(src_chain_id, other_gw_chain_id, other_gw_invoice, other_gw_bolt11)
+        if is_with_error(src_invoice):
+            print('Error calculating the src invoice from the other gateway\'s invoice:')
+            pprint(src_invoice)
+            return error_result
+
+        db_session.add(PendingRequest(
+            src_payment_hash = src_invoice['payment_hash'],
+            src_chain = src_chain_id,
+            src_bolt11 = src_invoice['bolt11'],
+            src_expires_at = datetime.utcfromtimestamp(src_invoice['expires_at']),
+            src_amount = int(src_invoice['msatoshi']),
+            dest_chain = dest_chain_id,
+            dest_bolt11 = dest_bolt11,
+            # TODO parse dest_bolt11 without calling the any node's rpc
+            # dest_expires_at = datetime.utcfromtimestamp(dest_invoice['created_at'] + dest_invoice['expiry']),
+            # dest_amount = int(dest_invoice['msatoshi'])
+            other_gw_chain = other_gw_chain_id,
+            other_gw_bolt11 = other_gw_bolt11,
+            other_gw_expires_at = datetime.utcfromtimestamp(other_gw_invoice['created_at'] + other_gw_invoice['expiry']),
+            other_gw_amount = int(other_gw_invoice['msatoshi'])
+        ))
+        db_session.commit()
+        return src_invoice
+
     def get_accepted_chains(self):
         return {'accepted_chains': list(self.sibling_nodes.keys())}
 
@@ -234,14 +295,16 @@ class Gateway(object):
             return dest_chain_id
 
         if dest_chain_id not in self.sibling_nodes:
-            return {'error': "gateway can't pay to chain %s" % dest_chain_id}
+            print("gateway can't pay to chain %s, trying with another gateway" % dest_chain_id)
+            return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_chain_id)
 
         dest_invoice = self._decode_check_bolt11(dest_chain_id, dest_bolt11)
         if is_with_error(dest_invoice):
             return dest_invoice
 
         if not self._check_route(dest_chain_id, dest_invoice['payee'], dest_invoice['msatoshi']):
-            return {'error': "No route found to pay dest_bolt11"}
+            print("No route found to pay dest_bolt11 %s, trying with another gateway" % dest_bolt11)
+            return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_chain_id)
 
         src_invoice = self._calculate_src_invoice(src_chain_id, dest_chain_id, dest_invoice, dest_bolt11)
         if is_with_error(src_invoice):
@@ -310,6 +373,9 @@ class Gateway(object):
         # This should never fail given the preimage corresponds to the hash, but let's be safe
         error = self.check_paid_to_own_node(payment_hash, pending_request.src_chain)
         if error: return error
+
+        if pending_request.other_gw_chain:
+            return {'error': 'TODO: Allow gateway to call other gateways to serve requests'}
 
         # Prices may have been changed from request to confirm call
         # Check the price one more time to mitigate the free option problem. If it fails because of this, a refund is required too.

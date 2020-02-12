@@ -31,8 +31,13 @@ class PendingRequest(Base):
     dest_payment_hash = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
     dest_chain = Column(String(64), nullable=False)
     dest_bolt11 = Column(String(MAX_BOLT11), nullable=False)
-    dest_expires_at = Column(DateTime(), nullable=False)
-    dest_amount = Column(Integer(), nullable=False)
+    dest_expires_at = Column(DateTime())
+    dest_amount = Column(Integer())
+
+    other_gw_chain = Column(String(64))
+    other_gw_bolt11 = Column(String(MAX_BOLT11))
+    other_gw_expires_at = Column(DateTime())
+    other_gw_amount = Column(Integer())
 
 class PaidRequest(Base):
     __tablename__ = 'paid_requests'
