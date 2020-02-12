@@ -68,6 +68,16 @@ class Gateway(object):
 
         return None
 
+    def _choose_src_chain(self, src_chain_ids):
+        src_chain_id = None
+        # TODO allow configuring rankings or consult prices instead of simply choosing the first match found
+        for chain_id in src_chain_ids:
+            for node_chain_id in self.sibling_nodes.keys():
+                if chain_id == node_chain_id:
+                    src_chain_id = chain_id
+                    break
+        return src_chain_id
+
     def get_accepted_chains(self):
         return {'accepted_chains': list(self.sibling_nodes.keys())}
 
@@ -93,17 +103,10 @@ class Gateway(object):
         if len(dest_bolt11) > MAX_BOLT11:
             return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
 
-        src_chain_ids = req.getlist('src_chain_ids')
-        src_chain_id = None
-        for chain_id in src_chain_ids:
-            for node_chain_id in self.sibling_nodes.keys():
-                if chain_id == node_chain_id:
-                    src_chain_id = chain_id
-                    break # TODO allow configuring rankings or consult prices instead of simply using the first match found
-
+        src_chain_id = self._choose_src_chain(req.getlist('src_chain_ids'))
         if not src_chain_id:
-            return {'error': "Offer chains %s not accepted. Accepted chains %s" % (
-                str(src_chain_ids), str(list(self.sibling_nodes.keys())))}
+            return {'error': "Offered chains not accepted. Accepted chains %s" % (
+                str(list(self.sibling_nodes.keys())))}
 
         dest_chain_hrp, data = bech32_decode(dest_bolt11)
         if not dest_chain_hrp:
