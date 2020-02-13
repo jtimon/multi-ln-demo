@@ -60,7 +60,9 @@ class FailedRequest(Base):
     src_chain = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
     src_bolt11 = Column(String(MAX_BOLT11), nullable=False)
     src_expires_at = Column(DateTime(), nullable=False)
+    src_amount = Column(Integer(), nullable=False)
 
     dest_chain = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
     dest_bolt11 = Column(String(MAX_BOLT11), nullable=False)
     dest_expires_at = Column(DateTime(), nullable=False)
+    dest_amount = Column(Integer(), nullable=False)

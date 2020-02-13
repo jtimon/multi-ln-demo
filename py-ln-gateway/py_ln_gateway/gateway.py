@@ -52,9 +52,11 @@ def save_failed_request(error, pending_request, src_payment_preimage):
         src_chain = pending_request.src_chain,
         src_bolt11 = pending_request.src_bolt11,
         src_expires_at = pending_request.src_expires_at,
+        src_amount = pending_request.src_amount,
         dest_chain = pending_request.dest_chain,
         dest_bolt11 = pending_request.dest_bolt11,
         dest_expires_at = pending_request.dest_expires_at,
+        dest_amount = pending_request.dest_amount,
     ))
     # Delete from pending_requests when failing too
     db_session.delete(pending_request)
