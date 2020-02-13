@@ -150,7 +150,7 @@ class Gateway(object):
         label = 'from_%s_to_%s_label_%s' % (self.chainparams_from_id(src_chain_id)['petname'],
                                             self.chainparams_from_id(dest_chain_id)['petname'],
                                             dest_invoice['payment_hash'])
-        description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_bolt11)
+        description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_invoice['payment_hash'])
         src_invoice = self.sibling_nodes[src_chain_id].invoice(str(int(offer_msatoshi)), label, description, expiry=self.invoices_expiry)
         if not 'msatoshi' in src_invoice:
             src_invoice['msatoshi'] = int(offer_msatoshi)
