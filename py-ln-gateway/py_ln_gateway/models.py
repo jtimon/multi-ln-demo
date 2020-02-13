@@ -52,13 +52,14 @@ class PaidRequest(Base):
 class FailedRequest(Base):
     __tablename__ = 'failed_requests'
 
-    error = Column(String(2500))
     src_payment_hash = Column(String(FIELD_32B_AS_HEX_STR), primary_key=True)
+
+    error = Column(String(2500))
+    src_payment_preimage = Column(String(FIELD_32B_AS_HEX_STR))
 
     src_chain = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
     src_bolt11 = Column(String(MAX_BOLT11), nullable=False)
     src_expires_at = Column(DateTime(), nullable=False)
-    src_payment_preimage = Column(String(FIELD_32B_AS_HEX_STR))
 
     dest_chain = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
     dest_bolt11 = Column(String(MAX_BOLT11), nullable=False)

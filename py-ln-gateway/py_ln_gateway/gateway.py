@@ -40,6 +40,26 @@ MIN_OFFER = 1000
 def is_with_error(result):
     return isinstance(result, dict) and 'error' in result
 
+def save_failed_request(error, pending_request, src_payment_preimage):
+    # TODO handle failed requests with refunds or something
+    # We could refund by opening a channel with some initial funds back to the customer,
+    # but then we need to have the node id on the initial request.
+    # Alternatively we can accept a refund invoice in this call.
+    db_session.add(FailedRequest(
+        src_payment_hash = pending_request.src_payment_hash,
+        error = error,
+        src_payment_preimage = src_payment_preimage,
+        src_chain = pending_request.src_chain,
+        src_bolt11 = pending_request.src_bolt11,
+        src_expires_at = pending_request.src_expires_at,
+        dest_chain = pending_request.dest_chain,
+        dest_bolt11 = pending_request.dest_bolt11,
+        dest_expires_at = pending_request.dest_expires_at,
+    ))
+    # Delete from pending_requests when failing too
+    db_session.delete(pending_request)
+    db_session.commit()
+
 class Gateway(object):
 
     def __init__(self, nodes_config_path):
@@ -278,21 +298,8 @@ class Gateway(object):
 
         src_current_offer = pending_request.dest_amount * price.price
         if Decimal(pending_request.src_amount) < src_current_offer:
-            error = "The offered price is no longer accepted."
-            db_session.add(FailedRequest(
-                error = error,
-                src_payment_hash = payment_hash,
-                src_payment_preimage = payment_preimage,
-                src_chain = pending_request.src_chain,
-                src_bolt11 = pending_request.src_bolt11,
-                src_expires_at = pending_request.src_expires_at,
-                dest_chain = pending_request.dest_chain,
-                dest_bolt11 = pending_request.dest_bolt11,
-                dest_expires_at = pending_request.dest_expires_at,
-            ))
-            # Delete from pending_requests when failing too
-            db_session.delete(pending_request)
-            db_session.commit()
+            save_failed_request("The offered price is no longer accepted.",
+                                pending_request, payment_preimage)
             return {
                 'error': error,
                 'src_payment_hash': payment_hash,
@@ -319,24 +326,7 @@ class Gateway(object):
         except Exception as e:
             print(type(e))
             print(e)
-            # TODO handle failed requests with refunds or something
-            # We could refund by opening a channel with some initial funds back to the customer,
-            # but then we need to have the node id on the initial request.
-            # Alternatively we can accept a refund invoice in this call.
-            db_session.add(FailedRequest(
-                error = str(e),
-                src_payment_hash = payment_hash,
-                src_payment_preimage = payment_preimage,
-                src_chain = pending_request.src_chain,
-                src_bolt11 = pending_request.src_bolt11,
-                src_expires_at = pending_request.src_expires_at,
-                dest_chain = pending_request.dest_chain,
-                dest_bolt11 = pending_request.dest_bolt11,
-                dest_expires_at = pending_request.dest_expires_at,
-            ))
-            # Delete from pending_requests when failing too
-            db_session.delete(pending_request)
-            db_session.commit()
+            save_failed_request(str(e), pending_request, payment_preimage)
             return {
                 'error': 'Error paying request.',
                 'src_payment_hash': payment_hash,
