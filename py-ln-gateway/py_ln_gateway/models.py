@@ -16,38 +16,38 @@ class Price(Base):
 
     # The id is composed by the src_chain_id followed by ':' and then the dest_chain_id
     src_dest = Column(String((2 * FIELD_32B_AS_HEX_STR) + 1), primary_key=True)
-    price = Column(Numeric(10,4))
+    price = Column(Numeric(10,4), nullable=False)
 
 class PendingRequest(Base):
     __tablename__ = 'pending_requests'
 
     src_payment_hash = Column(String(FIELD_32B_AS_HEX_STR), primary_key=True)
 
-    src_chain = Column(String(FIELD_32B_AS_HEX_STR))
-    src_bolt11 = Column(String(MAX_BOLT11))
-    src_expires_at = Column(DateTime())
-    src_amount = Column(Integer())
+    src_chain = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
+    src_bolt11 = Column(String(MAX_BOLT11), nullable=False)
+    src_expires_at = Column(DateTime(), nullable=False)
+    src_amount = Column(Integer(), nullable=False)
 
-    dest_chain = Column(String(64))
-    dest_bolt11 = Column(String(MAX_BOLT11))
-    dest_expires_at = Column(DateTime())
-    dest_amount = Column(Integer())
+    dest_chain = Column(String(64), nullable=False)
+    dest_bolt11 = Column(String(MAX_BOLT11), nullable=False)
+    dest_expires_at = Column(DateTime(), nullable=False)
+    dest_amount = Column(Integer(), nullable=False)
 
 class PaidRequest(Base):
     __tablename__ = 'paid_requests'
 
     src_payment_hash = Column(String(FIELD_32B_AS_HEX_STR), primary_key=True)
 
-    src_chain = Column(String(FIELD_32B_AS_HEX_STR))
-    src_bolt11 = Column(String(MAX_BOLT11))
-    src_expires_at = Column(DateTime())
-    src_payment_preimage = Column(String(FIELD_32B_AS_HEX_STR))
+    src_chain = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
+    src_bolt11 = Column(String(MAX_BOLT11), nullable=False)
+    src_expires_at = Column(DateTime(), nullable=False)
+    src_payment_preimage = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
 
-    dest_payment_hash = Column(String(FIELD_32B_AS_HEX_STR))
-    dest_chain = Column(String(FIELD_32B_AS_HEX_STR))
-    dest_bolt11 = Column(String(MAX_BOLT11))
-    dest_expires_at = Column(DateTime())
-    dest_payment_preimage = Column(String(FIELD_32B_AS_HEX_STR))
+    dest_payment_hash = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
+    dest_chain = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
+    dest_bolt11 = Column(String(MAX_BOLT11), nullable=False)
+    dest_expires_at = Column(DateTime(), nullable=False)
+    dest_payment_preimage = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
 
 class FailedRequest(Base):
     __tablename__ = 'failed_requests'
@@ -55,11 +55,11 @@ class FailedRequest(Base):
     error = Column(String(2500))
     src_payment_hash = Column(String(FIELD_32B_AS_HEX_STR), primary_key=True)
 
-    src_chain = Column(String(FIELD_32B_AS_HEX_STR))
-    src_bolt11 = Column(String(MAX_BOLT11))
-    src_expires_at = Column(DateTime())
-    src_payment_preimage = Column(String(FIELD_32B_AS_HEX_STR), nullable=True)
+    src_chain = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
+    src_bolt11 = Column(String(MAX_BOLT11), nullable=False)
+    src_expires_at = Column(DateTime(), nullable=False)
+    src_payment_preimage = Column(String(FIELD_32B_AS_HEX_STR))
 
-    dest_chain = Column(String(FIELD_32B_AS_HEX_STR))
-    dest_bolt11 = Column(String(MAX_BOLT11))
-    dest_expires_at = Column(DateTime())
+    dest_chain = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
+    dest_bolt11 = Column(String(MAX_BOLT11), nullable=False)
+    dest_expires_at = Column(DateTime(), nullable=False)
