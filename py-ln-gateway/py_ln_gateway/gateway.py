@@ -54,6 +54,7 @@ def save_failed_request(error, pending_request, src_payment_preimage):
         src_bolt11 = pending_request.src_bolt11,
         src_expires_at = pending_request.src_expires_at,
         src_amount = pending_request.src_amount,
+        dest_payment_hash = pending_request.dest_payment_hash,
         dest_chain = pending_request.dest_chain,
         dest_bolt11 = pending_request.dest_bolt11,
         dest_expires_at = pending_request.dest_expires_at,
@@ -235,6 +236,7 @@ class Gateway(object):
             src_bolt11 = src_invoice['bolt11'],
             src_expires_at = datetime.utcfromtimestamp(src_invoice['expires_at']),
             src_amount = int(src_invoice['msatoshi']),
+            dest_payment_hash = dest_invoice['payment_hash'],
             dest_chain = dest_chain_id,
             dest_bolt11 = dest_bolt11,
             dest_expires_at = datetime.utcfromtimestamp(dest_invoice['created_at'] + dest_invoice['expiry']),
@@ -312,6 +314,12 @@ class Gateway(object):
 
         try:
             result = self.sibling_nodes[pending_request.dest_chain].pay(pending_request.dest_bolt11)
+
+            if not result['payment_hash'] == pending_request.dest_payment_hash:
+                print('WARNING: This should never happen if our own lightning nodes are to be trusted')
+                save_failed_request('Payment pending payment_hash does not correspond to the paid hash', pending_request, payment_preimage)
+                return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
+
             db_session.add(PaidRequest(
                 src_payment_hash = payment_hash,
                 src_chain = pending_request.src_chain,
@@ -321,7 +329,7 @@ class Gateway(object):
                 dest_chain = pending_request.dest_chain,
                 dest_bolt11 = pending_request.dest_bolt11,
                 dest_expires_at = pending_request.dest_expires_at,
-                dest_payment_hash = result['payment_hash'],
+                dest_payment_hash = pending_request.dest_payment_hash,
                 dest_payment_preimage = result['payment_preimage'],
             ))
             db_session.delete(pending_request)
