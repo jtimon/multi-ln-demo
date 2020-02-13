@@ -128,6 +128,38 @@ class Gateway(object):
 
         return dest_invoice
 
+    def _calculate_src_invoice(self, src_chain_id, dest_chain_id, dest_invoice, dest_bolt11):
+        price = Price.query.get('%s:%s' % (src_chain_id, dest_chain_id))
+        if not price or price.price == 0:
+            return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
+                src_chain_id, dest_chain_id)}
+
+        # The gateway imposes a price per chain, take it or leave it
+        # You can try another chain or another gateway
+        offer_msatoshi = dest_invoice['msatoshi'] * price.price
+        if offer_msatoshi < MIN_OFFER:
+            return {
+                'error': "Insufficient amount",
+                'src_chain': src_chain_id,
+                'dest_chain': dest_chain_id,
+                'dest_amount': str(dest_invoice['msatoshi']),
+                'src_amount': str(offer_msatoshi),
+                'src_min_amount': str(MIN_OFFER),
+            }
+
+        label = 'from_%s_to_%s_label' % (self.chainparams_from_id(src_chain_id)['petname'],
+                                         self.chainparams_from_id(dest_chain_id)['petname'])
+        description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_bolt11)
+        src_invoice = self.sibling_nodes[src_chain_id].invoice(str(int(offer_msatoshi)), label, description, expiry=self.invoices_expiry)
+        if not 'msatoshi' in src_invoice:
+            src_invoice['msatoshi'] = int(offer_msatoshi)
+        print('src_invoice:')
+        pprint(src_invoice)
+        if len(src_invoice['bolt11']) > MAX_BOLT11:
+            return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
+
+        return src_invoice
+
     def get_accepted_chains(self):
         return {'accepted_chains': list(self.sibling_nodes.keys())}
 
@@ -166,42 +198,19 @@ class Gateway(object):
         if is_with_error(dest_invoice):
             return dest_invoice
 
-        price = Price.query.get('%s:%s' % (src_chain_id, dest_chain_id))
-        if not price or price.price == 0:
-            return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
-                src_chain_id, dest_chain_id)}
-
-        # The gateway imposes a price per chain, take it or leave it
-        # You can try another chain or another gateway
-        offer_msats = dest_invoice['msatoshi'] * price.price
-        if offer_msats < MIN_OFFER:
-            return {
-                'error': "Insufficient amount",
-                'src_chain': src_chain_id,
-                'dest_chain': dest_chain_id,
-                'dest_amount': str(dest_invoice['msatoshi']),
-                'src_amount': str(offer_msats),
-                'src_min_amount': str(MIN_OFFER),
-            }
-
         if not self._check_route(dest_chain_id, dest_invoice['payee'], dest_invoice['msatoshi']):
             return {'error': "No route found to pay dest_bolt11"}
 
-        label = 'from_%s_to_%s_label' % (self.chainparams_from_id(src_chain_id)['petname'],
-                                         self.chainparams_from_id(dest_chain_id)['petname'])
-        description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_bolt11)
-        src_invoice = self.sibling_nodes[src_chain_id].invoice(str(int(offer_msats)), label, description, expiry=self.invoices_expiry)
-        print('src_invoice:')
-        pprint(src_invoice)
-        if len(src_invoice['bolt11']) > MAX_BOLT11:
-            return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
+        src_invoice = self._calculate_src_invoice(src_chain_id, dest_chain_id, dest_invoice, dest_bolt11)
+        if is_with_error(src_invoice):
+            return src_invoice
 
         db_session.add(PendingRequest(
             src_payment_hash = src_invoice['payment_hash'],
             src_chain = src_chain_id,
             src_bolt11 = src_invoice['bolt11'],
             src_expires_at = datetime.utcfromtimestamp(src_invoice['expires_at']),
-            src_amount = int(offer_msats),
+            src_amount = int(src_invoice['msatoshi']),
             dest_chain = dest_chain_id,
             dest_bolt11 = dest_bolt11,
             dest_expires_at = datetime.utcfromtimestamp(dest_invoice['created_at'] + dest_invoice['expiry']),
