@@ -112,6 +112,22 @@ class Gateway(object):
             print(e)
             return False
 
+    def _decode_check_bolt11(self, dest_chain_id, dest_bolt11):
+        try:
+            dest_invoice = self.sibling_nodes[dest_chain_id].decodepay(dest_bolt11)
+            print('dest_invoice:')
+            pprint(dest_invoice)
+        except Exception as e:
+            return {'error': "Invalid bolt11: Bad bech32 string"}
+
+        if 'msatoshi' not in dest_invoice:
+            return {'error': "Invalid bolt11: dest_bolt11 needs to specify an amount"}
+
+        if 'created_at' not in dest_invoice or 'expiry' not in dest_invoice:
+            return {'error': "Invalid bolt11: dest_bolt11 needs to specify an expiry"}
+
+        return dest_invoice
+
     def get_accepted_chains(self):
         return {'accepted_chains': list(self.sibling_nodes.keys())}
 
@@ -146,18 +162,9 @@ class Gateway(object):
         if dest_chain_id not in self.sibling_nodes:
             return {'error': "gateway can't pay to chain %s" % dest_chain_id}
 
-        try:
-            dest_invoice = self.sibling_nodes[dest_chain_id].decodepay(dest_bolt11)
-            print('dest_invoice', dest_invoice)
-        except Exception as e:
-            return {'error': "Invalid bolt11: Bad bech32 string"}
-
-        if 'msatoshi' not in dest_invoice:
-            return {'error': "Invalid bolt11: dest_bolt11 needs to specify an amount"}
-        dest_amount_msats = dest_invoice['msatoshi']
-
-        if 'created_at' not in dest_invoice or 'expiry' not in dest_invoice:
-            return {'error': "Invalid bolt11: dest_bolt11 needs to specify an expiry"}
+        dest_invoice = self._decode_check_bolt11(dest_chain_id, dest_bolt11)
+        if is_with_error(dest_invoice):
+            return dest_invoice
 
         price = Price.query.get('%s:%s' % (src_chain_id, dest_chain_id))
         if not price or price.price == 0:
@@ -166,18 +173,18 @@ class Gateway(object):
 
         # The gateway imposes a price per chain, take it or leave it
         # You can try another chain or another gateway
-        offer_msats = dest_amount_msats * price.price
+        offer_msats = dest_invoice['msatoshi'] * price.price
         if offer_msats < MIN_OFFER:
             return {
                 'error': "Insufficient amount",
                 'src_chain': src_chain_id,
                 'dest_chain': dest_chain_id,
-                'dest_amount': str(dest_amount_msats),
+                'dest_amount': str(dest_invoice['msatoshi']),
                 'src_amount': str(offer_msats),
                 'src_min_amount': str(MIN_OFFER),
             }
 
-        if not self._check_route(dest_chain_id, dest_invoice['payee'], dest_amount_msats):
+        if not self._check_route(dest_chain_id, dest_invoice['payee'], dest_invoice['msatoshi']):
             return {'error': "No route found to pay dest_bolt11"}
 
         label = 'from_%s_to_%s_label' % (self.chainparams_from_id(src_chain_id)['petname'],
@@ -198,7 +205,7 @@ class Gateway(object):
             dest_chain = dest_chain_id,
             dest_bolt11 = dest_bolt11,
             dest_expires_at = datetime.utcfromtimestamp(dest_invoice['created_at'] + dest_invoice['expiry']),
-            dest_amount = int(dest_amount_msats)
+            dest_amount = int(dest_invoice['msatoshi'])
         ))
         db_session.commit()
         return src_invoice
