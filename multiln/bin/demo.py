@@ -121,27 +121,23 @@ def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, use
     print('src_invoice:', src_invoice)
     assert(not 'error' in src_invoice)
 
-    try:
-        src_payment_result = lightningd_map[chain_name_a][user_name_a].pay(src_invoice['bolt11'])
-        print('payment succesful:')
-        print(src_payment_result)
-        print('...and after a successful payment to %s gateway inc, %s calls again with the proof of payment...' % (user_name_gateway, user_name_a))
-        gateway_confirm_payment_result = requests.post(GATEWAY_URL[user_name_gateway] + "/confirm_src_payment", data={
-            'payment_hash': src_payment_result['payment_hash'],
-            'payment_preimage': src_payment_result['payment_preimage'],
-        }).json()
-        print('...this is what %s gateway inc responds:' % (user_name_gateway))
-        print(gateway_confirm_payment_result)
-        assert(not 'error' in gateway_confirm_payment_result)
-        print('...%s confirms that the payment preimage given corresponds to the original invoice to be paid by %s gateway inc too.' % (user_name_a, user_name_gateway))
-        if check_hash_preimage(invoice['payment_hash'], gateway_confirm_payment_result['payment_preimage']):
-            print('Preimage corresponds to payment hash')
-        else:
-            print('Preimage doesn\'t corresponds to payment hash. %s has been scammed by %s' % (user_name_a, user_name_gateway))
-
-    except Exception as e:
-        print(e)
-        print(type(e))
+    src_payment_result = lightningd_map[chain_name_a][user_name_a].pay(src_invoice['bolt11'])
+    print('payment succesful:')
+    print(src_payment_result)
+    print('...and after a successful payment to %s gateway inc, %s calls again with the proof of payment...' % (user_name_gateway, user_name_a))
+    gateway_confirm_payment_result = requests.post(GATEWAY_URL[user_name_gateway] + "/confirm_src_payment", data={
+        'payment_hash': src_payment_result['payment_hash'],
+        'payment_preimage': src_payment_result['payment_preimage'],
+    }).json()
+    print('...this is what %s gateway inc responds:' % (user_name_gateway))
+    print(gateway_confirm_payment_result)
+    assert(not 'error' in gateway_confirm_payment_result)
+    print('...%s confirms that the payment preimage given corresponds to the original invoice to be paid by %s gateway inc too.' % (user_name_a, user_name_gateway))
+    if check_hash_preimage(invoice['payment_hash'], gateway_confirm_payment_result['payment_preimage']):
+        print('Preimage corresponds to payment hash')
+    else:
+        print('Preimage doesn\'t corresponds to payment hash. %s has been scammed by %s' % (user_name_a, user_name_gateway))
+        assert(False)
 
 ##################################
 
