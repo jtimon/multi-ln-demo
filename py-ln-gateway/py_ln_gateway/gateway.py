@@ -64,6 +64,22 @@ def save_failed_request(error, pending_request, src_payment_preimage):
     db_session.delete(pending_request)
     db_session.commit()
 
+def save_paid_request(pending_request, src_payment_preimage, dest_payment_preimage):
+    db_session.add(PaidRequest(
+        src_payment_hash = pending_request.src_payment_hash,
+        src_payment_preimage = src_payment_preimage,
+        dest_payment_preimage = dest_payment_preimage,
+        src_chain = pending_request.src_chain,
+        src_bolt11 = pending_request.src_bolt11,
+        src_expires_at = pending_request.src_expires_at,
+        dest_chain = pending_request.dest_chain,
+        dest_bolt11 = pending_request.dest_bolt11,
+        dest_expires_at = pending_request.dest_expires_at,
+        dest_payment_hash = pending_request.dest_payment_hash,
+    ))
+    db_session.delete(pending_request)
+    db_session.commit()
+
 class Gateway(object):
 
     def __init__(self, nodes_config_path):
@@ -320,20 +336,7 @@ class Gateway(object):
                 save_failed_request('Payment pending payment_hash does not correspond to the paid hash', pending_request, payment_preimage)
                 return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
 
-            db_session.add(PaidRequest(
-                src_payment_hash = payment_hash,
-                src_chain = pending_request.src_chain,
-                src_bolt11 = pending_request.src_bolt11,
-                src_expires_at = pending_request.src_expires_at,
-                src_payment_preimage = payment_preimage,
-                dest_chain = pending_request.dest_chain,
-                dest_bolt11 = pending_request.dest_bolt11,
-                dest_expires_at = pending_request.dest_expires_at,
-                dest_payment_hash = pending_request.dest_payment_hash,
-                dest_payment_preimage = result['payment_preimage'],
-            ))
-            db_session.delete(pending_request)
-            db_session.commit()
+            save_paid_request(pending_request, payment_preimage, result['payment_preimage'])
         except Exception as e:
             print(type(e))
             print(e)
