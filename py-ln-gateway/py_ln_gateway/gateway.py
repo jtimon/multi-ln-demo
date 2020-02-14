@@ -471,11 +471,7 @@ class Gateway(object):
             print(type(e))
             print(e)
             save_failed_request(str(e), pending_request, payment_preimage)
-            return {
-                'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG),
-                'src_payment_hash': payment_hash,
-                'dest_bolt11': pending_request.dest_bolt11,
-            }
+            return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
 
         return {
             'payment_hash': pending_request.dest_payment_hash,
