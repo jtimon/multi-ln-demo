@@ -431,6 +431,7 @@ class Gateway(object):
                 return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
 
             if pending_request.other_gw_chain:
+                other_gw_confirm_payment_result = {'error': 'placeholder error'}
                 other_gw_payment_hash = result['payment_hash']
                 other_gw_payment_preimage = result['payment_preimage']
                 attempts = 0
