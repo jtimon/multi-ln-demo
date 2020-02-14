@@ -31,11 +31,12 @@ from py_ln_gateway.models import (
     Price,
 )
 
+REFUND_MSG = 'Please contact customer support to get a refund.'
+MIN_OFFER = 1000
+
 def check_hash_preimage(payment_hash, payment_preimage):
     hashed_result = sha256(binascii.unhexlify(payment_preimage)).hexdigest()
     return hashed_result == payment_hash
-
-MIN_OFFER = 1000
 
 def is_with_error(result):
     return isinstance(result, dict) and 'error' in result
@@ -280,7 +281,7 @@ class Gateway(object):
         failed_request = FailedRequest.query.get(payment_hash)
         if failed_request:
             return {
-                'error': 'Payment request %s already failed. Please contact customer support.' % payment_hash,
+                'error': 'Payment request %s already failed. %s' % (payment_hash, REFUND_MSG),
             }
 
         pending_request = PendingRequest.query.get(payment_hash)
@@ -300,10 +301,10 @@ class Gateway(object):
 
         src_current_offer = pending_request.dest_amount * price.price
         if Decimal(pending_request.src_amount) < src_current_offer:
-            save_failed_request("The offered price is no longer accepted.",
-                                pending_request, payment_preimage)
+            error_msg = 'The offered price for payment request %s is no longer accepted. %s' % (payment_hash, REFUND_MSG)
+            save_failed_request(error_msg, pending_request, payment_preimage)
             return {
-                'error': error,
+                'error': error_msg,
                 'src_payment_hash': payment_hash,
                 'src_current_offer': src_current_offer,
                 'dest_bolt11': pending_request.dest_bolt11,
@@ -329,11 +330,7 @@ class Gateway(object):
             print(type(e))
             print(e)
             save_failed_request(str(e), pending_request, payment_preimage)
-            return {
-                'error': 'Error paying request.',
-                'src_payment_hash': payment_hash,
-                'dest_bolt11': pending_request.dest_bolt11,
-            }
+            return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
 
         return {
             'payment_hash': result['payment_hash'],
