@@ -211,6 +211,13 @@ if N_CHAINS > 2:
                                   user_name_b = 'david',
                                   chain_name_b = 'chain_3')
 
-# TODO Pay from alice to david using lightning
+    # Alice on regtest pays an invoice to david on chain_3 through gateway bob with nodes in regtest and liquid-regtest
+    # Gateway bob needs to call gateway carol to be able to pay to chain_3
+    demo_2_chains_gateway_payment(LIGHTNINGD,
+                                  user_name_a = 'alice',
+                                  chain_name_a = 'regtest',
+                                  user_name_gateway = 'bob',
+                                  user_name_b = 'david',
+                                  chain_name_b = 'chain_3')
 
 print('All done for selected chains %s' % SELECTED_CHAINS)

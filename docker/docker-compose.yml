@@ -85,6 +85,7 @@ services:
       - elementsd_liquid_regtest
       - clightning_bob_regtest
       - clightning_bob_liquid_regtest
+      - carol_gateway
     volumes:
       - "clightning_datadir_bob_regtest:/wd/clightning_datadir_bob/regtest"
       - "clightning_datadir_bob_liquid_regtest:/wd/clightning_datadir_bob/liquid-regtest"
