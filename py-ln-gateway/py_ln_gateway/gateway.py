@@ -336,6 +336,11 @@ class Gateway(object):
                 save_failed_request('Payment pending payment_hash does not correspond to the paid hash', pending_request, payment_preimage)
                 return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
 
+            if not check_hash_preimage(result['payment_hash'], result['payment_preimage']):
+                print('WARNING: This should never happen if own lightning nodes are to be trusted')
+                save_failed_request('Payment preimage does not correspond to the hash', pending_request, payment_preimage)
+                return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
+
             save_paid_request(pending_request, payment_preimage, result['payment_preimage'])
         except Exception as e:
             print(type(e))
