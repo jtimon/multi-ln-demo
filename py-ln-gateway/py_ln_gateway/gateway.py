@@ -16,14 +16,13 @@ from decimal import Decimal
 from pprint import pprint
 import binascii
 import json
-import re
 import requests
 
 from hashlib import sha256
 from pyln.client import LightningRpc
 
-from py_ln_gateway.bech32 import bech32_decode
 from py_ln_gateway.db import db_session
+from py_ln_gateway.bolt11 import bolt11_decode
 from py_ln_gateway.models import (
     FailedRequest,
     MAX_BOLT11,
@@ -135,24 +134,14 @@ class Gateway(object):
                     break
         return src_chain_id
 
-    def _get_chainid_from_bolt11(self, dest_bolt11):
-        if len(dest_bolt11) > MAX_BOLT11:
-            return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
+    def _get_chainid_from_bolt11(self, bolt11):
+        decoded_bolt11 = bolt11_decode(bolt11)
+        if is_with_error(decoded_bolt11):
+            return decoded_bolt11
 
-        dest_chain_hrp, data = bech32_decode(dest_bolt11)
-        if not dest_chain_hrp:
-            return {'error': "Bad bech32 checksum for bolt11"}
-
-        if not dest_chain_hrp.startswith('ln'):
-            return {'error': "Bad bolt11, hrp does not start with ln"}
-
-        m = re.search("[^\d]+", dest_chain_hrp[2:])
-        if not m:
-            return {'error': "No chain bip173 name in bolt11"}
-
-        dest_chain_bip173_name = m.group(0)
+        dest_chain_bip173_name = decoded_bolt11['currency']
         if not dest_chain_bip173_name in self.chains_by_bip173:
-            return {'error': "gateway won't pay to chain with bip173 name (hrp) %s" % dest_chain_bip173_name}
+            return {'error': "gateway won't pay to unknown chain with bip173 currency name (hrp) %s" % dest_chain_bip173_name}
 
         return self.chains_by_bip173[dest_chain_bip173_name]['id']
 
