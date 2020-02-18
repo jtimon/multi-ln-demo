@@ -48,6 +48,5 @@ rsdemo-2-chains:
 	--scale clightning_carol_chain_3=0 \
 	--scale clightning_david_chain_3=0 \
 
-# TODO fix this: $() isn't working properly
 docker-clean-containers:
-	docker stop $(docker ps -aq) ; docker rm $(docker ps -aq)
+	docker stop $$(docker ps -aq) ; docker rm $$(docker ps -aq)
