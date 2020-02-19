@@ -206,7 +206,8 @@ class Gateway(object):
 
         return src_invoice
 
-    def _other_gateway_pays(self, dest_bolt11, src_chain_id, dest_chain_id):
+    def _other_gateway_pays(self, dest_bolt11, src_chain_id, dest_invoice):
+        dest_chain_id = dest_invoice['chain_id']
         error_result = {'error': "No route found to pay bolt11 %s" % dest_bolt11}
         # TODO Support several gateways per chain
         other_url = self.other_gateways[dest_chain_id][0]
@@ -256,7 +257,7 @@ class Gateway(object):
             src_amount = int(src_invoice['msatoshi']),
             dest_chain = dest_chain_id,
             dest_bolt11 = dest_bolt11,
-            # TODO parse dest_bolt11 without calling the any node's rpc
+            # TODO parse dest_bolt11 without calling any node's rpc
             # dest_expires_at = datetime.utcfromtimestamp(dest_invoice['created_at'] + dest_invoice['expiry']),
             # dest_amount = int(dest_invoice['msatoshi'])
             other_gw_payment_hash = other_gw_invoice['payment_hash'],
@@ -303,7 +304,7 @@ class Gateway(object):
 
         if dest_chain_id not in self.sibling_nodes:
             print("gateway can't pay to chain %s, trying with another gateway" % dest_chain_id)
-            return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_chain_id)
+            return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_decoded_bolt11)
 
         dest_invoice = self._decode_check_bolt11(dest_chain_id, dest_bolt11)
         if is_with_error(dest_invoice):
@@ -312,7 +313,7 @@ class Gateway(object):
         # When we can't find a route ourselves, try other gateway before calculating src_invoice
         if not self._check_route(dest_chain_id, dest_invoice['payee'], dest_invoice['msatoshi']):
             print("No route found to pay dest_bolt11 %s, trying with another gateway" % dest_bolt11)
-            return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_chain_id)
+            return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_decoded_bolt11)
 
         src_invoice = self._calculate_src_invoice(src_chain_id, dest_chain_id, dest_invoice, dest_bolt11)
         if is_with_error(src_invoice):
