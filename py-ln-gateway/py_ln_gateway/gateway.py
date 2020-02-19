@@ -234,14 +234,15 @@ class Gateway(object):
             pprint(other_gw_invoice)
             return error_result
 
-        if not self._check_route(other_gw_chain_id, other_gw_invoice['payee'], other_gw_invoice['msatoshi']):
-            print("No route found to pay other_gw_bolt11 %s" % other_gw_bolt11)
-            return error_result
-
+        # When another gateway pays, make sure we can be paid before checking a route
         src_invoice = self._calculate_src_invoice(src_chain_id, other_gw_chain_id, other_gw_invoice, other_gw_bolt11)
         if is_with_error(src_invoice):
             print('Error calculating the src invoice from the other gateway\'s invoice:')
             pprint(src_invoice)
+            return error_result
+
+        if not self._check_route(other_gw_chain_id, other_gw_invoice['payee'], other_gw_invoice['msatoshi']):
+            print("No route found to pay other_gw_bolt11 %s" % other_gw_bolt11)
             return error_result
 
         db_session.add(PendingRequest(
@@ -304,6 +305,7 @@ class Gateway(object):
         if is_with_error(dest_invoice):
             return dest_invoice
 
+        # When we can't find a route ourselves, try other gateway before calculating src_invoice
         if not self._check_route(dest_chain_id, dest_invoice['payee'], dest_invoice['msatoshi']):
             print("No route found to pay dest_bolt11 %s, trying with another gateway" % dest_bolt11)
             return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_chain_id)
