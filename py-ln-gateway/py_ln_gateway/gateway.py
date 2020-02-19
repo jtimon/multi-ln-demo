@@ -171,9 +171,11 @@ class Gateway(object):
         if 'created_at' not in dest_invoice or 'expiry' not in dest_invoice:
             return {'error': "Invalid bolt11: dest_bolt11 needs to specify an expiry"}
 
+        dest_invoice['chain_id'] = dest_chain_id
         return dest_invoice
 
-    def _calculate_src_invoice(self, src_chain_id, dest_chain_id, dest_invoice, dest_bolt11):
+    def _calculate_src_invoice(self, src_chain_id, dest_invoice, dest_bolt11):
+        dest_chain_id = dest_invoice['chain_id']
         price = Price.query.get('%s:%s' % (src_chain_id, dest_chain_id))
         if not price or price.price == 0:
             return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
@@ -239,7 +241,7 @@ class Gateway(object):
             return error_result
 
         # When another gateway pays, make sure we can be paid before checking a route
-        src_invoice = self._calculate_src_invoice(src_chain_id, other_gw_chain_id, other_gw_invoice, other_gw_bolt11)
+        src_invoice = self._calculate_src_invoice(src_chain_id, other_gw_invoice, other_gw_bolt11)
         if is_with_error(src_invoice):
             print('Error calculating the src invoice from the other gateway\'s invoice:')
             pprint(src_invoice)
@@ -315,7 +317,7 @@ class Gateway(object):
             print("No route found to pay dest_bolt11 %s, trying with another gateway" % dest_bolt11)
             return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_decoded_bolt11)
 
-        src_invoice = self._calculate_src_invoice(src_chain_id, dest_chain_id, dest_invoice, dest_bolt11)
+        src_invoice = self._calculate_src_invoice(src_chain_id, dest_invoice, dest_bolt11)
         if is_with_error(src_invoice):
             return src_invoice
 
