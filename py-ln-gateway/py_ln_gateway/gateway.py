@@ -157,7 +157,8 @@ class Gateway(object):
             print(e)
             return False
 
-    def _decode_check_bolt11(self, dest_chain_id, dest_bolt11):
+    def _decode_check_bolt11(self, dest_bolt11, pre_decoded_bolt11):
+        dest_chain_id = pre_decoded_bolt11['chain_id']
         try:
             dest_invoice = self.sibling_nodes[dest_chain_id].decodepay(dest_bolt11)
             print('dest_invoice:')
@@ -234,7 +235,7 @@ class Gateway(object):
             print('Error: the other gateway demands payment in a chain we don\'t support')
             return error_result
 
-        other_gw_invoice = self._decode_check_bolt11(other_gw_chain_id, other_gw_bolt11)
+        other_gw_invoice = self._decode_check_bolt11(other_gw_bolt11, other_gw_decoded_bolt11)
         if is_with_error(other_gw_invoice):
             print('Error decoding the other gateway\'s invoice:')
             pprint(other_gw_invoice)
@@ -308,7 +309,7 @@ class Gateway(object):
             print("gateway can't pay to chain %s, trying with another gateway" % dest_chain_id)
             return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_decoded_bolt11)
 
-        dest_invoice = self._decode_check_bolt11(dest_chain_id, dest_bolt11)
+        dest_invoice = self._decode_check_bolt11(dest_bolt11, dest_decoded_bolt11)
         if is_with_error(dest_invoice):
             return dest_invoice
 
