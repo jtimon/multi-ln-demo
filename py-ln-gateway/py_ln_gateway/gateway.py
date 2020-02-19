@@ -134,7 +134,8 @@ class Gateway(object):
                     break
         return src_chain_id
 
-    def _get_chainid_from_bolt11(self, bolt11):
+    # Add chain_id field to bolt11_decode if known, or return error
+    def _bolt11_decode(self, bolt11):
         decoded_bolt11 = bolt11_decode(bolt11)
         if is_with_error(decoded_bolt11):
             return decoded_bolt11
@@ -142,8 +143,9 @@ class Gateway(object):
         dest_chain_bip173_name = decoded_bolt11['currency']
         if not dest_chain_bip173_name in self.chains_by_bip173:
             return {'error': "gateway won't pay to unknown chain with bip173 currency name (hrp) %s" % dest_chain_bip173_name}
+        decoded_bolt11['chain_id'] = self.chains_by_bip173[dest_chain_bip173_name]['id']
 
-        return self.chains_by_bip173[dest_chain_bip173_name]['id']
+        return decoded_bolt11
 
     # Check that there's actually a route before accepting the request
     def _check_route(self, dest_chain_id, payee, amount_msats, risk_factor=1):
@@ -218,11 +220,12 @@ class Gateway(object):
             return error_result
 
         other_gw_bolt11 = other_gw_invoice['bolt11']
-        other_gw_chain_id = self._get_chainid_from_bolt11(other_gw_bolt11)
-        if is_with_error(other_gw_chain_id):
+        other_gw_decoded_bolt11 = self._bolt11_decode(other_gw_bolt11)
+        if is_with_error(other_gw_decoded_bolt11):
             print('Error parsing the other gateway\'s invoice:')
-            pprint(other_gw_chain_id)
+            pprint(other_gw_decoded_bolt11)
             return error_result
+        other_gw_chain_id = other_gw_decoded_bolt11['chain_id']
 
         if other_gw_chain_id not in self.sibling_nodes:
             print('Error: the other gateway demands payment in a chain we don\'t support')
@@ -293,9 +296,10 @@ class Gateway(object):
                 str(list(self.sibling_nodes.keys())))}
 
         dest_bolt11 = req['bolt11']
-        dest_chain_id = self._get_chainid_from_bolt11(dest_bolt11)
-        if is_with_error(dest_chain_id):
-            return dest_chain_id
+        dest_decoded_bolt11 = self._bolt11_decode(dest_bolt11)
+        if is_with_error(dest_decoded_bolt11):
+            return dest_decoded_bolt11
+        dest_chain_id = dest_decoded_bolt11['chain_id']
 
         if dest_chain_id not in self.sibling_nodes:
             print("gateway can't pay to chain %s, trying with another gateway" % dest_chain_id)
