@@ -279,11 +279,11 @@ class Gateway(object):
             src_bolt11 = src_invoice['bolt11'],
             src_expires_at = datetime.utcfromtimestamp(src_invoice['expires_at']),
             src_amount = int(src_invoice['msatoshi']),
+            dest_payment_hash = dest_invoice['payment_hash'],
             dest_chain = dest_chain_id,
             dest_bolt11 = dest_bolt11,
-            # TODO parse dest_bolt11 without calling any node's rpc
-            # dest_expires_at = datetime.utcfromtimestamp(dest_invoice['created_at'] + dest_invoice['expiry']),
-            # dest_amount = int(dest_invoice['msatoshi'])
+            dest_expires_at = datetime.utcfromtimestamp(dest_invoice['created_at'] + dest_invoice['expiry']),
+            dest_amount = int(dest_invoice['msatoshi']),
             other_gw_payment_hash = other_gw_invoice['payment_hash'],
             other_gw_url = other_url,
             other_gw_chain = other_gw_chain_id,

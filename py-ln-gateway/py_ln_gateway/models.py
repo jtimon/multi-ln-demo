@@ -29,11 +29,11 @@ class PendingRequest(Base):
     src_expires_at = Column(DateTime(), nullable=False)
     src_amount = Column(Integer(), nullable=False)
 
-    dest_payment_hash = Column(String(FIELD_32B_AS_HEX_STR))
+    dest_payment_hash = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
     dest_chain = Column(String(64), nullable=False)
     dest_bolt11 = Column(String(MAX_BOLT11), nullable=False)
-    dest_expires_at = Column(DateTime())
-    dest_amount = Column(Integer())
+    dest_expires_at = Column(DateTime(), nullable=False)
+    dest_amount = Column(Integer(), nullable=False)
 
     other_gw_payment_hash = Column(String(FIELD_32B_AS_HEX_STR))
     other_gw_url = Column(String(MAX_URL_LEN))
@@ -55,7 +55,7 @@ class PaidRequest(Base):
     dest_payment_hash = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
     dest_chain = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
     dest_bolt11 = Column(String(MAX_BOLT11), nullable=False)
-    dest_expires_at = Column(DateTime())
+    dest_expires_at = Column(DateTime(), nullable=False)
     dest_payment_preimage = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
 
     other_gw_payment_hash = Column(String(FIELD_32B_AS_HEX_STR))
@@ -78,11 +78,11 @@ class FailedRequest(Base):
     src_expires_at = Column(DateTime(), nullable=False)
     src_amount = Column(Integer(), nullable=False)
 
-    dest_payment_hash = Column(String(FIELD_32B_AS_HEX_STR))
+    dest_payment_hash = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
     dest_chain = Column(String(FIELD_32B_AS_HEX_STR), nullable=False)
     dest_bolt11 = Column(String(MAX_BOLT11), nullable=False)
-    dest_expires_at = Column(DateTime())
-    dest_amount = Column(Integer())
+    dest_expires_at = Column(DateTime(), nullable=False)
+    dest_amount = Column(Integer(), nullable=False)
 
     other_gw_payment_hash = Column(String(FIELD_32B_AS_HEX_STR))
     other_gw_url = Column(String(MAX_URL_LEN))
