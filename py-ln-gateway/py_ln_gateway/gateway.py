@@ -136,7 +136,7 @@ class Gateway(object):
 
     # Add chain_id field to bolt11_decode if known, or return error
     def _bolt11_decode(self, bolt11):
-        decoded_bolt11 = bolt11_decode(bolt11)
+        decoded_bolt11 = bolt11_decode(bolt11, amount_required=True)
         if is_with_error(decoded_bolt11):
             return decoded_bolt11
 
@@ -171,6 +171,27 @@ class Gateway(object):
 
         if 'created_at' not in dest_invoice or 'expiry' not in dest_invoice:
             return {'error': "Invalid bolt11: dest_bolt11 needs to specify an expiry"}
+
+        # TODO DRY: Less repetition per field
+        if pre_decoded_bolt11['msatoshi'] != dest_invoice['msatoshi']:
+            return {'error': "Invalid bolt11: invalid msatoshi %s and %s" % (
+                pre_decoded_bolt11['msatoshi'], dest_invoice['msatoshi'])}
+
+        if pre_decoded_bolt11['created_at'] != dest_invoice['created_at']:
+            return {'error': "Invalid bolt11: invalid created_at %s and %s" % (
+                pre_decoded_bolt11['created_at'], dest_invoice['created_at'])}
+
+        if pre_decoded_bolt11['expiry'] != dest_invoice['expiry']:
+            return {'error': "Invalid bolt11: invalid expiry %s and %s" % (
+                pre_decoded_bolt11['expiry'], dest_invoice['expiry'])}
+
+        if pre_decoded_bolt11['payment_hash'] != dest_invoice['payment_hash']:
+            return {'error': "Invalid bolt11: invalid payment_hash %s and %s" % (
+                pre_decoded_bolt11['payment_hash'], dest_invoice['payment_hash'])}
+
+        if pre_decoded_bolt11['payee'] != dest_invoice['payee']:
+            return {'error': "Invalid bolt11: invalid payee %s and %s" % (
+                pre_decoded_bolt11['payee'], dest_invoice['payee'])}
 
         dest_invoice['chain_id'] = dest_chain_id
         return dest_invoice
