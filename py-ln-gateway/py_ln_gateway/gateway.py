@@ -5,7 +5,7 @@
 # Example payment result:
 # {'id': 2, 'payment_hash': 'a1a06ea2fd1240473eb721b7f1b1d306de1b27ea63ed0f42722c69ea62873b46', 'destination': '02bc1adb03dd2102e4dabfb5554f5a489c9283f3ec663f71ff513045570f576b32', 'msatoshi': 1000, 'amount_msat': 1000msat, 'msatoshi_sent': 1000, 'amount_sent_msat': 1000msat, 'created_at': 1572091440, 'status': 'complete', 'payment_preimage': '2ff6f48168975725a8e7078741ae390f3979df1f52c92ac4ef84a4a494ee25fb', 'bolt11': 'lnbca10n1pwmgd3spp55xsxaghazfqyw04hyxmlrvwnqm0pkfl2v0ks7snj93575c588drqdwdveex7m2lvd5xz6twtuc47ar0ta3ksctfde0nzhmzdak8gvf3takxucnrvgcnqm33wpmk6emyxdehqup4wpmngvnhxqu8wefn0p5x56rhvamhs7tgvscrwet4xsmnqet2wsmkken48pekw7r4wsurs7tjdc6hqvmkxeekgur2wcukk7r2vdknjarpxd4h5atwxpjrxvrt0qm8yury895rjdmkdfk8vvm2dpuxxmt2vsukxwr8xe6rqerr0pchj6nhx4ckxutsxgmr2em9w3snqct2dgu8xap4dfjh2wrewqmkzvpnv9kh5utdxgc8xmt8xaun2ctpw5m8zwpewf58z7rrvam8saejvvm8y6psddhx6emsw9jkuvrwwfmhzdmg89n82mfnde6h5urdddcxvmr5x4c82cf4x3arywpnd3shjumsxc6rswfkdd0kgetnvdexjur5d9hkuxqyjw5qcqp277yuhhqs87udwph8a0jf7v5s6j80rgaw9gz6qtq8dz3xyna2yd2xkm4fvaw5hhdn8nv9rjw2suuvcl3hdfrqm8fufu4xsc6s8u6nm7cpsnyucv'}
 
-# Example decoded dest_invoice:
+# Example decoded dest_decoded_bolt11:
 # {'currency': 'bcb', 'created_at': 1574455201, 'expiry': 604800, 'payee': '0310e6acd171bf63ea5e0fb541082b4cdd9a7bc34aaedc3eeb2b14e8939e073cf4', 'msatoshi': 1000, 'amount_msat': 1000msat, 'description': 'alice_carol_liquid_regtest_description', 'min_final_cltv_expiry': 10, 'payment_hash': '34d771f86c9b17f9f15042f6c387408f8e931022eb30ac3dbed3d972dc742376', 'signature': '304402205021e829da965737470e4be8684c75ec48f1bf0e6762e8eccfe7b6e448da2b8f022008576c29d5453a852df817ca88029f3eaf820b73e1aafc8e505aac32a3a00fd2'}
 
 # Example route:
@@ -157,47 +157,8 @@ class Gateway(object):
             print(e)
             return False
 
-    def _decode_check_bolt11(self, dest_bolt11, pre_decoded_bolt11):
-        dest_chain_id = pre_decoded_bolt11['chain_id']
-        try:
-            dest_invoice = self.sibling_nodes[dest_chain_id].decodepay(dest_bolt11)
-            print('dest_invoice:')
-            pprint(dest_invoice)
-        except Exception as e:
-            return {'error': "Invalid bolt11: Bad bech32 string"}
-
-        if 'msatoshi' not in dest_invoice:
-            return {'error': "Invalid bolt11: dest_bolt11 needs to specify an amount"}
-
-        if 'created_at' not in dest_invoice or 'expiry' not in dest_invoice:
-            return {'error': "Invalid bolt11: dest_bolt11 needs to specify an expiry"}
-
-        # TODO DRY: Less repetition per field
-        if pre_decoded_bolt11['msatoshi'] != dest_invoice['msatoshi']:
-            return {'error': "Invalid bolt11: invalid msatoshi %s and %s" % (
-                pre_decoded_bolt11['msatoshi'], dest_invoice['msatoshi'])}
-
-        if pre_decoded_bolt11['created_at'] != dest_invoice['created_at']:
-            return {'error': "Invalid bolt11: invalid created_at %s and %s" % (
-                pre_decoded_bolt11['created_at'], dest_invoice['created_at'])}
-
-        if pre_decoded_bolt11['expiry'] != dest_invoice['expiry']:
-            return {'error': "Invalid bolt11: invalid expiry %s and %s" % (
-                pre_decoded_bolt11['expiry'], dest_invoice['expiry'])}
-
-        if pre_decoded_bolt11['payment_hash'] != dest_invoice['payment_hash']:
-            return {'error': "Invalid bolt11: invalid payment_hash %s and %s" % (
-                pre_decoded_bolt11['payment_hash'], dest_invoice['payment_hash'])}
-
-        if pre_decoded_bolt11['payee'] != dest_invoice['payee']:
-            return {'error': "Invalid bolt11: invalid payee %s and %s" % (
-                pre_decoded_bolt11['payee'], dest_invoice['payee'])}
-
-        dest_invoice['chain_id'] = dest_chain_id
-        return dest_invoice
-
-    def _calculate_src_invoice(self, src_chain_id, dest_invoice):
-        dest_chain_id = dest_invoice['chain_id']
+    def _calculate_src_invoice(self, src_chain_id, dest_decoded_bolt11):
+        dest_chain_id = dest_decoded_bolt11['chain_id']
         price = Price.query.get('%s:%s' % (src_chain_id, dest_chain_id))
         if not price or price.price == 0:
             return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
@@ -205,21 +166,21 @@ class Gateway(object):
 
         # The gateway imposes a price per chain, take it or leave it
         # You can try another chain or another gateway
-        offer_msatoshi = dest_invoice['msatoshi'] * price.price
+        offer_msatoshi = dest_decoded_bolt11['msatoshi'] * price.price
         if offer_msatoshi < MIN_OFFER:
             return {
                 'error': "Insufficient amount",
                 'src_chain': src_chain_id,
                 'dest_chain': dest_chain_id,
-                'dest_amount': str(dest_invoice['msatoshi']),
+                'dest_amount': str(dest_decoded_bolt11['msatoshi']),
                 'src_amount': str(offer_msatoshi),
                 'src_min_amount': str(MIN_OFFER),
             }
 
         label = 'from_%s_to_%s_label_%s' % (self.chainparams_from_id(src_chain_id)['petname'],
                                             self.chainparams_from_id(dest_chain_id)['petname'],
-                                            dest_invoice['payment_hash'])
-        description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_invoice['payment_hash'])
+                                            dest_decoded_bolt11['payment_hash'])
+        description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_decoded_bolt11['payment_hash'])
         src_invoice = self.sibling_nodes[src_chain_id].invoice(str(int(offer_msatoshi)), label, description, expiry=self.invoices_expiry)
         if not 'msatoshi' in src_invoice:
             src_invoice['msatoshi'] = int(offer_msatoshi)
@@ -230,8 +191,8 @@ class Gateway(object):
 
         return src_invoice
 
-    def _other_gateway_pays(self, dest_bolt11, src_chain_id, dest_invoice):
-        dest_chain_id = dest_invoice['chain_id']
+    def _other_gateway_pays(self, dest_bolt11, src_chain_id, dest_decoded_bolt11):
+        dest_chain_id = dest_decoded_bolt11['chain_id']
         error_result = {'error': "No route found to pay bolt11 %s" % dest_bolt11}
         # TODO Support several gateways per chain
         other_url = self.other_gateways[dest_chain_id][0]
@@ -256,20 +217,14 @@ class Gateway(object):
             print('Error: the other gateway demands payment in a chain we don\'t support')
             return error_result
 
-        other_gw_invoice = self._decode_check_bolt11(other_gw_bolt11, other_gw_decoded_bolt11)
-        if is_with_error(other_gw_invoice):
-            print('Error decoding the other gateway\'s invoice:')
-            pprint(other_gw_invoice)
-            return error_result
-
         # When another gateway pays, make sure we can be paid before checking a route
-        src_invoice = self._calculate_src_invoice(src_chain_id, other_gw_invoice)
+        src_invoice = self._calculate_src_invoice(src_chain_id, other_gw_decoded_bolt11)
         if is_with_error(src_invoice):
             print('Error calculating the src invoice from the other gateway\'s invoice:')
             pprint(src_invoice)
             return error_result
 
-        if not self._check_route(other_gw_chain_id, other_gw_invoice['payee'], other_gw_invoice['msatoshi']):
+        if not self._check_route(other_gw_chain_id, other_gw_decoded_bolt11['payee'], other_gw_decoded_bolt11['msatoshi']):
             print("No route found to pay other_gw_bolt11 %s" % other_gw_bolt11)
             return error_result
 
@@ -279,17 +234,17 @@ class Gateway(object):
             src_bolt11 = src_invoice['bolt11'],
             src_expires_at = datetime.utcfromtimestamp(src_invoice['expires_at']),
             src_amount = int(src_invoice['msatoshi']),
-            dest_payment_hash = dest_invoice['payment_hash'],
+            dest_payment_hash = dest_decoded_bolt11['payment_hash'],
             dest_chain = dest_chain_id,
             dest_bolt11 = dest_bolt11,
-            dest_expires_at = datetime.utcfromtimestamp(dest_invoice['created_at'] + dest_invoice['expiry']),
-            dest_amount = int(dest_invoice['msatoshi']),
-            other_gw_payment_hash = other_gw_invoice['payment_hash'],
+            dest_expires_at = datetime.utcfromtimestamp(dest_decoded_bolt11['created_at'] + dest_decoded_bolt11['expiry']),
+            dest_amount = int(dest_decoded_bolt11['msatoshi']),
+            other_gw_payment_hash = other_gw_decoded_bolt11['payment_hash'],
             other_gw_url = other_url,
             other_gw_chain = other_gw_chain_id,
             other_gw_bolt11 = other_gw_bolt11,
-            other_gw_expires_at = datetime.utcfromtimestamp(other_gw_invoice['created_at'] + other_gw_invoice['expiry']),
-            other_gw_amount = int(other_gw_invoice['msatoshi'])
+            other_gw_expires_at = datetime.utcfromtimestamp(other_gw_decoded_bolt11['created_at'] + other_gw_decoded_bolt11['expiry']),
+            other_gw_amount = int(other_gw_decoded_bolt11['msatoshi'])
         ))
         db_session.commit()
         return src_invoice
@@ -330,16 +285,12 @@ class Gateway(object):
             print("gateway can't pay to chain %s, trying with another gateway" % dest_chain_id)
             return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_decoded_bolt11)
 
-        dest_invoice = self._decode_check_bolt11(dest_bolt11, dest_decoded_bolt11)
-        if is_with_error(dest_invoice):
-            return dest_invoice
-
         # When we can't find a route ourselves, try other gateway before calculating src_invoice
-        if not self._check_route(dest_chain_id, dest_invoice['payee'], dest_invoice['msatoshi']):
+        if not self._check_route(dest_chain_id, dest_decoded_bolt11['payee'], dest_decoded_bolt11['msatoshi']):
             print("No route found to pay dest_bolt11 %s, trying with another gateway" % dest_bolt11)
             return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_decoded_bolt11)
 
-        src_invoice = self._calculate_src_invoice(src_chain_id, dest_invoice)
+        src_invoice = self._calculate_src_invoice(src_chain_id, dest_decoded_bolt11)
         if is_with_error(src_invoice):
             return src_invoice
 
@@ -349,11 +300,11 @@ class Gateway(object):
             src_bolt11 = src_invoice['bolt11'],
             src_expires_at = datetime.utcfromtimestamp(src_invoice['expires_at']),
             src_amount = int(src_invoice['msatoshi']),
-            dest_payment_hash = dest_invoice['payment_hash'],
+            dest_payment_hash = dest_decoded_bolt11['payment_hash'],
             dest_chain = dest_chain_id,
             dest_bolt11 = dest_bolt11,
-            dest_expires_at = datetime.utcfromtimestamp(dest_invoice['created_at'] + dest_invoice['expiry']),
-            dest_amount = int(dest_invoice['msatoshi'])
+            dest_expires_at = datetime.utcfromtimestamp(dest_decoded_bolt11['created_at'] + dest_decoded_bolt11['expiry']),
+            dest_amount = int(dest_decoded_bolt11['msatoshi'])
         ))
         db_session.commit()
         return src_invoice
