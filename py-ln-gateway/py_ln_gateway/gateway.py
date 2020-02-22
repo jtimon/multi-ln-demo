@@ -14,7 +14,6 @@
 from datetime import datetime
 from decimal import Decimal
 from pprint import pprint
-import binascii
 import json
 import requests
 
@@ -35,7 +34,7 @@ REFUND_MSG = 'Please contact customer support to get a refund.'
 MIN_OFFER = 1000
 
 def check_hash_preimage(payment_hash, payment_preimage):
-    hashed_result = sha256(binascii.unhexlify(payment_preimage)).hexdigest()
+    hashed_result = sha256(bytes.fromhex(payment_preimage)).hexdigest()
     return hashed_result == payment_hash
 
 def is_with_error(result):

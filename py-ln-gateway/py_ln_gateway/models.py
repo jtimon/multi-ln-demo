@@ -8,7 +8,7 @@ from py_ln_gateway.db import Base
 MAX_BOLT11 = 2048
 MAX_URL_LEN = 200
 
-# TODO optimization: binascii.unhexlify and store 32 bytes instead of 64 char hex string
+# TODO optimization: use bytes.fromhex() and store 32 bytes instead of 64 char hex string
 # Find out best field for this on sqlalchemy
 FIELD_32B_AS_HEX_STR = 64
 

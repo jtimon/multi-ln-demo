@@ -3,7 +3,6 @@
 if __name__ != '__main__':
     raise ImportError(u"%s may only be run as a script" % __file__)
 
-import binascii
 import requests
 import sys
 import time
@@ -37,7 +36,7 @@ from multiln.util_demo_clightning import (
 from multiln.chains import CHAINS
 
 def check_hash_preimage(payment_hash, payment_preimage):
-    hashed_result = sha256(binascii.unhexlify(payment_preimage)).hexdigest()
+    hashed_result = sha256(bytes.fromhex(payment_preimage)).hexdigest()
     return hashed_result == payment_hash
 
 print('This is a demo demonstrating lightning payments across several different regtest chains')
