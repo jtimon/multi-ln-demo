@@ -2,6 +2,12 @@ FROM ubuntu:18.04
 
 RUN apt-get -yqq update \
   && apt-get install -qfy \
+    automake \
+    build-essential \
+    libffi-dev \
+    libgmp-dev \
+    libtool \
+    pkg-config \
     python3 \
     python3-pip \
   && rm -rf /var/lib/apt/lists/*
