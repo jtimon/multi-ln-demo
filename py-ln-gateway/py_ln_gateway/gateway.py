@@ -188,6 +188,7 @@ class Gateway(object):
         if len(src_invoice['bolt11']) > MAX_BOLT11:
             return {'error': "Bolt11 invoices above %s in length are rejected" % MAX_BOLT11}
 
+        src_invoice['chain_id'] = src_chain_id
         return src_invoice
 
     def _other_gateway_pays(self, dest_bolt11, src_chain_id, dest_decoded_bolt11):
