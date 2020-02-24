@@ -69,19 +69,13 @@ def demo_fundchannel(lightningd_map, ln_info, chain_name, user_name_a, user_name
     print(lightningd_map[chain_name][user_name_a].fundchannel(ln_info[chain_name][user_name_b]['id'], amount))
 
 # A node receives invoices for every other node in the chain and pays it
-def demo_pay_every_chain(lightningd_map):
-    for chain_name, ln_daemons in lightningd_map.items():
-        for user_name_a, ln_caller_a in ln_daemons.items():
-            for user_name_b, ln_caller_b in ln_daemons.items():
-                if user_name_a != user_name_b:
-                    msatoshi = 1000
-                    print('%s receives invoice from %s on chain %s' % (user_name_a, user_name_b, chain_name))
-                    desc = '%s_%s_%s' % (user_name_a, user_name_b, chain_name)
-                    invoice = ln_caller_b.invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
-                    print(invoice)
-                    print('...and pays it...')
-                    print(ln_caller_a.pay(invoice['bolt11']))
-            break
+def demo_1_chain_payment(lightningd_map, chain_name, payer, payee, msatoshi):
+    print('%s receives invoice from %s on chain %s' % (payer, payee, chain_name))
+    desc = '%s_%s_%s' % (payer, payee, chain_name)
+    invoice = lightningd_map[chain_name][payee].invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
+    print(invoice)
+    print('...and pays it...')
+    print(lightningd_map[chain_name][payer].pay(invoice['bolt11']))
 
 def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, user_name_gateway, user_name_b, chain_name_b):
     print('--------Running demo_2_chains_gateway_payment()...')
@@ -191,7 +185,11 @@ ln_wait_channels_state(LIGHTNINGD, 'CHANNELD_NORMAL', wait_interval=5)
 ln_listchannels(LIGHTNINGD)
 
 # Pay an invoice on every chain
-demo_pay_every_chain(LIGHTNINGD)
+demo_1_chain_payment(LIGHTNINGD, "regtest", "alice", "bob", 1000)
+if N_CHAINS > 1:
+    demo_1_chain_payment(LIGHTNINGD, "liquid-regtest", "bob", "carol", 1000)
+if N_CHAINS > 2:
+    demo_1_chain_payment(LIGHTNINGD, "chain_3", "carol", "david", 1000)
 
 # Alice on regtest pays an invoice to carol on liquid-regtest through gateway bob with nodes on both chains
 if N_CHAINS > 1:
