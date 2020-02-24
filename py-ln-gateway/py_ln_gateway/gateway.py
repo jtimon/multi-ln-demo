@@ -40,6 +40,31 @@ def check_hash_preimage(payment_hash, payment_preimage):
 def is_with_error(result):
     return isinstance(result, dict) and 'error' in result
 
+def save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11,
+                         other_gw_decoded_bolt11=None, other_gw_bolt11=None, other_url=None):
+    pending_request = PendingRequest(
+        src_payment_hash = src_invoice['payment_hash'],
+        src_chain = src_invoice['chain_id'],
+        src_bolt11 = src_invoice['bolt11'],
+        src_expires_at = datetime.utcfromtimestamp(src_invoice['expires_at']),
+        src_amount = int(src_invoice['msatoshi']),
+        dest_payment_hash = dest_decoded_bolt11['payment_hash'],
+        dest_chain = dest_decoded_bolt11['chain_id'],
+        dest_bolt11 = dest_bolt11,
+        dest_expires_at = datetime.utcfromtimestamp(dest_decoded_bolt11['created_at'] + dest_decoded_bolt11['expiry']),
+        dest_amount = int(dest_decoded_bolt11['msatoshi'])
+    )
+    if other_gw_decoded_bolt11:
+        pending_request.other_gw_payment_hash = other_gw_decoded_bolt11['payment_hash']
+        pending_request.other_gw_url = other_url
+        pending_request.other_gw_chain = other_gw_decoded_bolt11['chain_id']
+        pending_request.other_gw_bolt11 = other_gw_bolt11
+        pending_request.other_gw_expires_at = datetime.utcfromtimestamp(other_gw_decoded_bolt11['created_at'] + other_gw_decoded_bolt11['expiry'])
+        pending_request.other_gw_amount = int(other_gw_decoded_bolt11['msatoshi'])
+
+    db_session.add(pending_request)
+    db_session.commit()
+
 def save_failed_request(error, pending_request, src_payment_preimage, other_gw_payment_preimage=None):
     # TODO handle failed requests with refunds or something
     # We could refund by opening a channel with some initial funds back to the customer,
@@ -232,25 +257,7 @@ class Gateway(object):
         if not self._check_route(other_gw_chain_id, other_gw_decoded_bolt11['payee'], other_gw_decoded_bolt11['msatoshi']):
             return {'error': "No route found to pay other_gw_bolt11 %s" % other_gw_bolt11}
 
-        db_session.add(PendingRequest(
-            src_payment_hash = src_invoice['payment_hash'],
-            src_chain = src_chain_id,
-            src_bolt11 = src_invoice['bolt11'],
-            src_expires_at = datetime.utcfromtimestamp(src_invoice['expires_at']),
-            src_amount = int(src_invoice['msatoshi']),
-            dest_payment_hash = dest_decoded_bolt11['payment_hash'],
-            dest_chain = dest_chain_id,
-            dest_bolt11 = dest_bolt11,
-            dest_expires_at = datetime.utcfromtimestamp(dest_decoded_bolt11['created_at'] + dest_decoded_bolt11['expiry']),
-            dest_amount = int(dest_decoded_bolt11['msatoshi']),
-            other_gw_payment_hash = other_gw_decoded_bolt11['payment_hash'],
-            other_gw_url = other_url,
-            other_gw_chain = other_gw_chain_id,
-            other_gw_bolt11 = other_gw_bolt11,
-            other_gw_expires_at = datetime.utcfromtimestamp(other_gw_decoded_bolt11['created_at'] + other_gw_decoded_bolt11['expiry']),
-            other_gw_amount = int(other_gw_decoded_bolt11['msatoshi'])
-        ))
-        db_session.commit()
+        save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11, other_gw_decoded_bolt11, other_gw_bolt11, other_url)
         return src_invoice
 
     def get_accepted_chains(self):
@@ -298,19 +305,7 @@ class Gateway(object):
         if is_with_error(src_invoice):
             return src_invoice
 
-        db_session.add(PendingRequest(
-            src_payment_hash = src_invoice['payment_hash'],
-            src_chain = src_chain_id,
-            src_bolt11 = src_invoice['bolt11'],
-            src_expires_at = datetime.utcfromtimestamp(src_invoice['expires_at']),
-            src_amount = int(src_invoice['msatoshi']),
-            dest_payment_hash = dest_decoded_bolt11['payment_hash'],
-            dest_chain = dest_chain_id,
-            dest_bolt11 = dest_bolt11,
-            dest_expires_at = datetime.utcfromtimestamp(dest_decoded_bolt11['created_at'] + dest_decoded_bolt11['expiry']),
-            dest_amount = int(dest_decoded_bolt11['msatoshi'])
-        ))
-        db_session.commit()
+        save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11)
         return src_invoice
 
     def check_paid_to_own_node(self, payment_hash, src_chain_id):
