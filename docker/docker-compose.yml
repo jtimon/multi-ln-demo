@@ -17,21 +17,20 @@ services:
     depends_on:
       - bitcoind_regtest
       - elementsd_liquid_regtest
-      - elementsd_chain_3
       - clightning_alice_regtest
       - clightning_bob_regtest
       - clightning_bob_liquid_regtest
       - clightning_carol_liquid_regtest
-      - clightning_carol_chain_3
-      - clightning_david_chain_3
+      - clightning_carol_regtest
+      - clightning_david_regtest
       - bob_gateway
     volumes:
       - "clightning_datadir_alice_regtest:/wd/clightning_datadir_alice/regtest"
       - "clightning_datadir_bob_regtest:/wd/clightning_datadir_bob/regtest"
       - "clightning_datadir_bob_liquid_regtest:/wd/clightning_datadir_bob/liquid-regtest"
       - "clightning_datadir_carol_liquid_regtest:/wd/clightning_datadir_carol/liquid-regtest"
-      - "clightning_datadir_carol_chain_3:/wd/clightning_datadir_carol/chain_3"
-      - "clightning_datadir_david_chain_3:/wd/clightning_datadir_david/chain_3"
+      - "clightning_datadir_carol_regtest:/wd/clightning_datadir_carol/regtest"
+      - "clightning_datadir_david_regtest:/wd/clightning_datadir_david/regtest"
     networks:
       - backend-network
 
@@ -43,21 +42,20 @@ services:
     depends_on:
       - bitcoind_regtest
       - elementsd_liquid_regtest
-      - elementsd_chain_3
       - clightning_alice_regtest
       - clightning_bob_regtest
       - clightning_bob_liquid_regtest
       - clightning_carol_liquid_regtest
-      - clightning_carol_chain_3
-      - clightning_david_chain_3
+      - clightning_carol_regtest
+      - clightning_david_regtest
       - bob_gateway
     volumes:
       - "clightning_datadir_alice_regtest:/wd/clightning_datadir_alice/regtest"
       - "clightning_datadir_bob_regtest:/wd/clightning_datadir_bob/regtest"
       - "clightning_datadir_bob_liquid_regtest:/wd/clightning_datadir_bob/liquid-regtest"
       - "clightning_datadir_carol_liquid_regtest:/wd/clightning_datadir_carol/liquid-regtest"
-      - "clightning_datadir_carol_chain_3:/wd/clightning_datadir_carol/chain_3"
-      - "clightning_datadir_david_chain_3:/wd/clightning_datadir_david/chain_3"
+      - "clightning_datadir_carol_regtest:/wd/clightning_datadir_carol/regtest"
+      - "clightning_datadir_david_regtest:/wd/clightning_datadir_david/regtest"
     networks:
       - backend-network
 
@@ -116,13 +114,13 @@ services:
     entrypoint: "/wd/docker/entrypoint-py-gateway.sh"
     depends_on:
       - db_carol
+      - bitcoind_regtest
       - elementsd_liquid_regtest
-      - elementsd_chain_3
       - clightning_carol_liquid_regtest
-      - clightning_carol_chain_3
+      - clightning_carol_regtest
     volumes:
       - "clightning_datadir_carol_liquid_regtest:/wd/clightning_datadir_carol/liquid-regtest"
-      - "clightning_datadir_carol_chain_3:/wd/clightning_datadir_carol/chain_3"
+      - "clightning_datadir_carol_regtest:/wd/clightning_datadir_carol/regtest"
     ports:
       - "6000:6000"
     expose:
@@ -155,20 +153,6 @@ services:
       - "18555"
     volumes:
       - "elementsd_liquid_regtest_datadir:/wd/elementsd_liquid-regtest"
-    networks:
-      - backend-network
-
-  elementsd_chain_3:
-    build:
-      context: ../
-      dockerfile: docker/elementsd.Dockerfile
-    command: "elementsd -chain=chain_3 -conf=/wd/conf/bitcoind.conf -datadir=/wd/elementsd_chain_3/"
-    ports:
-      - "18565:18565"
-    expose:
-      - "18565"
-    volumes:
-      - "elementsd_chain_3_datadir:/wd/elementsd_chain_3"
     networks:
       - backend-network
 
@@ -222,27 +206,27 @@ services:
     networks:
       - backend-network
 
-  clightning_carol_chain_3:
+  clightning_carol_regtest:
     depends_on:
-      - elementsd_chain_3
+      - bitcoind_regtest
     build:
       context: ../
-      dockerfile: docker/clightning_custom.Dockerfile
-    command: "lightningd --conf=/wd/conf/carol_chain_3.conf --lightning-dir=/wd/clightning_datadir_carol"
+      dockerfile: docker/clightning.Dockerfile
+    command: "lightningd --conf=/wd/conf/carol_regtest.conf --lightning-dir=/wd/clightning_datadir_carol"
     volumes:
-      - "clightning_datadir_carol_chain_3:/wd/clightning_datadir_carol/chain_3"
+      - "clightning_datadir_carol_regtest:/wd/clightning_datadir_carol/regtest"
     networks:
       - backend-network
 
-  clightning_david_chain_3:
+  clightning_david_regtest:
     depends_on:
-      - elementsd_chain_3
+      - bitcoind_regtest
     build:
       context: ../
-      dockerfile: docker/clightning_custom.Dockerfile
-    command: "lightningd --conf=/wd/conf/david_chain_3.conf --lightning-dir=/wd/clightning_datadir_david"
+      dockerfile: docker/clightning.Dockerfile
+    command: "lightningd --conf=/wd/conf/david_regtest.conf --lightning-dir=/wd/clightning_datadir_david"
     volumes:
-      - "clightning_datadir_david_chain_3:/wd/clightning_datadir_david/chain_3"
+      - "clightning_datadir_david_regtest:/wd/clightning_datadir_david/regtest"
     networks:
       - backend-network
 
@@ -279,8 +263,7 @@ volumes:
   clightning_datadir_bob_regtest:
   clightning_datadir_bob_liquid_regtest:
   clightning_datadir_carol_liquid_regtest:
-  clightning_datadir_carol_chain_3:
-  clightning_datadir_david_chain_3:
+  clightning_datadir_carol_regtest:
+  clightning_datadir_david_regtest:
   bitcoind_regtest_datadir:
   elementsd_liquid_regtest_datadir:
-  elementsd_chain_3_datadir:

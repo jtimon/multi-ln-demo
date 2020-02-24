@@ -6,7 +6,7 @@ CHAINS = {
         'bip173_name': 'bcrt',
         'host_url': 'bitcoind_regtest',
         'port_decimal': 1,
-        'users': ['alice', 'bob'],
+        'users': ['alice', 'bob', 'carol', 'david'],
     },
 
     'liquid-regtest': {
@@ -16,14 +16,5 @@ CHAINS = {
         'host_url': 'elementsd_liquid_regtest',
         'port_decimal': 5,
         'users': ['bob', 'carol'],
-    },
-
-    'chain_3': {
-        'id': '34bf1751fd81087a81aae0b16c6e7bffcfe5574fce013e9ddd2e100c038f9046',
-        'petname': 'chain_3',
-        'bip173_name': 'bcc',
-        'host_url': 'elementsd_chain_3',
-        'port_decimal': 6,
-        'users': ['carol', 'david'],
     },
 }

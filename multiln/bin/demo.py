@@ -46,8 +46,6 @@ N_HOPS = int(sys.argv[1])
 SELECTED_CHAINS = ["regtest"]
 if N_HOPS > 0:
     SELECTED_CHAINS.append("liquid-regtest")
-if N_HOPS > 1:
-    SELECTED_CHAINS.append("chain_3")
 
 print('Selected hops:', N_HOPS)
 
@@ -172,7 +170,7 @@ demo_fundchannel(LIGHTNINGD, LN_INFO, "regtest", "alice", "bob", 10000)
 if N_HOPS > 0:
     demo_fundchannel(LIGHTNINGD, LN_INFO, "liquid-regtest", "bob", "carol", 10000)
 if N_HOPS > 1:
-    demo_fundchannel(LIGHTNINGD, LN_INFO, "chain_3", "carol", "david", 10000)
+    demo_fundchannel(LIGHTNINGD, LN_INFO, "regtest", "carol", "david", 10000)
 
 ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_AWAITING_LOCKIN')
 ln_assert_channels_public(LIGHTNINGD, False)
@@ -188,7 +186,7 @@ demo_1_chain_payment(LIGHTNINGD, "regtest", "alice", "bob", 1000)
 if N_HOPS > 0:
     demo_1_chain_payment(LIGHTNINGD, "liquid-regtest", "bob", "carol", 1000)
 if N_HOPS > 1:
-    demo_1_chain_payment(LIGHTNINGD, "chain_3", "carol", "david", 1000)
+    demo_1_chain_payment(LIGHTNINGD, "regtest", "carol", "david", 1000)
 
 # Alice on regtest pays an invoice to carol on liquid-regtest through gateway bob with nodes on both chains
 if N_HOPS > 0:
@@ -200,21 +198,21 @@ if N_HOPS > 0:
                                   chain_name_b = 'liquid-regtest')
 
 if N_HOPS > 1:
-    # Bob on liquid-regtest pays an invoice to david on chain_3 through gateway carol with nodes on both chains
+    # Bob on liquid-regtest pays an invoice to david on regtest through gateway carol with nodes on both chains
     demo_2_chains_gateway_payment(LIGHTNINGD,
                                   user_name_a = 'bob',
                                   chain_name_a = 'liquid-regtest',
                                   user_name_gateway = 'carol',
                                   user_name_b = 'david',
-                                  chain_name_b = 'chain_3')
+                                  chain_name_b = 'regtest')
 
-    # Alice on regtest pays an invoice to david on chain_3 through gateway bob with nodes in regtest and liquid-regtest
-    # Gateway bob needs to call gateway carol to be able to pay to chain_3
+    # Alice on regtest pays an invoice to david on regtest through gateway bob with nodes in regtest and liquid-regtest
+    # Gateway bob needs to call gateway carol to be able to pay to regtest
     demo_2_chains_gateway_payment(LIGHTNINGD,
                                   user_name_a = 'alice',
                                   chain_name_a = 'regtest',
                                   user_name_gateway = 'bob',
                                   user_name_b = 'david',
-                                  chain_name_b = 'chain_3')
+                                  chain_name_b = 'regtest')
 
 print('All done for %s hops. Used chains %s' % (N_HOPS, SELECTED_CHAINS))

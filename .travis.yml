@@ -16,7 +16,7 @@ jobs:
       script:
         - make pydemo-1-hop
 
-    - name: '2 chain hops (regtest -> liquid-regtest -> chain_3)'
+    - name: '2 chain hops (regtest -> liquid-regtest -> regtest)'
       script:
         - make pydemo-2-hop
 

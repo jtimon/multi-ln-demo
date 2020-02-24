@@ -15,11 +15,8 @@ pydemo-0-hop:
 	--scale db_carol=0 \
 	--scale carol_gateway=0 \
 	--scale elementsd_liquid_regtest=0 \
-	--scale elementsd_chain_3=0 \
 	--scale clightning_bob_liquid_regtest=0 \
 	--scale clightning_carol_liquid_regtest=0 \
-	--scale clightning_carol_chain_3=0 \
-	--scale clightning_david_chain_3=0 \
 
 pydemo-1-hop:
 	export PYDEMO_HOPS=1 ; \
@@ -28,9 +25,6 @@ pydemo-1-hop:
 	--scale rsdemo=0 \
 	--scale db_carol=0 \
 	--scale carol_gateway=0 \
-	--scale elementsd_chain_3=0 \
-	--scale clightning_carol_chain_3=0 \
-	--scale clightning_david_chain_3=0 \
 
 pydemo-2-hop:
 	export PYDEMO_HOPS=2 ; \
@@ -44,9 +38,6 @@ rsdemo-1-hop:
 	--scale pydemo=0 \
 	--scale db_carol=0 \
 	--scale carol_gateway=0 \
-	--scale elementsd_chain_3=0 \
-	--scale clightning_carol_chain_3=0 \
-	--scale clightning_david_chain_3=0 \
 
 docker-clean-containers:
 	docker stop $$(docker ps -aq) ; docker rm $$(docker ps -aq)
