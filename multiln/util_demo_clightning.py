@@ -5,15 +5,13 @@ from pyln.client import LightningRpc
 
 from multiln.util import wait_for
 
-def get_clightningd(user_name, chain_name):
-    return LightningRpc('/wd/clightning_datadir_%s/%s/lightning-rpc' % (user_name, chain_name))
-
 def ln_init_global(chains):
     to_return = {}
     for chain_name in chains:
         to_return[chain_name] = {}
         for user_name in chains[chain_name]['users']:
-            to_return[chain_name][user_name] = get_clightningd(user_name, chain_name)
+            to_return[chain_name][user_name] = LightningRpc('/wd/clightning_datadir_%s/%s/lightning-rpc' % (
+                user_name, chain_name))
     return to_return
 
 def ln_wait_deamons_start(lightningd_map):
