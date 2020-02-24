@@ -192,40 +192,44 @@ class Gateway(object):
 
     def _other_gateway_pays(self, dest_bolt11, src_chain_id, dest_decoded_bolt11):
         dest_chain_id = dest_decoded_bolt11['chain_id']
-        error_result = {'error': "No route found to pay bolt11 %s" % dest_bolt11}
-        # TODO Support several gateways per chain
-        other_url = self.other_gateways[dest_chain_id][0]
+        for other_url, supported_chains in self.other_gateways.items():
+            if dest_chain_id not in supported_chains:
+                continue
+
+            result = self._other_gateway_attempt(dest_bolt11, src_chain_id, dest_decoded_bolt11, other_url)
+            if is_with_error(result):
+                print('Error returned by other gateway %s: (chain id %s)' % (other_url, dest_chain_id))
+                pprint(result)
+            else:
+                return result
+
+        return {'error': "No route found to pay bolt11 %s" % dest_bolt11}
+
+    def _other_gateway_attempt(self, dest_bolt11, src_chain_id, dest_decoded_bolt11, other_url):
+        dest_chain_id = dest_decoded_bolt11['chain_id']
         other_gw_invoice = requests.post(other_url + "/request_dest_payment", data={
             'bolt11': dest_bolt11,
             'src_chain_ids': list(self.sibling_nodes.keys()),
         }).json()
         if is_with_error(other_gw_invoice):
-            print('Error returned by the other gateway on the first request:')
-            pprint(other_gw_invoice)
-            return error_result
+            return other_gw_invoice
 
         other_gw_bolt11 = other_gw_invoice['bolt11']
         other_gw_decoded_bolt11 = self._bolt11_decode(other_gw_bolt11)
         if is_with_error(other_gw_decoded_bolt11):
-            print('Error parsing the other gateway\'s invoice:')
-            pprint(other_gw_decoded_bolt11)
-            return error_result
+            return other_gw_decoded_bolt11
         other_gw_chain_id = other_gw_decoded_bolt11['chain_id']
 
         if other_gw_chain_id not in self.sibling_nodes:
-            print('Error: the other gateway demands payment in a chain we don\'t support')
-            return error_result
+            return {'error': 'other gateway demands payment in a chain we don\'t support (chain id: %s)' % other_gw_chain_id}
 
         # When another gateway pays, make sure we can be paid before checking a route
         src_invoice = self._calculate_src_invoice(src_chain_id, other_gw_decoded_bolt11)
         if is_with_error(src_invoice):
-            print('Error calculating the src invoice from the other gateway\'s invoice:')
-            pprint(src_invoice)
-            return error_result
+            return src_invoice
 
         if not self._check_route(other_gw_chain_id, other_gw_decoded_bolt11['payee'], other_gw_decoded_bolt11['msatoshi']):
-            print("No route found to pay other_gw_bolt11 %s" % other_gw_bolt11)
-            return error_result
+            return {'error': "No route found to pay other_gw_bolt11 %s" % other_gw_bolt11}
 
         db_session.add(PendingRequest(
             src_payment_hash = src_invoice['payment_hash'],
