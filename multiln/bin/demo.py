@@ -64,6 +64,10 @@ GATEWAY_URL = {
 BITCOIND = btc_init_bitcoind_global(CHAINS)
 LIGHTNINGD = ln_init_global(CHAINS)
 
+def demo_fundchannel(lightningd_map, ln_info, chain_name, user_name_a, user_name_b, amount):
+    print('%s funds a channel to %s in chain %s' % (user_name_a, user_name_b, chain_name))
+    print(lightningd_map[chain_name][user_name_a].fundchannel(ln_info[chain_name][user_name_b]['id'], amount))
+
 # A node receives invoices for every other node in the chain and pays it
 def demo_pay_every_chain(lightningd_map):
     for chain_name, ln_daemons in lightningd_map.items():
@@ -171,14 +175,11 @@ ln_print_info(LN_INFO)
 ln_listfunds(LIGHTNINGD)
 ln_listpeers(LIGHTNINGD)
 
-# A node funds a channel with every other node in the chain
-for chain_name, ln_daemons in LIGHTNINGD.items():
-    for user_name_a, ln_caller in ln_daemons.items():
-        for user_name_b in ln_daemons:
-            if user_name_a != user_name_b:
-                print('%s funds a channel to %s in chain %s' % (user_name_a, user_name_b, chain_name))
-                print(ln_caller.fundchannel(LN_INFO[chain_name][user_name_b]['id'], 10000))
-        break
+demo_fundchannel(LIGHTNINGD, LN_INFO, "regtest", "alice", "bob", 10000)
+if N_CHAINS > 1:
+    demo_fundchannel(LIGHTNINGD, LN_INFO, "liquid-regtest", "bob", "carol", 10000)
+if N_CHAINS > 2:
+    demo_fundchannel(LIGHTNINGD, LN_INFO, "chain_3", "carol", "david", 10000)
 
 ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_AWAITING_LOCKIN')
 ln_assert_channels_public(LIGHTNINGD, False)
