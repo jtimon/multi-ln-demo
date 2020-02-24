@@ -2,11 +2,11 @@
 #  awk cat cmp cp diff echo egrep expr false grep install-info ln ls
 #  mkdir mv printf pwd rm rmdir sed sleep sort tar test touch tr true
 
-.PHONY: pydemo-regtest pydemo-2-chains pydemo-3-chains rsdemo-2-chains docker-clean-containers
-all: pydemo-3-chains
+.PHONY: pydemo-0-hop pydemo-1-hop pydemo-2-hop rsdemo-1-hop docker-clean-containers
+all: pydemo-2-hop
 
-pydemo-regtest:
-	export PYDEMO_CHAINS=regtest ; \
+pydemo-0-hop:
+	export PYDEMO_HOPS=0 ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale rsdemo=0 \
@@ -21,8 +21,8 @@ pydemo-regtest:
 	--scale clightning_carol_chain_3=0 \
 	--scale clightning_david_chain_3=0 \
 
-pydemo-2-chains:
-	export PYDEMO_CHAINS=regtest,liquid-regtest ; \
+pydemo-1-hop:
+	export PYDEMO_HOPS=1 ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale rsdemo=0 \
@@ -32,13 +32,13 @@ pydemo-2-chains:
 	--scale clightning_carol_chain_3=0 \
 	--scale clightning_david_chain_3=0 \
 
-pydemo-3-chains:
-	export PYDEMO_CHAINS=regtest,liquid-regtest,chain_3 ; \
+pydemo-2-hop:
+	export PYDEMO_HOPS=2 ; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale rsdemo=0 \
 
-rsdemo-2-chains:
+rsdemo-1-hop:
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale pydemo=0 \

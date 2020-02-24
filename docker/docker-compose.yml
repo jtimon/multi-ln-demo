@@ -13,7 +13,7 @@ services:
     build:
       context: ../
       dockerfile: docker/pydemo.Dockerfile
-    command: "python3 /wd/multiln/bin/demo.py ${PYDEMO_CHAINS}"
+    command: "python3 /wd/multiln/bin/demo.py ${PYDEMO_HOPS}"
     depends_on:
       - bitcoind_regtest
       - elementsd_liquid_regtest

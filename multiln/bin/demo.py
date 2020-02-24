@@ -40,20 +40,19 @@ def check_hash_preimage(payment_hash, payment_preimage):
     return hashed_result == payment_hash
 
 print('This is a demo demonstrating lightning payments across several different regtest chains')
-print('USAGE: single parameter containing selected chains separated by commas')
+print('USAGE: single parameter containing a natural number of hops (from 0 to 2)')
 
-SELECTED_CHAINS = sys.argv[1].split(',')
-print('Selected Chains:', SELECTED_CHAINS)
+N_HOPS = int(sys.argv[1])
+SELECTED_CHAINS = ["regtest"]
+if N_HOPS > 0:
+    SELECTED_CHAINS.append("liquid-regtest")
+if N_HOPS > 1:
+    SELECTED_CHAINS.append("chain_3")
 
-if len(SELECTED_CHAINS) == 0:
-    raise AssertionError("No chains selected to run the demo.")
-
-EXAMPLE_CHAIN = SELECTED_CHAINS[0]
+print('Selected hops:', N_HOPS)
 
 CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
-N_CHAINS = len(CHAINS)
-
-print('Chains considered (%s):' % N_CHAINS)
+print('Chains considered (%s):' % len(CHAINS))
 print(CHAINS)
 
 GATEWAY_URL = {
@@ -161,7 +160,7 @@ for chain_name, ln_daemons in LIGHTNINGD.items():
         print('%s %s: sending coins to address %s in lightning wallet (txid: %s)' % (chain_name, user_name, address, txid))
         generate_blocks(rpccaller, chain_name, 1)
 
-ln_sync_blockheight(BITCOIND, LIGHTNINGD, timeout=60 * N_CHAINS, interval=5, label='initial funds on lightningd nodes')
+ln_sync_blockheight(BITCOIND, LIGHTNINGD, timeout=60 * (N_HOPS + 1), interval=5, label='initial funds on lightningd nodes')
 ln_connect_nodes(LIGHTNINGD, LN_INFO)
 
 print_balances(BITCOIND)
@@ -170,9 +169,9 @@ ln_listfunds(LIGHTNINGD)
 ln_listpeers(LIGHTNINGD)
 
 demo_fundchannel(LIGHTNINGD, LN_INFO, "regtest", "alice", "bob", 10000)
-if N_CHAINS > 1:
+if N_HOPS > 0:
     demo_fundchannel(LIGHTNINGD, LN_INFO, "liquid-regtest", "bob", "carol", 10000)
-if N_CHAINS > 2:
+if N_HOPS > 1:
     demo_fundchannel(LIGHTNINGD, LN_INFO, "chain_3", "carol", "david", 10000)
 
 ln_assert_channels_state(LIGHTNINGD, 'CHANNELD_AWAITING_LOCKIN')
@@ -186,13 +185,13 @@ ln_listchannels(LIGHTNINGD)
 
 # Pay an invoice on every chain
 demo_1_chain_payment(LIGHTNINGD, "regtest", "alice", "bob", 1000)
-if N_CHAINS > 1:
+if N_HOPS > 0:
     demo_1_chain_payment(LIGHTNINGD, "liquid-regtest", "bob", "carol", 1000)
-if N_CHAINS > 2:
+if N_HOPS > 1:
     demo_1_chain_payment(LIGHTNINGD, "chain_3", "carol", "david", 1000)
 
 # Alice on regtest pays an invoice to carol on liquid-regtest through gateway bob with nodes on both chains
-if N_CHAINS > 1:
+if N_HOPS > 0:
     demo_2_chains_gateway_payment(LIGHTNINGD,
                                   user_name_a = 'alice',
                                   chain_name_a = 'regtest',
@@ -200,7 +199,7 @@ if N_CHAINS > 1:
                                   user_name_b = 'carol',
                                   chain_name_b = 'liquid-regtest')
 
-if N_CHAINS > 2:
+if N_HOPS > 1:
     # Bob on liquid-regtest pays an invoice to david on chain_3 through gateway carol with nodes on both chains
     demo_2_chains_gateway_payment(LIGHTNINGD,
                                   user_name_a = 'bob',
@@ -218,4 +217,4 @@ if N_CHAINS > 2:
                                   user_name_b = 'david',
                                   chain_name_b = 'chain_3')
 
-print('All done for selected chains %s' % SELECTED_CHAINS)
+print('All done for %s hops. Used chains %s' % (N_HOPS, SELECTED_CHAINS))

@@ -8,18 +8,18 @@ after_success:
 jobs:
   include:
 
-    - name: '3 chains'
+    - name: '0 hops, 1 chain (regtest)'
       script:
-        - make pydemo-3-chains
+        - make pydemo-0-hop
 
-    - name: '1 chain (regtest)'
+    - name: '1 chain hop (regtest -> liquid-regtest)'
       script:
-        - make pydemo-regtest
+        - make pydemo-1-hop
 
-    - name: '2 chains'
+    - name: '2 chain hops (regtest -> liquid-regtest -> chain_3)'
       script:
-        - make pydemo-2-chains
+        - make pydemo-2-hop
 
-    # - name: 'rustdemo 2 chains'
+    # - name: 'rustdemo 1 chain hop (regtest -> liquid-regtest)'
     #   script:
-    #     - make rsdemo-2-chains
+    #     - make rsdemo-1-hop
