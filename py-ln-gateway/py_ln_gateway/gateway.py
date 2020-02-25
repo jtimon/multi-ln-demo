@@ -189,7 +189,7 @@ class Gateway(object):
 
     def _calculate_src_invoice(self, src_chain_id, dest_decoded_bolt11):
         dest_chain_id = dest_decoded_bolt11['chain_id']
-        price = Price.query.get('%s:%s' % (src_chain_id, dest_chain_id))
+        price = Price.query.get('%s%s' % (src_chain_id, dest_chain_id))
         if not price or price.price == 0:
             return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
                 src_chain_id, dest_chain_id)}
@@ -272,11 +272,9 @@ class Gateway(object):
     def get_prices(self):
         prices = []
         for p in Price.query.all():
-            splitted = p.src_dest.split(':')
-            assert(len(splitted) == 2)
             prices.append({
-                'src_chain': splitted[0],
-                'dest_chain': splitted[1],
+                'src_chain': p.src_dest[:64],
+                'dest_chain': p.src_dest[64:],
                 'price': str(p.price),
             })
         return {'prices': prices}
@@ -383,7 +381,7 @@ class Gateway(object):
 
         # Prices may have been changed from request to confirm call
         # Check the price one more time to mitigate the free option problem. If it fails because of this, a refund is required too.
-        price = Price.query.get('%s:%s' % (pending_request.src_chain, to_pay_chain))
+        price = Price.query.get('%s%s' % (pending_request.src_chain, to_pay_chain))
         if not price or price.price == 0:
             return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
                 pending_request.src_chain, pending_request.dest_chain)}

@@ -15,8 +15,8 @@ FIELD_32B_AS_HEX_STR = 64
 class Price(Base):
     __tablename__ = 'prices'
 
-    # The id is composed by the src_chain_id followed by ':' and then the dest_chain_id
-    src_dest = Column(String((2 * FIELD_32B_AS_HEX_STR) + 1), primary_key=True)
+    # The id is composed by the src_chain_id followed by the dest_chain_id
+    src_dest = Column(String(2 * FIELD_32B_AS_HEX_STR), primary_key=True)
     price = Column(Numeric(10,4), nullable=False)
 
 class PendingRequest(Base):

@@ -12,12 +12,12 @@ from py_ln_gateway.models import Price
 
 def add_or_update_price(src_chain, dest_chain, next_price_val):
     print('Updating price to %s for chain trade %s:%s' % (next_price_val, src_chain, dest_chain))
-    price = Price.query.get('%s:%s' % (src_chain, dest_chain))
+    price = Price.query.get('%s%s' % (src_chain, dest_chain))
     if price:
         price.price = next_price_val
     else:
         db_session.add(Price(
-            src_dest = '%s:%s' % (src_chain, dest_chain),
+            src_dest = '%s%s' % (src_chain, dest_chain),
             price = next_price_val))
     db_session.commit()
 
