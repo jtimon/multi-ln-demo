@@ -10,8 +10,6 @@ import secp256k1
 from py_ln_gateway.bech32 import bech32_decode, CHARSET
 from py_ln_gateway.models import MAX_BOLT11
 
-BTC_TO_MILLISATOSHIS = 10**11
-
 # Bech32 spits out array of 5-bit values.  Shim here.
 def u5_to_bitarray(arr):
     ret = bitstring.BitArray()
@@ -38,10 +36,10 @@ def msatoshi_from_str_amount(amount):
     #* `n` (nano): multiply by 0.000000001
     #* `p` (pico): multiply by 0.000000000001
     units = {
-        'p': 10**12,
-        'n': 10**9,
-        'u': 10**6,
-        'm': 10**3,
+        'p': Decimal(1) / 10,
+        'n': 10**2,
+        'u': 10**5,
+        'm': 10**8, # from milli-btc to milli-satoshi
     }
     unit = str(amount)[-1]
     # BOLT #11:
@@ -51,11 +49,10 @@ def msatoshi_from_str_amount(amount):
         raise ValueError("Invalid amount '{}'".format(amount))
 
     if unit in units.keys():
-        # TODO optimize the table instead of multiplying by BTC_TO_MILLISATOSHIS here
-        return int((BTC_TO_MILLISATOSHIS * Decimal(amount[:-1])) / units[unit])
+        return int(Decimal(amount[:-1]) * units[unit])
     else:
         # Convert from btc to millisatoshis
-        return int(BTC_TO_MILLISATOSHIS * Decimal(amount))
+        return int(Decimal(amount) * 10**11)
 
 # Try to pull out tagged data: returns tag, tagged data and remainder.
 def pull_tagged(stream):
