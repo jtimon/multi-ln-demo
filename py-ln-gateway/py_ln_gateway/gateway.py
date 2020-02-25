@@ -298,6 +298,13 @@ class Gateway(object):
             return dest_decoded_bolt11
         dest_chain_id = dest_decoded_bolt11['chain_id']
 
+        pending_request = PendingRequest.query.filter(PendingRequest.dest_payment_hash == dest_decoded_bolt11['payment_hash']).first()
+        if pending_request:
+            return {
+                'chain_id': pending_request.src_chain_id,
+                'bolt11': pending_request.src_bolt11,
+            }
+
         if dest_chain_id not in self.sibling_nodes:
             print("gateway can't pay to chain %s, trying with another gateway" % dest_chain_id)
             return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_decoded_bolt11)
