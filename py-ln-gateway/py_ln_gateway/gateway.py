@@ -116,6 +116,12 @@ def save_paid_request(pending_request, src_payment_preimage, dest_payment_preima
     db_session.delete(pending_request)
     db_session.commit()
 
+def sanitize_response_request_dest_payment(response):
+    return {
+        'bolt11': response['bolt11'],
+        'chain_id': response['chain_id'],
+    }
+
 class Gateway(object):
 
     def __init__(self, nodes_config_path):
@@ -258,7 +264,7 @@ class Gateway(object):
             return {'error': "No route found to pay other_gw_bolt11 %s" % other_gw_bolt11}
 
         save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11, other_gw_decoded_bolt11, other_gw_bolt11, other_url)
-        return src_invoice
+        return sanitize_response_request_dest_payment(src_invoice)
 
     def get_accepted_chains(self):
         return {'accepted_chains': list(self.sibling_nodes.keys())}
@@ -306,7 +312,7 @@ class Gateway(object):
             return src_invoice
 
         save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11)
-        return src_invoice
+        return sanitize_response_request_dest_payment(src_invoice)
 
     def check_paid_to_own_node(self, payment_hash, src_chain_id):
         invoices = self.sibling_nodes[src_chain_id].listinvoices()['invoices']
