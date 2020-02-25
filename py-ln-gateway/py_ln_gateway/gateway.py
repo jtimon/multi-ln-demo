@@ -160,15 +160,16 @@ class Gateway(object):
                 return True
         return False
 
-    def _choose_src_chain(self, src_chain_ids):
-        src_chain_id = None
-        # TODO allow configuring rankings or consult prices instead of simply choosing the first match found
+    def _calculate_src_invoice(self, src_chain_ids, dest_decoded_bolt11):
+        # TODO allow configuring rankings or consult prices instead of simply choosing the first one that works
         for chain_id in src_chain_ids:
-            for node_chain_id in self.sibling_nodes.keys():
-                if chain_id == node_chain_id:
-                    src_chain_id = chain_id
-                    break
-        return src_chain_id
+            if chain_id in self.sibling_nodes.keys():
+                result = self._calculate_src_invoice_attempt(chain_id, dest_decoded_bolt11)
+                if not 'error' in result:
+                    return result
+                else:
+                    print('ERROR calculating src_invoice:', result)
+        return {'error': 'Unable to create and invoice. Possibly the amount of the destination invoice is too low.'}
 
     # Add chain_id field to bolt11_decode if known, or return error
     def _bolt11_decode(self, bolt11):
@@ -193,8 +194,7 @@ class Gateway(object):
             print(e)
             return False
 
-    def _calculate_src_invoice(self, src_chain_ids, dest_decoded_bolt11):
-        src_chain_id = self._choose_src_chain(src_chain_ids)
+    def _calculate_src_invoice_attempt(self, src_chain_id, dest_decoded_bolt11):
         dest_chain_id = dest_decoded_bolt11['chain_id']
         price = Price.query.get('%s%s' % (src_chain_id, dest_chain_id))
         if not price or price.price == 0:
