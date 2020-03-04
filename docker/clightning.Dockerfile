@@ -53,8 +53,8 @@ RUN curl -sL -o elements.tar.gz https://github.com/ElementsProject/elements/rele
  && rm elements.tar.gz
 ENV PATH="/wd/elements-0.17.0/bin:${PATH}"
 
-ENV SHA256SUM_CLIGHTNING=0da11624b178277f6e498b241df78e94d1da6e115954d91eb22f92e462d2b7bf
-RUN curl -sL -o lighting.tar.xz https://github.com/ElementsProject/lightning/releases/download/v0.8.0/clightning-v0.8.0-Ubuntu-18.04.tar.xz \
+ENV SHA256SUM_CLIGHTNING=8a3f6c5390fd8a2d04d5ace1852998d88400378127192a5063a0ff6c7b53d4be
+RUN curl -sL -o lighting.tar.xz https://github.com/ElementsProject/lightning/releases/download/v0.8.1/clightning-v0.8.1-Ubuntu-18.04.tar.xz \
  && echo "${SHA256SUM_CLIGHTNING}  lighting.tar.xz" | sha256sum --check \
  && ls \
  && tar xf lighting.tar.xz -C /wd \
