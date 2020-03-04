@@ -154,6 +154,12 @@ class Gateway(object):
 
         return None
 
+    def _check_chains_accepted(self, src_chain_ids):
+        for chain_id in src_chain_ids:
+            if chain_id in self.sibling_nodes.keys():
+                return True
+        return False
+
     def _choose_src_chain(self, src_chain_ids):
         src_chain_id = None
         # TODO allow configuring rankings or consult prices instead of simply choosing the first match found
@@ -187,7 +193,8 @@ class Gateway(object):
             print(e)
             return False
 
-    def _calculate_src_invoice(self, src_chain_id, dest_decoded_bolt11):
+    def _calculate_src_invoice(self, src_chain_ids, dest_decoded_bolt11):
+        src_chain_id = self._choose_src_chain(src_chain_ids)
         dest_chain_id = dest_decoded_bolt11['chain_id']
         price = Price.query.get('%s%s' % (src_chain_id, dest_chain_id))
         if not price or price.price == 0:
@@ -222,13 +229,13 @@ class Gateway(object):
         src_invoice['chain_id'] = src_chain_id
         return src_invoice
 
-    def _other_gateway_pays(self, dest_bolt11, src_chain_id, dest_decoded_bolt11):
+    def _other_gateway_pays(self, dest_bolt11, src_chain_ids, dest_decoded_bolt11):
         dest_chain_id = dest_decoded_bolt11['chain_id']
         for other_url, supported_chains in self.other_gateways.items():
             if dest_chain_id not in supported_chains:
                 continue
 
-            result = self._other_gateway_attempt(dest_bolt11, src_chain_id, dest_decoded_bolt11, other_url)
+            result = self._other_gateway_attempt(dest_bolt11, src_chain_ids, dest_decoded_bolt11, other_url)
             if is_with_error(result):
                 print('Error returned by other gateway %s: (chain id %s)' % (other_url, dest_chain_id))
                 pprint(result)
@@ -237,7 +244,7 @@ class Gateway(object):
 
         return {'error': "No route found to pay bolt11 %s" % dest_bolt11}
 
-    def _other_gateway_attempt(self, dest_bolt11, src_chain_id, dest_decoded_bolt11, other_url):
+    def _other_gateway_attempt(self, dest_bolt11, src_chain_ids, dest_decoded_bolt11, other_url):
         dest_chain_id = dest_decoded_bolt11['chain_id']
         other_gw_invoice = requests.post(other_url + "/request_dest_payment", data={
             'bolt11': dest_bolt11,
@@ -256,7 +263,7 @@ class Gateway(object):
             return {'error': 'other gateway demands payment in a chain we don\'t support (chain id: %s)' % other_gw_chain_id}
 
         # When another gateway pays, make sure we can be paid before checking a route
-        src_invoice = self._calculate_src_invoice(src_chain_id, other_gw_decoded_bolt11)
+        src_invoice = self._calculate_src_invoice(src_chain_ids, other_gw_decoded_bolt11)
         if is_with_error(src_invoice):
             return src_invoice
 
@@ -285,8 +292,8 @@ class Gateway(object):
         if error: return error
         print('Received valid req for %s:' % 'request_dest_payment', req)
 
-        src_chain_id = self._choose_src_chain(req.getlist('src_chain_ids'))
-        if not src_chain_id:
+        src_chain_ids = req.getlist('src_chain_ids')
+        if not self._check_chains_accepted(src_chain_ids):
             return {'error': "Offered chains not accepted. Accepted chains %s" % (
                 str(list(self.sibling_nodes.keys())))}
 
@@ -305,14 +312,14 @@ class Gateway(object):
 
         if dest_chain_id not in self.sibling_nodes:
             print("gateway can't pay to chain %s, trying with another gateway" % dest_chain_id)
-            return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_decoded_bolt11)
+            return self._other_gateway_pays(dest_bolt11, src_chain_ids, dest_decoded_bolt11)
 
         # When we can't find a route ourselves, try other gateway before calculating src_invoice
         if not self._check_route(dest_chain_id, dest_decoded_bolt11['payee'], dest_decoded_bolt11['msatoshi']):
             print("No route found to pay dest_bolt11 %s, trying with another gateway" % dest_bolt11)
-            return self._other_gateway_pays(dest_bolt11, src_chain_id, dest_decoded_bolt11)
+            return self._other_gateway_pays(dest_bolt11, src_chain_ids, dest_decoded_bolt11)
 
-        src_invoice = self._calculate_src_invoice(src_chain_id, dest_decoded_bolt11)
+        src_invoice = self._calculate_src_invoice(src_chain_ids, dest_decoded_bolt11)
         if is_with_error(src_invoice):
             return src_invoice
 
