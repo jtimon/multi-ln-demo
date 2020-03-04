@@ -137,13 +137,13 @@ class Gateway(object):
                 self.sibling_nodes[chain_id] = LightningRpc(node_config)
             self.other_gateways = data['other_gateways']
 
-    def chainparams_from_id(self, chain_id):
+    def _chainparams_from_id(self, chain_id):
         for key, val in self.chains_by_bip173.items():
             if val['id'] == chain_id:
                 return val
         return None
 
-    def check_basic(self, req, known_args, required_args, method='check_basic'):
+    def _check_basic(self, req, known_args, required_args, method='_check_basic'):
         for arg in req:
             if arg not in known_args:
                 return {'error': '%s: unknown arg %s.' % (method, arg)}
@@ -207,8 +207,8 @@ class Gateway(object):
                 'src_min_amount': str(MIN_OFFER),
             }
 
-        label = 'from_%s_to_%s_label_%s' % (self.chainparams_from_id(src_chain_id)['petname'],
-                                            self.chainparams_from_id(dest_chain_id)['petname'],
+        label = 'from_%s_to_%s_label_%s' % (self._chainparams_from_id(src_chain_id)['petname'],
+                                            self._chainparams_from_id(dest_chain_id)['petname'],
                                             dest_decoded_bolt11['payment_hash'])
         description = 'from_%s_to_%s_bolt11_%s_description' % (src_chain_id, dest_chain_id, dest_decoded_bolt11['payment_hash'])
         src_invoice = self.sibling_nodes[src_chain_id].invoice(str(int(offer_msatoshi)), label, description, expiry=self.invoices_expiry)
@@ -281,7 +281,7 @@ class Gateway(object):
 
     def request_dest_payment(self, req):
         required_args = ['bolt11', 'src_chain_ids']
-        error = self.check_basic(req, required_args, required_args, method='request_dest_payment')
+        error = self._check_basic(req, required_args, required_args, method='request_dest_payment')
         if error: return error
         print('Received valid req for %s:' % 'request_dest_payment', req)
 
@@ -319,7 +319,7 @@ class Gateway(object):
         save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11)
         return sanitize_response_request_dest_payment(src_invoice)
 
-    def check_paid_to_own_node(self, payment_hash, src_chain_id):
+    def _check_paid_to_own_node(self, payment_hash, src_chain_id):
         invoices = self.sibling_nodes[src_chain_id].listinvoices()['invoices']
         found = None
         for invoice in invoices:
@@ -337,7 +337,7 @@ class Gateway(object):
 
     def confirm_src_payment(self, req):
         required_args = ['payment_hash', 'payment_preimage']
-        error = self.check_basic(req, required_args, required_args, method='confirm_src_payment')
+        error = self._check_basic(req, required_args, required_args, method='confirm_src_payment')
         if error: return error
         print('Received valid req for %s:' % 'confirm_src_payment', req)
 
@@ -365,7 +365,7 @@ class Gateway(object):
             return {'error': 'Unkown payment request %s.' % payment_hash}
 
         # This should never fail given the preimage corresponds to the hash, but let's be safe
-        error = self.check_paid_to_own_node(payment_hash, pending_request.src_chain)
+        error = self._check_paid_to_own_node(payment_hash, pending_request.src_chain)
         if error: return error
 
         if pending_request.other_gw_chain:
