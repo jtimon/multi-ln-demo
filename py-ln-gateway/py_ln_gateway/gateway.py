@@ -342,6 +342,13 @@ class Gateway(object):
 
         return None
 
+    # TODO replace this call with an invoice_payment hook
+    # if anything fails, don't accept the payment. That way there's no need for refunds
+    # On the other hand, the payer doesn't receive the dest_payment_preimage back
+    # TODO create the dest_bolt11 with the same payment_hash as the src_bolt11
+    # that way (combined with the invoice_payment hook) both payments can be atomic
+    # a way to pass the received payment preimage within the invoice_payment hook to clightning
+    # so that it can pass it back to last hop paying
     def confirm_src_payment(self, req):
         required_args = ['payment_hash', 'payment_preimage']
         error = self._check_basic(req, required_args, required_args, method='confirm_src_payment')

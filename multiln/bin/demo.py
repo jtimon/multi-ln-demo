@@ -107,6 +107,7 @@ def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, use
 
     print(requests.get(GATEWAY_URL[user_name_gateway] + "/get_accepted_chains").json())
     print(requests.get(GATEWAY_URL[user_name_gateway] + "/get_prices").json())
+    # TODO encapsulate this behind a clightning plugin
     src_invoice = requests.post(GATEWAY_URL[user_name_gateway] + "/request_dest_payment", data={
         'bolt11': invoice['bolt11'],
         'src_chain_ids': [CHAINS[chain_name_a]['id']],
