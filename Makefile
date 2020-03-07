@@ -5,8 +5,11 @@
 .PHONY: pydemo-0-hop pydemo-1-hop pydemo-2-hop rsdemo-1-hop docker-clean-containers
 all: pydemo-2-hop
 
+CLN_CMD="lightningd --log-level=debug"
+
 pydemo-0-hop:
 	export PYDEMO_HOPS=0 ; \
+	export CLN_CMD=${CLN_CMD}; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale rsdemo=0 \
@@ -20,6 +23,7 @@ pydemo-0-hop:
 
 pydemo-1-hop:
 	export PYDEMO_HOPS=1 ; \
+	export CLN_CMD=${CLN_CMD}; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale rsdemo=0 \
@@ -28,12 +32,14 @@ pydemo-1-hop:
 
 pydemo-2-hop:
 	export PYDEMO_HOPS=2 ; \
+	export CLN_CMD=${CLN_CMD}; \
 	cd docker && docker-compose down -v && \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale rsdemo=0 \
 
 rsdemo-1-hop:
 	cd docker && docker-compose down -v && \
+	export CLN_CMD=${CLN_CMD}; \
 	docker-compose up --build --force-recreate -V --remove-orphans --abort-on-container-exit \
 	--scale pydemo=0 \
 	--scale db_carol=0 \

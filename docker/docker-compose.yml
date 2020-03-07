@@ -158,11 +158,11 @@ services:
 
   clightning_alice_regtest:
     environment:
-      PYTHONUNBUFFERED: "true"
+      CLN_CMD: ${CLN_CMD}
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile
-    command: "lightningd --conf=/wd/conf/alice_regtest.conf --lightning-dir=/wd/clightning_datadir_alice"
+    command: "${CLN_CMD} --conf=/wd/conf/alice_regtest.conf --lightning-dir=/wd/clightning_datadir_alice"
     depends_on:
       - bitcoind_regtest
     volumes:
@@ -171,60 +171,70 @@ services:
       - backend-network
 
   clightning_bob_regtest:
+    environment:
+      CLN_CMD: ${CLN_CMD}
     depends_on:
       - bitcoind_regtest
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile
-    command: "lightningd --conf=/wd/conf/bob_regtest.conf --lightning-dir=/wd/clightning_datadir_bob"
+    command: "${CLN_CMD} --conf=/wd/conf/bob_regtest.conf --lightning-dir=/wd/clightning_datadir_bob"
     volumes:
       - "clightning_datadir_bob_regtest:/wd/clightning_datadir_bob/regtest"
     networks:
       - backend-network
 
   clightning_bob_liquid_regtest:
+    environment:
+      CLN_CMD: ${CLN_CMD}
     depends_on:
       - elementsd_liquid_regtest
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile
-    command: "lightningd --conf=/wd/conf/bob_liquid_regtest.conf --lightning-dir=/wd/clightning_datadir_bob"
+    command: "${CLN_CMD} --conf=/wd/conf/bob_liquid_regtest.conf --lightning-dir=/wd/clightning_datadir_bob"
     volumes:
       - "clightning_datadir_bob_liquid_regtest:/wd/clightning_datadir_bob/liquid-regtest"
     networks:
       - backend-network
 
   clightning_carol_liquid_regtest:
+    environment:
+      CLN_CMD: ${CLN_CMD}
     depends_on:
       - elementsd_liquid_regtest
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile
-    command: "lightningd --conf=/wd/conf/carol_liquid_regtest.conf --lightning-dir=/wd/clightning_datadir_carol"
+    command: "${CLN_CMD} --conf=/wd/conf/carol_liquid_regtest.conf --lightning-dir=/wd/clightning_datadir_carol"
     volumes:
       - "clightning_datadir_carol_liquid_regtest:/wd/clightning_datadir_carol/liquid-regtest"
     networks:
       - backend-network
 
   clightning_carol_regtest:
+    environment:
+      CLN_CMD: ${CLN_CMD}
     depends_on:
       - bitcoind_regtest
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile
-    command: "lightningd --conf=/wd/conf/carol_regtest.conf --lightning-dir=/wd/clightning_datadir_carol"
+    command: "${CLN_CMD} --conf=/wd/conf/carol_regtest.conf --lightning-dir=/wd/clightning_datadir_carol"
     volumes:
       - "clightning_datadir_carol_regtest:/wd/clightning_datadir_carol/regtest"
     networks:
       - backend-network
 
   clightning_david_regtest:
+    environment:
+      CLN_CMD: ${CLN_CMD}
     depends_on:
       - bitcoind_regtest
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile
-    command: "lightningd --conf=/wd/conf/david_regtest.conf --lightning-dir=/wd/clightning_datadir_david"
+    command: "${CLN_CMD} --conf=/wd/conf/david_regtest.conf --lightning-dir=/wd/clightning_datadir_david"
     volumes:
       - "clightning_datadir_david_regtest:/wd/clightning_datadir_david/regtest"
     networks:
