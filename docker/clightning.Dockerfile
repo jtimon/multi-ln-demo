@@ -4,6 +4,8 @@ RUN apt-get -yqq update \
   && apt-get install -qfy \
     curl \
     libsodium-dev \
+    python3 \
+    python3-pip \
     xz-utils \
   && rm -rf /var/lib/apt/lists/*
 
@@ -61,5 +63,9 @@ RUN curl -sL -o lighting.tar.xz https://github.com/ElementsProject/lightning/rel
  && rm -r /wd/usr/share \
  && rm lighting.tar.xz
 ENV PATH="/wd/usr/bin:${PATH}"
+
+COPY plugins/gatepay /wd/plugins/gatepay
+RUN chmod a+x /wd/plugins/gatepay/gatepay.py
+RUN pip3 install -r /wd/plugins/gatepay/requirements.txt --require-hashes
 
 COPY conf /wd/conf

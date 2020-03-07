@@ -7,8 +7,6 @@ import requests
 import sys
 import time
 
-from hashlib import sha256
-
 from multiln.utils_demo_bitcoin import (
     btc_generate_all_chains,
     btc_init_bitcoind_global,
@@ -34,10 +32,6 @@ from multiln.util_demo_clightning import (
 )
 
 from multiln.chains import CHAINS
-
-def check_hash_preimage(payment_hash, payment_preimage):
-    hashed_result = sha256(bytes.fromhex(payment_preimage)).hexdigest()
-    return hashed_result == payment_hash
 
 print('This is a demo demonstrating lightning payments across several different regtest chains')
 print('USAGE: single parameter containing a natural number of hops (from 0 to 2)')
@@ -82,57 +76,26 @@ def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, use
     print('user_name_b = %s' % user_name_b)
     print('chain_name_b = %s' % chain_name_b)
 
+    print(requests.get(GATEWAY_URL[user_name_gateway] + "/get_accepted_chains").json())
+    print(requests.get(GATEWAY_URL[user_name_gateway] + "/get_prices").json())
+
     msatoshi = 1000
     print('%s on chain %s receives invoice for %s msatoshis from %s on chain %s' % (user_name_a, chain_name_a, msatoshi, user_name_b, chain_name_b))
     desc = '%s_%s_%s' % (user_name_a, user_name_b, chain_name_b)
     invoice = lightningd_map[chain_name_b][user_name_b].invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
-    print(invoice)
-    print('...and tries to pay it...')
-    try:
-        print(lightningd_map[chain_name_a][user_name_a].pay(invoice['bolt11']))
-    except Exception as e:
-        print(e)
-        print(type(e))
-        print(e.error['message'])
-        assert(e.method == 'pay')
-        assert(e.error['code'] == 205 # Invoice is for another network
-               or e.error['code'] == -32602 # Invalid bolt11: Unknown chain
-               or e.error['code'] == 205 # Could not find a route
-        )
-        assert(e.error['message'] == 'Invoice is for another network %s' % chain_name_b
-               or e.error['message'] == 'Invalid bolt11: Unknown chain %s' % CHAINS[chain_name_b]['bip173_name']
-               or e.error['message'] == 'Could not find a route'
-        )
-        assert('bolt11' in e.payload)
-
-    print(requests.get(GATEWAY_URL[user_name_gateway] + "/get_accepted_chains").json())
-    print(requests.get(GATEWAY_URL[user_name_gateway] + "/get_prices").json())
-    # TODO encapsulate this behind a clightning plugin
-    src_invoice = requests.post(GATEWAY_URL[user_name_gateway] + "/request_dest_payment", data={
-        'bolt11': invoice['bolt11'],
-        'src_chain_ids': [CHAINS[chain_name_a]['id']],
-    }).json()
-    print("...but since %s can't pay to chain %s, pays the following invoice to %s gateway inc in chain %s instead..." % (user_name_a, chain_name_b, user_name_gateway, chain_name_a))
-    print('src_invoice:', src_invoice)
-    assert(not 'error' in src_invoice)
-
-    src_payment_result = lightningd_map[chain_name_a][user_name_a].pay(src_invoice['bolt11'])
-    print('payment succesful:')
-    print(src_payment_result)
+    print('invoice', invoice)
+    gatepay_result = lightningd_map[chain_name_a][user_name_a].gatepay(
+        invoice['bolt11'],
+        [CHAINS[chain_name_a]['id']],
+        GATEWAY_URL[user_name_gateway],
+        invoice['payment_hash'],
+    )
+    print("...but since %s can't pay to chain %s, it tries to pay %s gateway inc in chain %s instead..." % (user_name_a, chain_name_b, user_name_gateway, chain_name_a))
     print('...and after a successful payment to %s gateway inc, %s calls again with the proof of payment...' % (user_name_gateway, user_name_a))
-    gateway_confirm_payment_result = requests.post(GATEWAY_URL[user_name_gateway] + "/confirm_src_payment", data={
-        'payment_hash': src_payment_result['payment_hash'],
-        'payment_preimage': src_payment_result['payment_preimage'],
-    }).json()
     print('...this is what %s gateway inc responds:' % (user_name_gateway))
-    print(gateway_confirm_payment_result)
-    assert(not 'error' in gateway_confirm_payment_result)
     print('...%s confirms that the payment preimage given corresponds to the original invoice to be paid by %s gateway inc too.' % (user_name_a, user_name_gateway))
-    if check_hash_preimage(invoice['payment_hash'], gateway_confirm_payment_result['payment_preimage']):
-        print('Preimage corresponds to payment hash')
-    else:
-        print('Preimage doesn\'t corresponds to payment hash. %s has been scammed by %s' % (user_name_a, user_name_gateway))
-        assert(False)
+    print('gatepay_result', gatepay_result)
+    assert('error' not in gatepay_result)
 
 ##################################
 
