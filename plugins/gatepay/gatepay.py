@@ -5,7 +5,7 @@ import requests
 
 from hashlib import sha256
 
-from pyln.client import Plugin, LightningRpc
+from pyln.client import Plugin
 
 plugin = Plugin()
 
@@ -17,7 +17,7 @@ def has_error(var_name, var_val):
     plugin.log('GATEPAY: %s (%s)' % (var_name, var_val))
     return not isinstance(var_val, dict) or 'error' in var_val
 
-def _gatepay_with_gateway(lnnode, plugin, bolt11, src_chain_ids, gateway, payment_hash):
+def _gatepay_with_gateway(plugin, bolt11, src_chain_ids, gateway, payment_hash):
     plugin.log('GATEPAY: try to pay using gateway (%s)' % gateway)
     src_invoice = requests.post(gateway + "/request_dest_payment", data={
         'bolt11': bolt11,
@@ -26,7 +26,7 @@ def _gatepay_with_gateway(lnnode, plugin, bolt11, src_chain_ids, gateway, paymen
     if has_error('src_invoice', src_invoice):
         return {'error': src_invoice['error']}
 
-    src_payment_result = lnnode.pay(src_invoice['bolt11'])
+    src_payment_result = plugin.rpc.pay(src_invoice['bolt11'])
     if has_error('src_payment_result', src_payment_result):
         return {'error': src_payment_result['error']}
 
@@ -55,9 +55,8 @@ def gatepay(plugin, bolt11, src_chain_ids, gateway, payment_hash):
     To have more chances, one needs to configure gateways.
     """
     try:
-        lnnode = LightningRpc(plugin.get_option('rpcpath'))
         plugin.log('GATEPAY: try to pay bolt11 normally first (%s)' % bolt11)
-        return lnnode.pay(bolt11)
+        return plugin.rpc.pay(bolt11)
 
     except Exception as e:
         # TODO try more than one gateway
@@ -72,11 +71,9 @@ def gatepay(plugin, bolt11, src_chain_ids, gateway, payment_hash):
             or 'Could not find a route' in e.error['message']
         ):
             plugin.log('GATEPAY: error paying normally (%s)' % e.error['message'])
-            return _gatepay_with_gateway(lnnode, plugin, bolt11, src_chain_ids, gateway, payment_hash)
+            return _gatepay_with_gateway(plugin, bolt11, src_chain_ids, gateway, payment_hash)
 
     return {'error': 'Error calling gatepay plugin bolt11 %s' % bolt11}
 
-# TODO Introspect this from the clightning node somehow instead of needing a new option
-plugin.add_option('rpcpath', '/wd/clightning_datadir_alice/regtest/lightning-rpc', 'The file path to the clightning rpc interface for this node.')
 # plugin.add_option('gateway', 'http://bob_gateway:5000', 'Your most trusted gateway starting with b.')
 plugin.run()
