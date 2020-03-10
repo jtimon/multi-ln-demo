@@ -47,11 +47,6 @@ CHAINS = {k: CHAINS[k] for k in SELECTED_CHAINS}
 print('Chains considered (%s):' % len(CHAINS))
 print(CHAINS)
 
-GATEWAY_URL = {
-    'bob': 'http://bob_gateway:5000',
-    'carol': 'http://carol_gateway:6000',
-}
-
 BITCOIND = btc_init_bitcoind_global(CHAINS)
 LIGHTNINGD = ln_init_global(CHAINS)
 
@@ -68,16 +63,12 @@ def demo_1_chain_payment(lightningd_map, chain_name, payer, payee, msatoshi):
     print('...and pays it...')
     print(lightningd_map[chain_name][payer].pay(invoice['bolt11']))
 
-def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, user_name_gateway, user_name_b, chain_name_b):
-    print('--------Running demo_2_chains_gateway_payment()...')
+def demo_N_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, user_name_b, chain_name_b):
+    print('--------Running demo_N_chains_gateway_payment()...')
     print('user_name_a = %s' % user_name_a)
     print('chain_name_a = %s' % chain_name_a)
-    print('user_name_gateway = %s' % user_name_gateway)
     print('user_name_b = %s' % user_name_b)
     print('chain_name_b = %s' % chain_name_b)
-
-    print(requests.get(GATEWAY_URL[user_name_gateway] + "/get_accepted_chains").json())
-    print(requests.get(GATEWAY_URL[user_name_gateway] + "/get_prices").json())
 
     msatoshi = 1000
     print('%s on chain %s receives invoice for %s msatoshis from %s on chain %s' % (user_name_a, chain_name_a, msatoshi, user_name_b, chain_name_b))
@@ -85,10 +76,6 @@ def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, use
     invoice = lightningd_map[chain_name_b][user_name_b].invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
     print('invoice', invoice)
     gatepay_result = lightningd_map[chain_name_a][user_name_a].gatepay(invoice['bolt11'])
-    print("...but since %s can't pay to chain %s, it tries to pay %s gateway inc in chain %s instead..." % (user_name_a, chain_name_b, user_name_gateway, chain_name_a))
-    print('...and after a successful payment to %s gateway inc, %s calls again with the proof of payment...' % (user_name_gateway, user_name_a))
-    print('...this is what %s gateway inc responds:' % (user_name_gateway))
-    print('...%s confirms that the payment preimage given corresponds to the original invoice to be paid by %s gateway inc too.' % (user_name_a, user_name_gateway))
     print('gatepay_result', gatepay_result)
     assert('error' not in gatepay_result)
 
@@ -149,29 +136,20 @@ if N_HOPS > 1:
 
 # Alice on regtest pays an invoice to carol on liquid-regtest through gateway bob with nodes on both chains
 if N_HOPS > 0:
-    demo_2_chains_gateway_payment(LIGHTNINGD,
-                                  user_name_a = 'alice',
-                                  chain_name_a = 'regtest',
-                                  user_name_gateway = 'bob',
-                                  user_name_b = 'carol',
-                                  chain_name_b = 'liquid-regtest')
+    demo_N_chains_gateway_payment(LIGHTNINGD,
+                                  user_name_a = 'alice', chain_name_a = 'regtest',
+                                  user_name_b = 'carol', chain_name_b = 'liquid-regtest')
 
 if N_HOPS > 1:
     # Bob on liquid-regtest pays an invoice to david on regtest through gateway carol with nodes on both chains
-    demo_2_chains_gateway_payment(LIGHTNINGD,
-                                  user_name_a = 'bob',
-                                  chain_name_a = 'liquid-regtest',
-                                  user_name_gateway = 'carol',
-                                  user_name_b = 'david',
-                                  chain_name_b = 'regtest')
+    demo_N_chains_gateway_payment(LIGHTNINGD,
+                                  user_name_a = 'bob', chain_name_a = 'liquid-regtest',
+                                  user_name_b = 'david', chain_name_b = 'regtest')
 
     # Alice on regtest pays an invoice to david on regtest through gateway bob with nodes in regtest and liquid-regtest
     # Gateway bob needs to call gateway carol to be able to pay to regtest
-    demo_2_chains_gateway_payment(LIGHTNINGD,
-                                  user_name_a = 'alice',
-                                  chain_name_a = 'regtest',
-                                  user_name_gateway = 'bob',
-                                  user_name_b = 'david',
-                                  chain_name_b = 'regtest')
+    demo_N_chains_gateway_payment(LIGHTNINGD,
+                                  user_name_a = 'alice', chain_name_a = 'regtest',
+                                  user_name_b = 'david', chain_name_b = 'regtest')
 
 print('All done for %s hops. Used chains %s' % (N_HOPS, SELECTED_CHAINS))
