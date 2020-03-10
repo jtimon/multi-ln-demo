@@ -22,9 +22,11 @@ def has_error(var_name, var_val):
     plugin.log('GATEPAY: %s (%s)' % (var_name, var_val))
     return not isinstance(var_val, dict) or 'error' in var_val
 
-def _gatepay_with_gateway(plugin, bolt11, gateway, payment_hash):
+def _gatepay_with_gateway(plugin, bolt11, gateway):
     plugin.log('GATEPAY: try to pay using gateway (%s)' % gateway)
     src_chain_id = chain_ids[ plugin.rpc.getinfo()['network'] ]
+    payment_hash = plugin.rpc.decodepay(bolt11)['payment_hash']
+
     src_invoice = requests.post(gateway + "/request_dest_payment", data={
         'bolt11': bolt11,
         'src_chain_ids': [src_chain_id],
@@ -55,7 +57,7 @@ def _gatepay_with_gateway(plugin, bolt11, gateway, payment_hash):
     return {'error': msg}
 
 @plugin.method("gatepay")
-def gatepay(plugin, bolt11, payment_hash):
+def gatepay(plugin, bolt11):
     """This is like the pay plugin but with more chances to actually pay.
 
     To have more chances, one needs to configure gateways.
@@ -78,7 +80,7 @@ def gatepay(plugin, bolt11, payment_hash):
             gateway = plugin.get_option('gateway')
             if gateway == '':
                 return {'error': 'Gatepay failed to pay normally and there\'s no gateway configured.'}
-            return _gatepay_with_gateway(plugin, bolt11, gateway, payment_hash)
+            return _gatepay_with_gateway(plugin, bolt11, gateway)
 
     return {'error': 'Error calling gatepay plugin bolt11 %s' % bolt11}
 

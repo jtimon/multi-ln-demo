@@ -84,10 +84,7 @@ def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, use
     desc = '%s_%s_%s' % (user_name_a, user_name_b, chain_name_b)
     invoice = lightningd_map[chain_name_b][user_name_b].invoice(msatoshi, '%s_label' % desc, '%s_description' % desc)
     print('invoice', invoice)
-    gatepay_result = lightningd_map[chain_name_a][user_name_a].gatepay(
-        invoice['bolt11'],
-        invoice['payment_hash'],
-    )
+    gatepay_result = lightningd_map[chain_name_a][user_name_a].gatepay(invoice['bolt11'])
     print("...but since %s can't pay to chain %s, it tries to pay %s gateway inc in chain %s instead..." % (user_name_a, chain_name_b, user_name_gateway, chain_name_a))
     print('...and after a successful payment to %s gateway inc, %s calls again with the proof of payment...' % (user_name_gateway, user_name_a))
     print('...this is what %s gateway inc responds:' % (user_name_gateway))
