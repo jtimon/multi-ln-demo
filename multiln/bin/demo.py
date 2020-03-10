@@ -86,7 +86,6 @@ def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, use
     print('invoice', invoice)
     gatepay_result = lightningd_map[chain_name_a][user_name_a].gatepay(
         invoice['bolt11'],
-        [CHAINS[chain_name_a]['id']],
         GATEWAY_URL[user_name_gateway],
         invoice['payment_hash'],
     )

@@ -9,6 +9,11 @@ from pyln.client import Plugin
 
 plugin = Plugin()
 
+chain_ids = {
+    'regtest': '0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206',
+    'liquid-regtest': '9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6',
+}
+
 def check_hash_preimage(payment_hash, payment_preimage):
     hashed_result = sha256(bytes.fromhex(payment_preimage)).hexdigest()
     return hashed_result == payment_hash
@@ -17,11 +22,12 @@ def has_error(var_name, var_val):
     plugin.log('GATEPAY: %s (%s)' % (var_name, var_val))
     return not isinstance(var_val, dict) or 'error' in var_val
 
-def _gatepay_with_gateway(plugin, bolt11, src_chain_ids, gateway, payment_hash):
+def _gatepay_with_gateway(plugin, bolt11, gateway, payment_hash):
     plugin.log('GATEPAY: try to pay using gateway (%s)' % gateway)
+    src_chain_id = chain_ids[ plugin.rpc.getinfo()['network'] ]
     src_invoice = requests.post(gateway + "/request_dest_payment", data={
         'bolt11': bolt11,
-        'src_chain_ids': src_chain_ids,
+        'src_chain_ids': [src_chain_id],
     }).json()
     if has_error('src_invoice', src_invoice):
         return {'error': src_invoice['error']}
@@ -49,7 +55,7 @@ def _gatepay_with_gateway(plugin, bolt11, src_chain_ids, gateway, payment_hash):
     return {'error': msg}
 
 @plugin.method("gatepay")
-def gatepay(plugin, bolt11, src_chain_ids, gateway, payment_hash):
+def gatepay(plugin, bolt11, gateway, payment_hash):
     """This is like the pay plugin but with more chances to actually pay.
 
     To have more chances, one needs to configure gateways.
@@ -71,7 +77,7 @@ def gatepay(plugin, bolt11, src_chain_ids, gateway, payment_hash):
             or 'Could not find a route' in e.error['message']
         ):
             plugin.log('GATEPAY: error paying normally (%s)' % e.error['message'])
-            return _gatepay_with_gateway(plugin, bolt11, src_chain_ids, gateway, payment_hash)
+            return _gatepay_with_gateway(plugin, bolt11, gateway, payment_hash)
 
     return {'error': 'Error calling gatepay plugin bolt11 %s' % bolt11}
 
