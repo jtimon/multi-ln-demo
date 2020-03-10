@@ -38,7 +38,7 @@ def check_hash_preimage(payment_hash, payment_preimage):
     return hashed_result == payment_hash
 
 def is_with_error(result):
-    return isinstance(result, dict) and 'error' in result
+    return not isinstance(result, dict) or 'error' in result
 
 def save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11,
                          other_gw_decoded_bolt11=None, other_gw_bolt11=None, other_url=None):
