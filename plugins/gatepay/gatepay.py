@@ -55,7 +55,7 @@ def _gatepay_with_gateway(plugin, bolt11, gateway, payment_hash):
     return {'error': msg}
 
 @plugin.method("gatepay")
-def gatepay(plugin, bolt11, gateway, payment_hash):
+def gatepay(plugin, bolt11, payment_hash):
     """This is like the pay plugin but with more chances to actually pay.
 
     To have more chances, one needs to configure gateways.
@@ -65,9 +65,6 @@ def gatepay(plugin, bolt11, gateway, payment_hash):
         return plugin.rpc.pay(bolt11)
 
     except Exception as e:
-        # TODO try more than one gateway
-        # TODO make gateways configurable on clightning
-        # gateway = plugin.get_option('gateway')
         if (e.error['code'] == 205 # Invoice is for another network
             or e.error['code'] == -32602 # Invalid bolt11: Unknown chain
             or e.error['code'] == 205 # Could not find a route
@@ -77,9 +74,13 @@ def gatepay(plugin, bolt11, gateway, payment_hash):
             or 'Could not find a route' in e.error['message']
         ):
             plugin.log('GATEPAY: error paying normally (%s)' % e.error['message'])
+            # TODO Try more than one gateway
+            gateway = plugin.get_option('gateway')
+            if gateway == '':
+                return {'error': 'Gatepay failed to pay normally and there\'s no gateway configured.'}
             return _gatepay_with_gateway(plugin, bolt11, gateway, payment_hash)
 
     return {'error': 'Error calling gatepay plugin bolt11 %s' % bolt11}
 
-# plugin.add_option('gateway', 'http://bob_gateway:5000', 'Your most trusted gateway starting with b.')
+plugin.add_option('gateway', '', 'Your most trusted gateway.')
 plugin.run()

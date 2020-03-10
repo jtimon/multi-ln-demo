@@ -86,7 +86,6 @@ def demo_2_chains_gateway_payment(lightningd_map, user_name_a, chain_name_a, use
     print('invoice', invoice)
     gatepay_result = lightningd_map[chain_name_a][user_name_a].gatepay(
         invoice['bolt11'],
-        GATEWAY_URL[user_name_gateway],
         invoice['payment_hash'],
     )
     print("...but since %s can't pay to chain %s, it tries to pay %s gateway inc in chain %s instead..." % (user_name_a, chain_name_b, user_name_gateway, chain_name_a))
