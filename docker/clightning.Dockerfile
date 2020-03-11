@@ -70,6 +70,8 @@ RUN pip3 install -r /wd/plugins/gatepay/requirements.txt --require-hashes
 
 COPY plugins/gateway /wd/plugins/gateway
 RUN chmod a+x /wd/plugins/gateway/gateway.py
+COPY py-ln-gateway/py_ln_gateway/db.py /wd/plugins/gateway/db.py
+COPY py-ln-gateway/py_ln_gateway/models.py /wd/plugins/gateway/models.py
 RUN pip3 install -r /wd/plugins/gateway/requirements.txt --require-hashes
 
 COPY conf /wd/conf

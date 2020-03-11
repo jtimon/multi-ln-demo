@@ -2,9 +2,12 @@
 """Simple plugin to allow testing while closing of HTLC is delayed.
 """
 
+from decimal import Decimal
 import os
 
 from pyln.client import Plugin
+
+from .models import Price, PendingRequest
 
 plugin = Plugin()
 
@@ -24,8 +27,41 @@ def on_payment(payment, plugin, **kwargs):
     payment_hash = invoice['payment_hash']
     plugin.log('GATEWAY: receiving a payment:\n%s' % invoice)
 
-    # if False:
-    #     return {'result': 'reject'}
+    payment_hash = invoice['payment_hash']
+    pending_request = PendingRequest.query.get(payment_hash)
+    if not pending_request:
+        # Ignore payments
+        plugin.log('GATEWAY: Ignoring payment hash %s since it\'s not a pending request:\n%s' % payment_hash)
+        return {'result': 'continue'}
+
+    if pending_request.other_gw_chain:
+        to_pay_chain = pending_request.other_gw_chain
+        to_pay_amount = pending_request.other_gw_amount
+        to_pay_bolt11 = pending_request.other_gw_bolt11
+        to_pay_payment_hash = pending_request.other_gw_payment_hash
+    else:
+        to_pay_chain = pending_request.dest_chain
+        to_pay_amount = pending_request.dest_amount
+        to_pay_bolt11 = pending_request.dest_bolt11
+        to_pay_payment_hash = pending_request.dest_payment_hash
+
+    # Prices may have been changed from request to confirm call
+    # Check the price one more time to mitigate the free option problem. If it fails because of this, a refund is required too.
+    price = Price.query.get('%s%s' % (pending_request.src_chain, to_pay_chain))
+    if not price or price.price == 0:
+        error_msg = "gateway won't receive from chain %s to pay to chain %s" % (
+            pending_request.src_chain, pending_request.dest_chain)
+        plugin.log('GATEWAY: rejected payment hash %s msg:\n%s' % (payment_hash, error_msg))
+        save_failed_request(error_msg, pending_request, payment['preimage'])
+        return {'result': 'reject'}
+
+    src_current_offer = to_pay_amount * price.price
+    if Decimal(pending_request.src_amount) < src_current_offer:
+        error_msg = 'The offered price for payment request %s is no longer accepted. %s' % (payment_hash)
+        plugin.log('GATEWAY: rejected payment hash %s msg:\n%s' % (payment_hash, error_msg))
+        save_failed_request(error_msg, pending_request, payment_preimage)
+        return {'result': 'reject'}
+
     return {'result': 'continue'}
 
 plugin.run()

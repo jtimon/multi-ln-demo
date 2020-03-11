@@ -1,6 +1,7 @@
 
 from sqlalchemy import Column, DateTime, Integer, Numeric, String, LargeBinary, TypeDecorator
-from py_ln_gateway.db import Base
+
+from .db import Base
 
 # There is no absolute limit for bolt11. There are practical limits based on QR code sizes.
 # There's no maximum to find in the spec, but apparently 2048 for validation and storage is good enough as a guess.
