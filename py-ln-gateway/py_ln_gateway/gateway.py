@@ -342,6 +342,11 @@ class Gateway(object):
 
         return None
 
+    def auth_confirm_src_payment(self, req):
+        # TODO Implement auth_confirm_src_payment
+        pass
+
+
     # TODO replace this call with an invoice_payment hook
     # if anything fails, don't accept the payment. That way there's no need for refunds
     # On the other hand, the payer doesn't receive the dest_payment_preimage back

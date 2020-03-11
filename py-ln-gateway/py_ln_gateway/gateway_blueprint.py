@@ -26,3 +26,9 @@ def request_dest_payment():
 def confirm_src_payment():
     req = request.form # a multidict containing POST data
     return gateway.confirm_src_payment(req)
+
+# TODO Implement authentication for this call, or put it on a different server
+@gateway_blueprint.route('/auth_confirm_src_payment', methods = ['POST'])
+def confirm_src_payment():
+    req = request.form # a multidict containing POST data
+    return gateway.confirm_src_payment(req)
