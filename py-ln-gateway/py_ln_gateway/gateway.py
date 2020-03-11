@@ -342,11 +342,6 @@ class Gateway(object):
 
         return None
 
-    def auth_confirm_src_payment(self, req):
-        # TODO Implement auth_confirm_src_payment
-        pass
-
-
     # TODO replace this call with an invoice_payment hook
     # if anything fails, don't accept the payment. That way there's no need for refunds
     # On the other hand, the payer doesn't receive the dest_payment_preimage back
@@ -379,6 +374,16 @@ class Gateway(object):
                 'error': 'Payment request %s already failed. %s' % (payment_hash, REFUND_MSG),
             }
 
+        return self.auth_confirm_src_payment(req)
+
+    def auth_confirm_src_payment(self, req):
+        required_args = ['payment_hash', 'payment_preimage']
+        error = self._check_basic(req, required_args, required_args, method='auth_confirm_src_payment')
+        if error: return error
+        print('Received valid req for %s:' % 'auth_confirm_src_payment', req)
+
+        payment_hash = req['payment_hash']
+        payment_preimage = req['payment_preimage']
         pending_request = PendingRequest.query.get(payment_hash)
         if not pending_request:
             return {'error': 'Unkown payment request %s.' % payment_hash}
