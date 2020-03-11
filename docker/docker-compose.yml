@@ -167,6 +167,7 @@ services:
   clightning_bob_regtest:
     environment:
       CLN_CMD: ${CLN_CMD}
+      GATEWAY_DB: "postgresql+psycopg2://postgres:password@db_bob:5432/gateway_db"
     depends_on:
       - bitcoind_regtest
     build:
@@ -195,6 +196,7 @@ services:
   clightning_carol_liquid_regtest:
     environment:
       CLN_CMD: ${CLN_CMD}
+      GATEWAY_DB: "postgresql+psycopg2://postgres:password@db_carol:5432/gateway_db"
     depends_on:
       - elementsd_liquid_regtest
     build:

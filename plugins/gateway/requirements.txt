@@ -1,0 +1,1 @@
+pyln-client==0.8.0 --hash=sha256:3a7e833faaad83b3683ad0022902a2d339e8759bf61b009036073fb85a5c94fb
