@@ -6,11 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-DB_URL = 'postgresql+psycopg2://{user}:{pw}@{url}/{db}'.format(user=os.environ.get('POSTGRES_USER'),
-                                                               pw=os.environ.get('POSTGRES_PASSWORD'),
-                                                               url=os.environ.get('POSTGRES_URL'),
-                                                               db=os.environ.get('POSTGRES_DB'))
-engine = create_engine(DB_URL, convert_unicode=True)
+engine = create_engine(os.environ.get('GATEWAY_DB'), convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))

@@ -62,10 +62,7 @@ services:
   bob_gateway:
     environment:
       PYTHONUNBUFFERED: "true"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "password"
-      POSTGRES_DB: "gateway_db"
-      POSTGRES_URL: "db_bob:5432"
+      GATEWAY_DB: "postgresql+psycopg2://postgres:password@db_bob:5432/gateway_db"
       PYGATEWAY_CONF: "/wd/conf/bob_gateway.json"
       FLASK_ENV: development
       LC_ALL: C.UTF-8
@@ -97,10 +94,7 @@ services:
   carol_gateway:
     environment:
       PYTHONUNBUFFERED: "true"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "password"
-      POSTGRES_DB: "gateway_db"
-      POSTGRES_URL: "db_carol:5432"
+      GATEWAY_DB: "postgresql+psycopg2://postgres:password@db_carol:5432/gateway_db"
       PYGATEWAY_CONF: "/wd/conf/carol_gateway.json"
       FLASK_ENV: development
       LC_ALL: C.UTF-8
