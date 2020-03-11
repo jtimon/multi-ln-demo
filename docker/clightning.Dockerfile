@@ -68,4 +68,8 @@ COPY plugins/gatepay /wd/plugins/gatepay
 RUN chmod a+x /wd/plugins/gatepay/gatepay.py
 RUN pip3 install -r /wd/plugins/gatepay/requirements.txt --require-hashes
 
+COPY plugins/gateway /wd/plugins/gateway
+RUN chmod a+x /wd/plugins/gateway/gateway.py
+RUN pip3 install -r /wd/plugins/gateway/requirements.txt --require-hashes
+
 COPY conf /wd/conf

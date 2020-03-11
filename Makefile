@@ -5,7 +5,7 @@
 .PHONY: pydemo-0-hop pydemo-1-hop pydemo-2-hop rsdemo-1-hop docker-clean-containers
 all: pydemo-2-hop
 
-CLN_CMD="lightningd --log-level=debug --plugin=/wd/plugins/gatepay/gatepay.py"
+CLN_CMD="lightningd --log-level=debug --plugin=/wd/plugins/gatepay/gatepay.py --plugin=/wd/plugins/gateway/gateway.py"
 
 pydemo-0-hop:
 	export PYDEMO_HOPS=0 ; \
