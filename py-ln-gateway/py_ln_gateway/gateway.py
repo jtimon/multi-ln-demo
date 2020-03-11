@@ -397,8 +397,10 @@ class Gateway(object):
         # Check the price one more time to mitigate the free option problem. If it fails because of this, a refund is required too.
         price = Price.query.get('%s%s' % (pending_request.src_chain, to_pay_chain))
         if not price or price.price == 0:
-            return {'error': "gateway won't receive from chain %s to pay to chain %s" % (
-                pending_request.src_chain, pending_request.dest_chain)}
+            error_msg = "gateway won't receive from chain %s to pay to chain %s. %s" % (
+                pending_request.src_chain, pending_request.dest_chain, REFUND_MSG)
+            save_failed_request(error_msg, pending_request, payment_preimage)
+            return {'error': error_msg}
 
         src_current_offer = to_pay_amount * price.price
         if Decimal(pending_request.src_amount) < src_current_offer:
