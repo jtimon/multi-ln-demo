@@ -170,6 +170,7 @@ services:
       GATEWAY_DB: "postgresql+psycopg2://postgres:password@db_bob:5432/gateway_db"
     depends_on:
       - bitcoind_regtest
+      - db_bob
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile
@@ -199,6 +200,7 @@ services:
       GATEWAY_DB: "postgresql+psycopg2://postgres:password@db_carol:5432/gateway_db"
     depends_on:
       - elementsd_liquid_regtest
+      - db_carol
     build:
       context: ../
       dockerfile: docker/clightning.Dockerfile

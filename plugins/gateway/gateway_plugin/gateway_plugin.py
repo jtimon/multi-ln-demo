@@ -7,7 +7,7 @@ import os
 
 from pyln.client import Plugin
 
-from .models import Price, PendingRequest
+from gateway_plugin.models import Price, PendingRequest
 
 plugin = Plugin()
 
