@@ -7,7 +7,8 @@ import os
 
 from pyln.client import Plugin
 
-from gateway_plugin.models import Price, PendingRequest
+# TODO first try to call authenticated http instead of db directly
+# from gateway_plugin.models import Price, PendingRequest
 
 plugin = Plugin()
 
