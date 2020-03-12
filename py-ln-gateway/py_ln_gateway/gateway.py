@@ -403,17 +403,10 @@ class Gateway(object):
                 other_gw_confirm_payment_result = {'error': 'placeholder error'}
                 other_gw_payment_hash = result['payment_hash']
                 other_gw_payment_preimage = result['payment_preimage']
-                attempts = 0
-                while attempts < 5 and ('error' in other_gw_confirm_payment_result
-                    or not 'payment_preimage' in other_gw_confirm_payment_result
-                    or not check_hash_preimage(pending_request.dest_payment_hash,
-                                               other_gw_confirm_payment_result['payment_preimage'])
-                ):
-                    other_gw_confirm_payment_result = requests.post(pending_request.other_gw_url + "/confirm_src_payment", data={
-                        'payment_hash': other_gw_payment_hash,
-                        'payment_preimage': other_gw_payment_preimage,
-                    }).json()
-                    attempts = attempts + 1
+                other_gw_confirm_payment_result = requests.post(pending_request.other_gw_url + "/confirm_src_payment", data={
+                    'payment_hash': other_gw_payment_hash,
+                    'payment_preimage': other_gw_payment_preimage,
+                }).json()
 
                 if ('error' in other_gw_confirm_payment_result
                     or not 'payment_preimage' in other_gw_confirm_payment_result
