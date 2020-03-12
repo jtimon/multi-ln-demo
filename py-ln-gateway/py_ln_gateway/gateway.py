@@ -363,7 +363,6 @@ class Gateway(object):
         paid_request = PaidRequest.query.get(payment_hash)
         if paid_request:
             return {
-                'payment_hash': paid_request.dest_payment_hash,
                 'payment_preimage': paid_request.dest_payment_preimage,
             }
 
@@ -431,9 +430,8 @@ class Gateway(object):
                 other_gw_payment_preimage = result['payment_preimage']
                 attempts = 0
                 while attempts < 5 and ('error' in other_gw_confirm_payment_result
-                    or not 'payment_hash' in other_gw_confirm_payment_result
                     or not 'payment_preimage' in other_gw_confirm_payment_result
-                    or not check_hash_preimage(other_gw_confirm_payment_result['payment_hash'],
+                    or not check_hash_preimage(pending_request.dest_payment_hash,
                                                other_gw_confirm_payment_result['payment_preimage'])
                 ):
                     other_gw_confirm_payment_result = requests.post(pending_request.other_gw_url + "/confirm_src_payment", data={
@@ -443,9 +441,7 @@ class Gateway(object):
                     attempts = attempts + 1
 
                 if ('error' in other_gw_confirm_payment_result
-                    or not 'payment_hash' in other_gw_confirm_payment_result
                     or not 'payment_preimage' in other_gw_confirm_payment_result
-                    or other_gw_confirm_payment_result['payment_hash'] != pending_request.dest_payment_hash
                     or not check_hash_preimage(pending_request.dest_payment_hash,
                                                other_gw_confirm_payment_result['payment_preimage'])
                 ):
@@ -469,6 +465,5 @@ class Gateway(object):
             return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
 
         return {
-            'payment_hash': pending_request.dest_payment_hash,
             'payment_preimage': dest_payment_preimage,
         }
