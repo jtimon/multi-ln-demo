@@ -18,6 +18,10 @@ def get_accepted_chains():
 def get_prices():
     return gateway.get_prices()
 
+@gateway_blueprint.route('/check_gateway_request', methods = ['POST'])
+def check_gateway_request():
+    return gateway.check_gateway_request(request.form)
+
 @gatepay_blueprint.route('/request_dest_payment', methods = ['POST'])
 def request_dest_payment():
     req = request.form # a multidict containing POST data

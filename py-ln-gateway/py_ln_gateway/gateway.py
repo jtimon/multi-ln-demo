@@ -259,7 +259,7 @@ class Gateway(object):
             })
         return {'prices': prices}
 
-    def request_dest_payment(self, req):
+    def _request_dest_payment(self, req, save_as_pending=True):
         required_args = ['bolt11', 'src_chain_ids']
         error = self._check_basic(req, required_args, required_args, method='request_dest_payment')
         if error: return error
@@ -296,8 +296,16 @@ class Gateway(object):
         if is_with_error(src_invoice):
             return src_invoice
 
-        save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11)
+        if save_as_pending:
+            save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11)
+
         return sanitize_response_request_dest_payment(src_invoice)
+
+    def request_dest_payment(self, req):
+        return self._request_dest_payment(req, save_as_pending=True)
+
+    def check_gateway_request(self, req):
+        return self._request_dest_payment(req, save_as_pending=False)
 
     # TODO create the dest_bolt11 with the same payment_hash as the src_bolt11
     # that way (combined with the invoice_payment hook) both payments can be atomic.
