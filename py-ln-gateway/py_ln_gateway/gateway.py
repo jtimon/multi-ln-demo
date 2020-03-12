@@ -30,7 +30,6 @@ from py_ln_gateway.models import (
     Price,
 )
 
-REFUND_MSG = 'Please contact customer support to get a refund.'
 MIN_OFFER = 1000
 
 def check_hash_preimage(payment_hash, payment_preimage):
@@ -353,7 +352,7 @@ class Gateway(object):
         failed_request = FailedRequest.query.get(payment_hash)
         if failed_request:
             return {
-                'error': 'Payment request %s already failed. %s' % (payment_hash, REFUND_MSG),
+                'error': 'Payment request %s already failed: %s' % (payment_hash, failed_request.error),
             }
 
         pending_request = PendingRequest.query.get(payment_hash)
@@ -375,14 +374,14 @@ class Gateway(object):
         # Check the price one more time to mitigate the free option problem. If it fails because of this, a refund is required too.
         price = Price.query.get('%s%s' % (pending_request.src_chain, to_pay_chain))
         if not price or price.price == 0:
-            error_msg = "gateway won't receive from chain %s to pay to chain %s. %s" % (
-                pending_request.src_chain, pending_request.dest_chain, REFUND_MSG)
+            error_msg = "gateway won't receive from chain %s to pay to chain %s." % (
+                pending_request.src_chain, pending_request.dest_chain)
             save_failed_request(error_msg, pending_request, payment_preimage)
             return {'error': error_msg}
 
         src_current_offer = to_pay_amount * price.price
         if Decimal(pending_request.src_amount) < src_current_offer:
-            error_msg = 'The offered price for payment request %s is no longer accepted. %s' % (payment_hash, REFUND_MSG)
+            error_msg = 'The offered price for payment request %s is no longer accepted.' % (payment_hash)
             save_failed_request(error_msg, pending_request, payment_preimage)
             return {
                 'error': error_msg,
@@ -398,7 +397,7 @@ class Gateway(object):
                 or not check_hash_preimage(result['payment_hash'], result['payment_preimage'])):
                 print('ERROR: This should never happen if our own lightning nodes are to be trusted')
                 save_failed_request('Payment pending payment_hash does not correspond to the paid hash', pending_request, payment_preimage)
-                return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
+                return {'error': 'Payment request %s failed.' % (payment_hash)}
 
             if pending_request.other_gw_chain:
                 other_gw_confirm_payment_result = {'error': 'placeholder error'}
@@ -426,7 +425,7 @@ class Gateway(object):
                     save_failed_request('gateway %s is unreliable' % pending_request.other_gw_url,
                                         pending_request, src_payment_preimage,
                                         other_gw_payment_preimage=other_gw_payment_preimage)
-                    return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
+                    return {'error': 'Payment request %s failed.' % (payment_hash)}
 
                 dest_payment_preimage = other_gw_confirm_payment_result['payment_preimage']
             else:
@@ -438,7 +437,7 @@ class Gateway(object):
             print(type(e))
             print(e)
             save_failed_request(str(e), pending_request, payment_preimage)
-            return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
+            return {'error': 'Payment request %s failed.' % (payment_hash)}
 
         return {
             'payment_preimage': dest_payment_preimage,
