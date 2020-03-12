@@ -3,9 +3,7 @@
 if __name__ != '__main__':
     raise ImportError(u"%s may only be run as a script" % __file__)
 
-import requests
 import sys
-import time
 
 from multiln.utils_demo_bitcoin import (
     btc_generate_all_chains,
