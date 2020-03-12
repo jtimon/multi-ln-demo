@@ -325,13 +325,32 @@ class Gateway(object):
         save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11)
         return sanitize_response_request_dest_payment(src_invoice)
 
-    # TODO replace this call with an invoice_payment hook
-    # if anything fails, don't accept the payment. That way there's no need for refunds
-    # On the other hand, the payer doesn't receive the dest_payment_preimage back
     # TODO create the dest_bolt11 with the same payment_hash as the src_bolt11
-    # that way (combined with the invoice_payment hook) both payments can be atomic
-    # a way to pass the received payment preimage within the invoice_payment hook to clightning
+    # that way (combined with the invoice_payment hook) both payments can be atomic.
+    # A way to pass the received payment preimage within the invoice_payment hook to clightning
     # so that it can pass it back to last hop paying
+    def get_payment_proof(self, req):
+        required_args = ['payment_hash', 'payment_preimage']
+        error = self._check_basic(req, required_args, required_args, method='get_payment_proof')
+        if error: return error
+        print('Received valid req for %s:' % 'get_payment_proof', req)
+
+        payment_hash = req['payment_hash']
+        payment_preimage = req['payment_preimage']
+        if not check_hash_preimage(payment_hash, payment_preimage):
+            return {'error': 'Payment preimage does not correspond to the hash.'}
+
+        paid_request = PaidRequest.query.get(payment_hash)
+        if paid_request:
+            toreturn = {'payment_preimage': paid_request.dest_payment_preimage}
+        else:
+            toreturn = {'error': 'Unkown paid request %s' % payment_hash}
+
+        pprint(toreturn)
+        return toreturn
+
+    # If anything fails, don't accept the payment. That way there's no need for refunds
+    # TODO Hide this call from final users, even though they shouldn't know the preimage
     def confirm_src_payment(self, req):
         required_args = ['payment_hash', 'payment_preimage']
         error = self._check_basic(req, required_args, required_args, method='confirm_src_payment')
@@ -400,27 +419,26 @@ class Gateway(object):
                 return {'error': 'Payment request %s failed.' % (payment_hash)}
 
             if pending_request.other_gw_chain:
-                other_gw_confirm_payment_result = {'error': 'placeholder error'}
                 other_gw_payment_hash = result['payment_hash']
                 other_gw_payment_preimage = result['payment_preimage']
-                other_gw_confirm_payment_result = requests.post(pending_request.other_gw_url + "/confirm_src_payment", data={
+                other_gw_payment_proof = requests.post(pending_request.other_gw_url + "/get_payment_proof", data={
                     'payment_hash': other_gw_payment_hash,
                     'payment_preimage': other_gw_payment_preimage,
                 }).json()
 
-                if ('error' in other_gw_confirm_payment_result
-                    or not 'payment_preimage' in other_gw_confirm_payment_result
+                if ('error' in other_gw_payment_proof
+                    or not 'payment_preimage' in other_gw_payment_proof
                     or not check_hash_preimage(pending_request.dest_payment_hash,
-                                               other_gw_confirm_payment_result['payment_preimage'])
+                                               other_gw_payment_proof['payment_preimage'])
                 ):
                     print('EXPENSIVE ERROR: REM: Don\'t rely on gateway %s anymore and ask for refunds' % pending_request.other_gw_url)
-                    pprint(other_gw_confirm_payment_result)
+                    pprint(other_gw_payment_proof)
                     save_failed_request('gateway %s is unreliable' % pending_request.other_gw_url,
                                         pending_request, src_payment_preimage,
                                         other_gw_payment_preimage=other_gw_payment_preimage)
                     return {'error': 'Payment request %s failed.' % (payment_hash)}
 
-                dest_payment_preimage = other_gw_confirm_payment_result['payment_preimage']
+                dest_payment_preimage = other_gw_payment_proof['payment_preimage']
             else:
                 dest_payment_preimage = result['payment_preimage']
                 other_gw_payment_preimage = None

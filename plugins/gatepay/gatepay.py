@@ -38,18 +38,18 @@ def _gatepay_with_gateway(plugin, bolt11, gateway):
     if has_error('src_payment_result', src_payment_result):
         return {'error': src_payment_result['error']}
 
-    gateway_confirm_payment_result = requests.post(gateway + "/confirm_src_payment", data={
+    payment_proof = requests.post(gateway + "/get_payment_proof", data={
         'payment_hash': src_payment_result['payment_hash'],
         'payment_preimage': src_payment_result['payment_preimage'],
     }).json()
-    if has_error('gateway_confirm_payment_result', gateway_confirm_payment_result):
-        return {'error': gateway_confirm_payment_result['error']}
+    if has_error('payment_proof', payment_proof):
+        return {'error': payment_proof['error']}
 
-    if check_hash_preimage(payment_hash, gateway_confirm_payment_result['payment_preimage']):
+    if check_hash_preimage(payment_hash, payment_proof['payment_preimage']):
         plugin.log('GATEPAY: Preimage corresponds to payment hash')
         return {
             'payment_hash': payment_hash,
-            'payment_preimage': gateway_confirm_payment_result['payment_preimage'],
+            'payment_preimage': payment_proof['payment_preimage'],
         }
 
     msg = 'Preimage doesn\'t corresponds to payment hash. Gateway %s is a scam' % gateway
