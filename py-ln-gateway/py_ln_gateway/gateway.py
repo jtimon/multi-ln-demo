@@ -326,22 +326,6 @@ class Gateway(object):
         save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11)
         return sanitize_response_request_dest_payment(src_invoice)
 
-    def _check_paid_to_own_node(self, payment_hash, src_chain_id):
-        invoices = self.sibling_nodes[src_chain_id].listinvoices()['invoices']
-        found = None
-        for invoice in invoices:
-            if invoice['payment_hash'] == payment_hash:
-                found = invoice
-                break
-
-        if not found:
-            return {'error': 'Invoice not found %s.' % payment_hash}
-
-        if found['status'] != 'paid':
-            return {'error': 'Invoice not paid yet, current status %s %s.' % (found['status'], payment_hash)}
-
-        return None
-
     # TODO replace this call with an invoice_payment hook
     # if anything fails, don't accept the payment. That way there's no need for refunds
     # On the other hand, the payer doesn't receive the dest_payment_preimage back
@@ -375,10 +359,6 @@ class Gateway(object):
         pending_request = PendingRequest.query.get(payment_hash)
         if not pending_request:
             return {'error': 'Unkown payment request %s.' % payment_hash}
-
-        # This should never fail given the preimage corresponds to the hash, but let's be safe
-        error = self._check_paid_to_own_node(payment_hash, pending_request.src_chain)
-        if error: return error
 
         if pending_request.other_gw_chain:
             to_pay_chain = pending_request.other_gw_chain
