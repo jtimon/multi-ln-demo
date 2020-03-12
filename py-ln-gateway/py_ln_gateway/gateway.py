@@ -363,9 +363,8 @@ class Gateway(object):
         paid_request = PaidRequest.query.get(payment_hash)
         if paid_request:
             return {
-                'error': 'Payment request %s already paid.' % payment_hash,
-                'dest_payment_hash': paid_request.dest_payment_hash,
-                'dest_payment_preimage': paid_request.dest_payment_preimage,
+                'payment_hash': paid_request.dest_payment_hash,
+                'payment_preimage': paid_request.dest_payment_preimage,
             }
 
         failed_request = FailedRequest.query.get(payment_hash)
