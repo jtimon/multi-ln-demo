@@ -394,14 +394,10 @@ class Gateway(object):
         try:
             result = self.sibling_nodes[to_pay_chain].pay(to_pay_bolt11)
 
-            if not result['payment_hash'] == to_pay_payment_hash:
-                print('WARNING: This should never happen if our own lightning nodes are to be trusted')
+            if (not result['payment_hash'] == to_pay_payment_hash
+                or not check_hash_preimage(result['payment_hash'], result['payment_preimage'])):
+                print('ERROR: This should never happen if our own lightning nodes are to be trusted')
                 save_failed_request('Payment pending payment_hash does not correspond to the paid hash', pending_request, payment_preimage)
-                return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
-
-            if not check_hash_preimage(result['payment_hash'], result['payment_preimage']):
-                print('WARNING: This should never happen if our own lightning nodes are to be trusted')
-                save_failed_request('Payment preimage does not correspond to the hash', pending_request, payment_preimage)
                 return {'error': 'Payment request %s failed. %s' % (payment_hash, REFUND_MSG)}
 
             if pending_request.other_gw_chain:
