@@ -23,7 +23,6 @@ from pyln.client import LightningRpc
 from py_ln_gateway.db import db_session
 from py_ln_gateway.bolt11 import bolt11_decode
 from py_ln_gateway.models import (
-    FailedRequest,
     MAX_BOLT11,
     PaidRequest,
     PendingRequest,
@@ -64,32 +63,7 @@ def save_pending_request(src_invoice, dest_decoded_bolt11, dest_bolt11,
     db_session.add(pending_request)
     db_session.commit()
 
-def save_failed_request(error, pending_request, src_payment_preimage, other_gw_payment_preimage=None):
-    # TODO handle failed requests with refunds or something
-    # We could refund by opening a channel with some initial funds back to the customer,
-    # but then we need to have the node id on the initial request.
-    # Alternatively we can accept a refund invoice in this call.
-    db_session.add(FailedRequest(
-        src_payment_hash = pending_request.src_payment_hash,
-        error = error,
-        src_payment_preimage = src_payment_preimage,
-        other_gw_payment_preimage = other_gw_payment_preimage,
-        src_chain = pending_request.src_chain,
-        src_bolt11 = pending_request.src_bolt11,
-        src_expires_at = pending_request.src_expires_at,
-        src_amount = pending_request.src_amount,
-        dest_payment_hash = pending_request.dest_payment_hash,
-        dest_chain = pending_request.dest_chain,
-        dest_bolt11 = pending_request.dest_bolt11,
-        dest_expires_at = pending_request.dest_expires_at,
-        dest_amount = pending_request.dest_amount,
-        other_gw_url = pending_request.other_gw_url,
-        other_gw_chain = pending_request.other_gw_chain,
-        other_gw_bolt11 = pending_request.other_gw_bolt11,
-        other_gw_expires_at = pending_request.other_gw_expires_at,
-        other_gw_amount = pending_request.other_gw_amount,
-    ))
-    # Delete from pending_requests when failing too
+def remove_pending_request(pending_request):
     db_session.delete(pending_request)
     db_session.commit()
 
@@ -368,12 +342,6 @@ class Gateway(object):
                 'payment_preimage': paid_request.dest_payment_preimage,
             }
 
-        failed_request = FailedRequest.query.get(payment_hash)
-        if failed_request:
-            return {
-                'error': 'Payment request %s already failed: %s' % (payment_hash, failed_request.error),
-            }
-
         pending_request = PendingRequest.query.get(payment_hash)
         if not pending_request:
             return {'error': 'Unkown payment request %s.' % payment_hash}
@@ -393,30 +361,27 @@ class Gateway(object):
         # Check the price one more time to mitigate the free option problem. If it fails because of this, a refund is required too.
         price = Price.query.get('%s%s' % (pending_request.src_chain, to_pay_chain))
         if not price or price.price == 0:
-            error_msg = "gateway won't receive from chain %s to pay to chain %s." % (
-                pending_request.src_chain, pending_request.dest_chain)
-            save_failed_request(error_msg, pending_request, payment_preimage)
-            return {'error': error_msg}
+            remove_pending_request(pending_request)
+            return {'error': 'gateway won\'t receive from chain %s to pay to chain %s.' % (
+                pending_request.src_chain, pending_request.dest_chain)}
 
         src_current_offer = to_pay_amount * price.price
         if Decimal(pending_request.src_amount) < src_current_offer:
-            error_msg = 'The offered price for payment request %s is no longer accepted.' % (payment_hash)
-            save_failed_request(error_msg, pending_request, payment_preimage)
-            return {
-                'error': error_msg,
-                'src_payment_hash': payment_hash,
-                'src_current_offer': src_current_offer,
-                'dest_bolt11': pending_request.dest_bolt11,
-            }
+            remove_pending_request(pending_request)
+            return {'error': 'The offered price for payment request %s is no longer accepted.' % (payment_hash)}
 
         try:
             result = self.sibling_nodes[to_pay_chain].pay(to_pay_bolt11)
 
             if (not result['payment_hash'] == to_pay_payment_hash
                 or not check_hash_preimage(result['payment_hash'], result['payment_preimage'])):
-                print('ERROR: This should never happen if our own lightning nodes are to be trusted')
-                save_failed_request('Payment pending payment_hash does not correspond to the paid hash', pending_request, payment_preimage)
-                return {'error': 'Payment request %s failed.' % (payment_hash)}
+                error_msg = 'ERROR: This should never happen if our own lightning nodes are to be trusted\n%s' % (
+                    '(payment_hash %s)' % payment_hash,
+                    '(payment_result %s)' % result,
+                )
+                print(error_msg)
+                remove_pending_request(pending_request)
+                return {'error': error_msg}
 
             if pending_request.other_gw_chain:
                 other_gw_payment_hash = result['payment_hash']
@@ -431,12 +396,14 @@ class Gateway(object):
                     or not check_hash_preimage(pending_request.dest_payment_hash,
                                                other_gw_payment_proof['payment_preimage'])
                 ):
-                    print('EXPENSIVE ERROR: REM: Don\'t rely on gateway %s anymore and ask for refunds' % pending_request.other_gw_url)
+                    error_msg = 'EXPENSIVE ERROR: REM: Don\'t rely on gateway %s anymore and ask for refunds\n%s' % (
+                        pending_request.other_gw_url,
+                        '(payment_hash %s)' % payment_hash,
+                    )
+                    print(error_msg)
                     pprint(other_gw_payment_proof)
-                    save_failed_request('gateway %s is unreliable' % pending_request.other_gw_url,
-                                        pending_request, src_payment_preimage,
-                                        other_gw_payment_preimage=other_gw_payment_preimage)
-                    return {'error': 'Payment request %s failed.' % (payment_hash)}
+                    remove_pending_request(pending_request)
+                    return {'error': error_msg}
 
                 dest_payment_preimage = other_gw_payment_proof['payment_preimage']
             else:
@@ -447,8 +414,8 @@ class Gateway(object):
         except Exception as e:
             print(type(e))
             print(e)
-            save_failed_request(str(e), pending_request, payment_preimage)
-            return {'error': 'Payment request %s failed.' % (payment_hash)}
+            remove_pending_request(pending_request)
+            return {'error': 'Payment request %s failed: %s' % (payment_hash, str(e))}
 
         return {
             'payment_preimage': dest_payment_preimage,

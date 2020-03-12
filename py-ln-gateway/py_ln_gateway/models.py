@@ -74,30 +74,3 @@ class PaidRequest(Base):
     other_gw_bolt11 = Column(String(MAX_BOLT11))
     other_gw_expires_at = Column(DateTime())
     other_gw_payment_preimage = Column(ByteHexString(32))
-
-class FailedRequest(Base):
-    __tablename__ = 'failed_requests'
-
-    src_payment_hash = Column(ByteHexString(32), primary_key=True)
-
-    error = Column(String(2500))
-    src_payment_preimage = Column(ByteHexString(32))
-
-    src_chain = Column(ByteHexString(32), nullable=False)
-    src_bolt11 = Column(String(MAX_BOLT11), nullable=False)
-    src_expires_at = Column(DateTime(), nullable=False)
-    src_amount = Column(Integer(), nullable=False)
-
-    dest_payment_hash = Column(ByteHexString(32), nullable=False, unique=True)
-    dest_chain = Column(ByteHexString(32), nullable=False)
-    dest_bolt11 = Column(String(MAX_BOLT11), nullable=False)
-    dest_expires_at = Column(DateTime(), nullable=False)
-    dest_amount = Column(Integer(), nullable=False)
-
-    other_gw_payment_hash = Column(ByteHexString(32))
-    other_gw_url = Column(String(MAX_URL_LEN))
-    other_gw_chain = Column(ByteHexString(32))
-    other_gw_bolt11 = Column(String(MAX_BOLT11))
-    other_gw_expires_at = Column(DateTime())
-    other_gw_amount = Column(Integer())
-    other_gw_payment_preimage = Column(ByteHexString(32))
