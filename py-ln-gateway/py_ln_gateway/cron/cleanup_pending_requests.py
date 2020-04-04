@@ -29,6 +29,8 @@ while True:
         print('Expired pending request %s: %s' % (p.src_payment_hash, error_msg))
         db_session.delete(p)
         db_session.commit()
+        # TODO call lightning-cli delinvoice for the src_invoice
+        # is there a way to remove all expired invoices at once better than listinvoices, filter by status=expired, then iteratively call delinvoice?
 
     count = count + 1
     time.sleep(30)
