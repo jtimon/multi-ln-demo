@@ -317,8 +317,13 @@ class Gateway(object):
         paid_request = PaidRequest.query.get(payment_hash)
         if paid_request:
             toreturn = {'payment_preimage': paid_request.dest_payment_preimage}
-        else:
-            toreturn = {'error': 'Unkown paid request %s' % payment_hash}
+
+        pending_request = PendingRequest.query.get(payment_hash)
+        if pending_request:
+            # This should be impossible, the preimage if only revealed on succesful payments
+            toreturn = {'error': 'Still pending payment request %s.\nHow did you do this?\nWe\'re hiring.' % payment_hash}
+
+        toreturn = {'error': 'Unkown or expired payment request %s.' % payment_hash}
 
         pprint(toreturn)
         return toreturn
