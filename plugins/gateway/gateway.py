@@ -47,6 +47,7 @@ def on_payment(payment, plugin, **kwargs):
 
         plugin.log('GATEWAY: WARNING: Rejecting payment with payment_hash %s' % payment_hash)
         plugin.log('GATEWAY: Rejection error: %s' % gateway_confirm_payment_result['error'])
+        plugin.rpc.delinvoice(payment['label'], 'unpaid')
         return {'result': 'reject'}
 
     return {'result': 'continue'}
