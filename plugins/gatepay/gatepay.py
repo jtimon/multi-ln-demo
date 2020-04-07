@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Like pay plugin but if that fails, it tries using gateways instead.
+"""Like pay plugin but if that fails, it tries using gatepays instead.
 """
 import requests
 
@@ -22,12 +22,12 @@ def has_error(var_name, var_val):
     plugin.log('GATEPAY: %s (%s)' % (var_name, var_val))
     return not isinstance(var_val, dict) or 'error' in var_val
 
-def _gatepay_with_gateway(plugin, bolt11, gateway):
-    plugin.log('GATEPAY: try to pay using gateway (%s)' % gateway)
+def _gatepay_with_gatepay(plugin, bolt11, gatepay):
+    plugin.log('GATEPAY: try to pay using gatepay (%s)' % gatepay)
     src_chain_id = chain_ids[ plugin.rpc.getinfo()['network'] ]
     payment_hash = plugin.rpc.decodepay(bolt11)['payment_hash']
 
-    src_invoice = requests.post(gateway + "/request_dest_payment", data={
+    src_invoice = requests.post(gatepay + "/request_dest_payment", data={
         'bolt11': bolt11,
         'src_chain_ids': [src_chain_id],
     }).json()
@@ -38,7 +38,7 @@ def _gatepay_with_gateway(plugin, bolt11, gateway):
     if has_error('src_payment_result', src_payment_result):
         return {'error': src_payment_result['error']}
 
-    payment_proof = requests.post(gateway + "/get_payment_proof", data={
+    payment_proof = requests.post(gatepay + "/get_payment_proof", data={
         'payment_hash': src_payment_result['payment_hash'],
         'payment_preimage': src_payment_result['payment_preimage'],
     }).json()
@@ -52,15 +52,18 @@ def _gatepay_with_gateway(plugin, bolt11, gateway):
             'payment_preimage': payment_proof['payment_preimage'],
         }
 
-    msg = 'Preimage doesn\'t corresponds to payment hash. Gateway %s is a scam' % gateway
+    msg = 'Preimage doesn\'t corresponds to payment hash. Gatepay %s is a scam' % gatepay
     plugin.log('GATEPAY: ERROR: %s' % msg)
     return {'error': msg}
+
+# TODO More elegant way to configure multiple gatepays
+GATEPAY_SPLIT_STRING = '::::'
 
 @plugin.method("gatepay")
 def gatepay(plugin, bolt11):
     """This is like the pay plugin but with more chances to actually pay.
 
-    To have more chances, one needs to configure gateways.
+    To have more chances, one needs to configure gatepays.
     """
     try:
         plugin.log('GATEPAY: try to pay bolt11 normally first (%s)' % bolt11)
@@ -76,13 +79,16 @@ def gatepay(plugin, bolt11):
             or 'Could not find a route' in e.error['message']
         ):
             plugin.log('GATEPAY: error paying normally (%s)' % e.error['message'])
-            # TODO Try more than one gateway
-            gateway = plugin.get_option('gatepay')
-            if gateway == '':
-                return {'error': 'Gatepay failed to pay normally and there\'s no gateway configured.'}
-            return _gatepay_with_gateway(plugin, bolt11, gateway)
+            gatepays = plugin.get_option('gatepay').split(GATEPAY_SPLIT_STRING)
+            if not gatepays:
+                return {'error': 'Gatepay failed to pay normally and there\'s no gatepay configured.'}
 
-    return {'error': 'Error calling gatepay plugin bolt11 %s' % bolt11}
+            for gatepay in gatepays:
+                toreturn = _gatepay_with_gatepay(plugin, bolt11, gatepay)
+                if has_error('gatepay', toreturn):
+                    return {'error': toreturn['error']}
+
+    return toreturn or {'error': 'Error calling gatepay plugin bolt11 %s' % bolt11}
 
 plugin.add_option('gatepay', '', 'Your most trusted gatepay.')
 plugin.run()
