@@ -21,9 +21,9 @@ def has_error(var_name, var_val):
 
 @plugin.hook('invoice_payment')
 def on_payment(payment, plugin, **kwargs):
-    gateway = plugin.get_option('own_gateway')
+    gateway = plugin.get_option('gateway')
     if gateway == '':
-        plugin.log('GATEWAY: WARNING: All payments are accepted if own_gateway is not configured')
+        plugin.log('GATEWAY: WARNING: All payments are accepted if gateway is not configured')
         return {'result': 'continue'}
 
     invoice = plugin.rpc.listinvoices(payment['label'])['invoices'][0]
@@ -36,13 +36,13 @@ def on_payment(payment, plugin, **kwargs):
             'payment_preimage': payment['preimage'],
         }).json()
     except ConnectionError as e:
-        plugin.log('GATEWAY: WARNING: Accepting payment because own_gateway seems down (%s)' % payment_hash)
+        plugin.log('GATEWAY: WARNING: Accepting payment because gateway seems down (%s)' % payment_hash)
         plugin.log('GATEWAY: WARNING: Exception: %s' % str(e))
         return {'result': 'continue'}
 
     if has_error('gateway_confirm_payment_result', gateway_confirm_payment_result):
         if gateway_confirm_payment_result['error'] == 'Unkown payment request %s.' % payment_hash:
-            plugin.log('GATEWAY: WARNING: Accepting payment with payment_hash unkown to own_gateway (%s)' % payment_hash)
+            plugin.log('GATEWAY: WARNING: Accepting payment with payment_hash unkown to gateway (%s)' % payment_hash)
             return {'result': 'continue'}
 
         plugin.log('GATEWAY: WARNING: Rejecting payment with payment_hash %s' % payment_hash)
@@ -52,5 +52,5 @@ def on_payment(payment, plugin, **kwargs):
 
     return {'result': 'continue'}
 
-plugin.add_option('own_gateway', '', 'A gateway you control.')
+plugin.add_option('gateway', '', 'A gateway you control.')
 plugin.run()

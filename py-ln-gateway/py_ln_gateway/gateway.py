@@ -324,7 +324,6 @@ class Gateway(object):
         return toreturn
 
     # If anything fails, don't accept the payment. That way there's no need for refunds
-    # TODO Hide this call from final users, even though they shouldn't know the preimage
     def confirm_src_payment(self, req):
         required_args = ['payment_hash', 'payment_preimage']
         error = self._check_basic(req, required_args, required_args, method='confirm_src_payment')

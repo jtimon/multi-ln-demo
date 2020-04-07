@@ -21,6 +21,7 @@ RUN cd /wd/py-ln-gateway && python3 setup.py install
 
 COPY docker/py-gateway.Procfile /wd/docker/py-gateway.Procfile
 COPY docker/entrypoint-py-gateway.sh /wd/docker/entrypoint-py-gateway.sh
+COPY docker/entrypoint-py-gatepay.sh /wd/docker/entrypoint-py-gatepay.sh
 
 COPY conf/bob_gateway.json /wd/conf/bob_gateway.json
 COPY conf/carol_gateway.json /wd/conf/carol_gateway.json

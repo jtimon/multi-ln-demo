@@ -28,7 +28,7 @@
 
     "other_gateways":
     {
-	"http://carol_gateway:6000": [
+	"http://carol_gatepay:6050": [
 	    "9f87eb580b9e5f11dc211e9fb66abb3699999044f8fe146801162393364286c6",
 	    "0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206"
 	]

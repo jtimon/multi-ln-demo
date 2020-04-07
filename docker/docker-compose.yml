@@ -67,7 +67,7 @@ services:
       FLASK_ENV: development
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
-      FLASK_APP: /wd/py-ln-gateway/py_ln_gateway/app.py
+      FLASK_APP: /wd/py-ln-gateway/py_ln_gateway/gateway_app.py
       FLASK_RUN_HOST: 0.0.0.0
       FLASK_RUN_PORT: 5000
     build:
@@ -80,7 +80,7 @@ services:
       - elementsd_liquid_regtest
       - clightning_bob_regtest
       - clightning_bob_liquid_regtest
-      - carol_gateway
+      - carol_gatepay
     volumes:
       - "clightning_datadir_bob_regtest:/wd/clightning_datadir_bob/regtest"
       - "clightning_datadir_bob_liquid_regtest:/wd/clightning_datadir_bob/liquid-regtest"
@@ -88,6 +88,39 @@ services:
       - "5000:5000"
     expose:
       - "5000"
+    networks:
+      - backend-network
+
+  bob_gatepay:
+    environment:
+      PYTHONUNBUFFERED: "true"
+      GATEWAY_DB: "postgresql+psycopg2://postgres:password@db_bob:5432/gateway_db"
+      PYGATEWAY_CONF: "/wd/conf/bob_gateway.json"
+      FLASK_ENV: development
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      FLASK_APP: /wd/py-ln-gateway/py_ln_gateway/gatepay_app.py
+      FLASK_RUN_HOST: 0.0.0.0
+      FLASK_RUN_PORT: 5050
+    build:
+      context: ../
+      dockerfile: "docker/py-gateway.Dockerfile"
+    entrypoint: "/wd/docker/entrypoint-py-gatepay.sh"
+    depends_on:
+      - db_bob
+      - bitcoind_regtest
+      - elementsd_liquid_regtest
+      - clightning_bob_regtest
+      - clightning_bob_liquid_regtest
+      - carol_gateway
+      - carol_gatepay
+    volumes:
+      - "clightning_datadir_bob_regtest:/wd/clightning_datadir_bob/regtest"
+      - "clightning_datadir_bob_liquid_regtest:/wd/clightning_datadir_bob/liquid-regtest"
+    ports:
+      - "5050:5050"
+    expose:
+      - "5050"
     networks:
       - backend-network
 
@@ -99,7 +132,7 @@ services:
       FLASK_ENV: development
       LC_ALL: C.UTF-8
       LANG: C.UTF-8
-      FLASK_APP: /wd/py-ln-gateway/py_ln_gateway/app.py
+      FLASK_APP: /wd/py-ln-gateway/py_ln_gateway/gateway_app.py
       FLASK_RUN_HOST: 0.0.0.0
       FLASK_RUN_PORT: 6000
     build:
@@ -119,6 +152,38 @@ services:
       - "6000:6000"
     expose:
       - "6000"
+    networks:
+      - backend-network
+
+  carol_gatepay:
+    environment:
+      PYTHONUNBUFFERED: "true"
+      GATEWAY_DB: "postgresql+psycopg2://postgres:password@db_carol:5432/gateway_db"
+      PYGATEWAY_CONF: "/wd/conf/carol_gateway.json"
+      FLASK_ENV: development
+      LC_ALL: C.UTF-8
+      LANG: C.UTF-8
+      FLASK_APP: /wd/py-ln-gateway/py_ln_gateway/gatepay_app.py
+      FLASK_RUN_HOST: 0.0.0.0
+      FLASK_RUN_PORT: 6050
+    build:
+      context: ../
+      dockerfile: "docker/py-gateway.Dockerfile"
+    entrypoint: "/wd/docker/entrypoint-py-gatepay.sh"
+    depends_on:
+      - db_carol
+      - bitcoind_regtest
+      - elementsd_liquid_regtest
+      - clightning_carol_liquid_regtest
+      - clightning_carol_regtest
+      - carol_gateway
+    volumes:
+      - "clightning_datadir_carol_liquid_regtest:/wd/clightning_datadir_carol/liquid-regtest"
+      - "clightning_datadir_carol_regtest:/wd/clightning_datadir_carol/regtest"
+    ports:
+      - "6050:6050"
+    expose:
+      - "6050"
     networks:
       - backend-network
 
